@@ -1,9 +1,11 @@
 package i5.las2peer.services.ocd;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.persistency.MalformedXMLException;
+import i5.las2peer.security.AgentException;
+import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.services.ocd.adapters.AdapterException;
@@ -11,13 +13,18 @@ import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.testsUtils.OcdTestGraphFactory;
 import i5.las2peer.services.ocd.utils.RequestHandler;
 import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.tools.CryptoException;
 import i5.las2peer.webConnector.WebConnector;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -28,9 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Example Test Class demonstrating a basic JUnit test structure.
- * 
- * @author Peter de Lange
+ * Test Class testing the Service calls
  * 
  */
 
@@ -40,13 +45,14 @@ public class ServiceTest {
 	private static final String HTTP_ADDRESS = "http://127.0.0.1";
 	private static final int HTTP_PORT = WebConnector.DEFAULT_HTTP_PORT;
 
-	private static LocalNode node;
+	private static LocalNode serviceNode;
 	private static WebConnector connector;
 	private static ByteArrayOutputStream logStream;
 
-	private static UserAgent testAgent;
+	private static UserAgent adam;
 	private static final String testPass = "adamspass";
 
+	private static ServiceAgent testServiceAgent;	
 	private static final String testServiceClass = "i5.las2peer.services.ocd.ServiceClass";
 	private static final String mainPath = "ocd/";
 	private static long SawmillGraphId;
@@ -67,28 +73,27 @@ public class ServiceTest {
 	public static void startServer() throws Exception {
 
 		// start node
-		node = LocalNode.newNode();
-		testAgent = MockAgentFactory.getAdam();
-		testAgent.unlockPrivateKey(testPass); // agent must be unlocked in order to be stored 
-		node.storeAgent(testAgent);
-		node.launch();
+		serviceNode = LocalNode.newNode();
+		serviceNode.getNodeServiceCache().setWaitForResults(3);
+		
+		adam = MockAgentFactory.getAdam();
+		adam.unlockPrivateKey(testPass); 
+		
+		serviceNode.storeAgent(adam);
+		serviceNode.launch();
 
-		// during testing, the specified service version does not matter
-		ServiceAgent testService = ServiceAgent.createServiceAgent(
-				ServiceNameVersion.fromString(ServiceClass.class.getName() + "@1.0"), "a pass");
-		testService.unlockPrivateKey("a pass");
-
-node.registerReceiver(testService);
+		testServiceAgent = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass + "@1.0"), "a pass");
+		testServiceAgent.unlockPrivateKey("a pass");
+		serviceNode.registerReceiver(testServiceAgent);
 
 		// start connector
 		logStream = new ByteArrayOutputStream();
 
 		connector = new WebConnector(true, HTTP_PORT, false, 1000);
 		connector.setLogStream(new PrintStream(logStream));
-		connector.start(node);
+		connector.start(serviceNode);
 		Thread.sleep(1000); // wait a second for the connector to become ready
-		testAgent = MockAgentFactory.getAdam();
-
+		adam = MockAgentFactory.getAdam();
 		
 		/*
 		 * Sets up the database environment for testing.
@@ -106,13 +111,15 @@ node.registerReceiver(testService);
 		/*
 		 * Set db content
 		 */
-		CustomGraph graph = OcdTestGraphFactory
-				.getAperiodicTwoCommunitiesGraph();
+		CustomGraph graph;
+		graph = OcdTestGraphFactory.getAperiodicTwoCommunitiesGraph();
 		createGraph(graph);
 		AperiodicTwoCommunitiesGraphId = graph.getId();
+		
 		graph = OcdTestGraphFactory.getDolphinsGraph();
 		createGraph(graph);
 		DolphinsGraphId = graph.getId();
+		
 		graph = OcdTestGraphFactory.getSawmillGraph();
 		createGraph(graph);
 		SawmillGraphId = graph.getId();
@@ -121,7 +128,8 @@ node.registerReceiver(testService);
 	// Persists a graph for database setup.
 	public static void createGraph(CustomGraph graph) throws AdapterException,
 			FileNotFoundException, ParserConfigurationException {
-		graph.setUserName(testAgent.getLoginName());
+		
+		graph.setUserName(adam.getLoginName());
 		EntityManager em = requestHandler.getEntityManager();
 		EntityTransaction tx = em.getTransaction();
 		try {
@@ -148,10 +156,10 @@ node.registerReceiver(testService);
 	public static void shutDownServer() throws Exception {
 
 		connector.stop();
-		node.shutDown();
+		serviceNode.shutDown();
 
 		connector = null;
-		node = null;
+		serviceNode = null;
 
 		LocalNode.reset();
 
@@ -173,7 +181,7 @@ node.registerReceiver(testService);
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(Long.toString(adam.getId()), testPass);
 			ClientResponse result = c.sendRequest("GET", mainPath + "validate",
 					"");
 			assertEquals(200, result.getHttpCode());
@@ -185,13 +193,17 @@ node.registerReceiver(testService);
 		}
 
 	}
-
+	
+	
+	////////// Test RESTful Service calls  //////////// 
+	
+	
 	@Test
 	public void testGetGraph() throws AdapterException, FileNotFoundException {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			c.setLogin(Long.toString(adam.getId()), testPass);
 			ClientResponse result = c.sendRequest("GET", mainPath + "graphs/"
 					+ SawmillGraphId + "?outputFormat=META_XML", "");
 			assertEquals(200, result.getHttpCode());
@@ -215,6 +227,41 @@ node.registerReceiver(testService);
 		}
 	}
 	
+	
+	
+	//////////Test RMI functions  //////////// 
+	
+	@Test
+	public void testGetRMIGraph() throws AdapterException, MalformedXMLException, IOException, L2pSecurityException, AgentException, NodeException, CryptoException, InterruptedException {
+		
+	
+		LocalNode serviceNode = LocalNode.newNode();
+		serviceNode.getNodeServiceCache().setWaitForResults(3);
+		UserAgent adam = MockAgentFactory.getAdam();
+
+		adam.unlockPrivateKey("adamspass");
+		serviceNode.launch();
+
+		ServiceAgent testServiceAgent = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass + "@1.0"), "a pass");
+		testServiceAgent.unlockPrivateKey("a pass");
+		serviceNode.registerReceiver(testServiceAgent);
+		
+		
+		int[][] matrix = (int[][]) serviceNode.invoke(adam, ServiceNameVersion.fromString(testServiceClass) + "@1.0", "getGraphAsAdjacencyMatrix", new Serializable[] { SawmillGraphId });
+
+		assertEquals(36, matrix.length);
+		assertEquals(1, matrix[0][1]);
+		assertEquals(0, matrix[3][8]);
+		assertEquals(1, matrix[16][19]);
+		assertEquals(1, matrix[19][16]);
+		assertEquals(1, matrix[34][35]);
+		
+		
+	}
+		
+		
+		
 	
 
 }

@@ -15,12 +15,14 @@ import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
+import i5.las2peer.services.ocd.graphs.Community;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
 import i5.las2peer.services.ocd.graphs.CoverId;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.CustomGraphId;
+import i5.las2peer.services.ocd.graphs.CustomNode;
 import i5.las2peer.services.ocd.graphs.GraphCreationLog;
 import i5.las2peer.services.ocd.graphs.GraphCreationType;
 import i5.las2peer.services.ocd.graphs.GraphProcessor;
@@ -46,6 +48,11 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
+import y.base.Edge;
+import y.base.EdgeCursor;
+import y.base.Graph;
+import y.base.Node;
+import y.base.NodeCursor;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -77,6 +84,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.la4j.matrix.Matrix;
 import org.la4j.matrix.sparse.CCSMatrix;
 
 
@@ -158,7 +166,57 @@ public class ServiceClass extends RESTService {
 	 */
 	private OcdMetricFactory metricFactory = new OcdMetricFactory();
 	
+	
+	//////////////////////////////////////////////////////////////////
+	///////// RMI Methods
+	//////////////////////////////////////////////////////////////////
+	
+	
+	//////////// GRAPH ////////////
+	
+    /**
+     * Get the graph as adjacency matrix by its index
+     * @param graphId 
+     * @return adjacency matrix. Entry (i,j) in row i and column j has value 1 if node i and j are linked.
+     */
+	public int[][] getGraphAsAdjacencyMatrix(long graphId) {		
+    	
+		// Get stored graph by id		
+	    CustomGraph graph = getGraphById(graphId);
 		
+		//Transform graph into simple adjacency matrix 
+		int size = graph.nodeCount();
+		int [][] adjMatrix = new int[size][size];
+		
+		for (EdgeCursor ec = graph.edges(); ec.ok(); ec.next()) {  
+			  Edge edge = ec.edge();  
+			  adjMatrix[edge.source().index()][edge.target().index()] = 1;
+			  adjMatrix[edge.target().index()][edge.source().index()] = 1;
+		}  
+		
+		return adjMatrix;
+    }		
+		
+	
+	//////////// COVER ////////////
+			
+	/**
+	 * Get the membership matrix representing the community structure.
+	 * @param graphId 
+	 * @param coverId  
+	 * 
+	 * @return The membership matrix. rows: nodes and columns: communities.
+	 * Entry (i,j) in row i and column j represents belonging factor of the node with index i
+	 * 
+	 */
+	public double[][] getMemberships(long graphId, long coverId) {		
+
+	    Cover cover = getCoverById(graphId, coverId);	    
+	    double[][] matrix = cover.getPrimitveMatrix();
+	   
+	    return matrix;		
+	}
+
 	
 	//////////////////////////////////////////////////////////////////
 	///////// REST Service Methods
@@ -2180,7 +2238,76 @@ public class ServiceClass extends RESTService {
     }
 
   }  
+
+
+
+///////////////////////////////////////////////////////////
+//////// Utility Methods
+///////////////////////////////////////////////////////////
+
+	/**
+	 * Get a stored graph by its index
+	 * @param graphId 
+	 * @return CustomGraph
+	 */
+	private CustomGraph getGraphById(long graphId) {		
+
+		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();	    	
+	    EntityManager em = requestHandler.getEntityManager();
+	    CustomGraphId id = new CustomGraphId(graphId, username);
+	    EntityTransaction tx = em.getTransaction();
+	    CustomGraph graph = null;
+	    
+	    try {
+			tx.begin();
+			graph = em.find(CustomGraph.class, id);
+		    if(graph == null) {
+		    	requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+		    }
+			tx.commit();
+		}
+	    catch( RuntimeException e ) {
+			if( tx != null && tx.isActive() ) {
+				tx.rollback();
+			}
+			throw e;
+		}
+		em.close();		
+		return graph;
+	}	
+	
+	 /**
+     * Get a stored community-cover of a graph by its index
+     * @param coverId
+     * @param graphId
+     * @return Cover
+     */
+	private Cover getCoverById(long coverId, long graphId) {		
+
+    	String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    	EntityManager em = requestHandler.getEntityManager();
+	    CustomGraphId gId = new CustomGraphId(graphId, username);
+	    CoverId cId = new CoverId(coverId, gId);
+		EntityTransaction tx = em.getTransaction();
+	    Cover cover;
+	    	
+	    try {
+			tx.begin();
+			cover = em.find(Cover.class, cId);
+			tx.commit();
+		}
+	    catch( RuntimeException e ) {
+			if( tx != null && tx.isActive() ) {
+				tx.rollback();
+			}
+			throw e;
+		}
+	    if(cover == null) {
+	    	requestHandler.log(Level.WARNING, "user: " + username + ", " + "Cover does not exist: cover id " + coverId + ", graph id " + graphId);
+		}
+	    return cover;
+	}
+
+	
+
 }
-
-
-

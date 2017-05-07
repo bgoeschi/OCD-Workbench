@@ -195,6 +195,33 @@ public class Cover {
 		return memberships;
 	}
 	
+	
+	/**
+	 * Get the membership matrix as java primitive
+	 * Used for remote method invocation service interface
+	 * @return The membership matrix. Contains one row for each node and one column for each community.
+	 */
+	public double[][] getPrimitveMatrix() {
+		
+		double[][] matrix = new double[graph.nodeCount()][communities.size()];
+		Map<CustomNode, Node> reverseNodeMap = new HashMap<CustomNode, Node>();
+		NodeCursor nodes = graph.nodes();
+		while(nodes.ok()) {
+			Node node = nodes.node();
+			reverseNodeMap.put(graph.getCustomNode(node), node);
+			nodes.next();
+		}
+		for(int i=0; i<communities.size(); i++) {
+			Community community = communities.get(i);
+			for(Map.Entry<Node, Double> membership : community.getMemberships().entrySet()) {
+				matrix[membership.getKey().index()][i] = membership.getValue();
+			}
+		}
+		return matrix;
+	}		
+		
+	
+	
 	/*
 	 * Sets the communities from a membership matrix. All metric logs (besides optionally the execution time) will be removed from the cover.
 	 * Note that the membership matrix (and consequently the cover) will automatically be row normalized.

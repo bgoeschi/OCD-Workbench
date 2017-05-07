@@ -64,7 +64,7 @@ public class OcdAlgorithmExecutor {
 		}
 	}
 	
-	/*
+	/**
 	 * Calculates the cover of each connected component.
 	 * @param components The connected components each with a node mapping from the component nodes to the original graph nodes.
 	 * @param algorithm The algorithm to calculate the covers with.
@@ -96,7 +96,7 @@ public class OcdAlgorithmExecutor {
 		return componentCovers;
 	}
 	
-	/*
+	/**
 	 * Calculates a cover consisting of a single community.
 	 * @param graph The graph to create the cover for.
 	 * @param algorithm The algorithm used for setting the log entry.

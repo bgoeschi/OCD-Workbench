@@ -104,7 +104,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return labelPropagationPhase(graph, leaders, leadershipVector);
 	}
 
-	/*
+	/**
 	 * Returns the list of global leaders.
 	 * 
 	 * @param graph The graph whose leaders will be detected.
@@ -117,7 +117,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return getGlobalLeader(localLeader);
 	}
 
-	/*
+	/**
 	 * Returns a list of global leaders.
 	 * 
 	 * @param localLeader The mapping from nodes to their follower degrees.
@@ -151,7 +151,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return globalLeaders;
 	}
 
-	/*
+	/**
 	 * Returns the mapping from the local leaders to the corresponding follower degrees.
 	 * 
 	 * @param graph The graph whose local leaders will be detected.
@@ -216,7 +216,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return followerMap;
 	}
 
-	/*
+	/**
 	 * Returns the leadership value vector.
 	 * 
 	 * @param graph The graph under observation.
@@ -267,14 +267,14 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return leadershipVector;
 	}
 
-	/*
+	/**
 	 * Executes the label propagation phase.
 	 * 
 	 * @param graph The graph which is being analyzed.
 	 * 
 	 * @param leaders The list of detected global leader nodes.
 	 * 
-	 * @param threshold for adopting a new behavior,which equals to LLD in this
+	 * @param ProfitabilityThreshold threshold for adopting a new behavior,which equals to LLD in this
 	 * algorithm.
 	 * 
 	 * @return A cover containing the detected communities.
@@ -296,7 +296,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return getMembershipDegrees(graph, communities);
 	}
 
-	/*
+	/**
 	 * Executes the label propagation for a single leader to identify its
 	 * community members.
 	 * 
@@ -362,7 +362,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return memberships;
 	}
 
-	/*
+	/**
 	 * Returns the number of positive neighbours with the new label of a given
 	 * node.
 	 * 
@@ -392,7 +392,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return positiveNeighboursWithNewLabel.size();
 	}
 
-	/*
+	/**
 	 * Returns the number of negative neighbours with the new label of a given
 	 * node.
 	 * 
@@ -422,7 +422,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 		return negativeNeighboursWithNewLabel.size();
 	}
 
-	/*
+	/**
 	 * Returns a cover containing the membership degrees of all nodes.
 	 * 
 	 * @param graph The graph which is being analyzed.

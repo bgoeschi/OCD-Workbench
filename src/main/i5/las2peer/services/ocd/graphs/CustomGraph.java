@@ -696,7 +696,7 @@ public class CustomGraph extends Graph2D {
 	}
 	
 	////////////////// THE FOLLOWING METHODS ARE ONLY OF INTERNAL PACKAGE USE AND FOR PERSISTENCE PURPOSES
-	/*
+	/**
 	 * Initializes all node and edge mappings for the copy constructor.
 	 * @param customNodes The custom node mapping of the copied custom graph.
 	 * @param customEdges The custom edge mapping of the copied custom graph.
@@ -725,7 +725,7 @@ public class CustomGraph extends Graph2D {
 			this.edgeIds.put(edgeArr[entry.getKey().index()], entry.getValue());
 		}
 	}
-	/*
+	/**
 	 * Returns the custom edge object corresponding to an edge.
 	 * @param edge An edge which must belong to this graph.
 	 * @return The corresponding custom edge object.
@@ -734,7 +734,7 @@ public class CustomGraph extends Graph2D {
 		int index = edgeIds.get(edge);
 		return customEdges.get(index);	
 	}
-	/*
+	/**
 	 * Returns the custom node object corresponding to a node.
 	 * @param node A node which must belong to this graph.
 	 * @return The corresponding custom node object.
@@ -743,7 +743,7 @@ public class CustomGraph extends Graph2D {
 		int index = nodeIds.get(node);
 		return customNodes.get(index);	
 	}
-	/*
+	/**
 	 * Returns the node object corresponding to a custom node.
 	 * @param customNode A customNode which must belong to this graph.
 	 * @return The corresponding node object.
@@ -751,7 +751,7 @@ public class CustomGraph extends Graph2D {
 	protected Node getNode(CustomNode customNode) {
 		return reverseNodeMap.get(customNode);
 	}
-	/*
+	/**
 	 * Creates a new custom node object and maps the node to it.
 	 * @param node The node.
 	 */
@@ -762,7 +762,7 @@ public class CustomGraph extends Graph2D {
 		this.reverseNodeMap.put(customNode,  node);
 		nodeIndexer++;
 	}
-	/*
+	/**
 	 * Removes the mappings between a node and its custom node object.
 	 * @param node
 	 */
@@ -773,7 +773,7 @@ public class CustomGraph extends Graph2D {
 		this.customNodes.remove(id);
 		this.reverseNodeMap.remove(customNode);
 	}
-	/*
+	/**
 	 * Creates a new custom edge object and maps the edge to it.
 	 * @param edge The edge.
 	 */
@@ -783,7 +783,7 @@ public class CustomGraph extends Graph2D {
 		this.customEdges.put(edgeIndexer, customEdge);
 		edgeIndexer++;
 	}
-	/*
+	/**
 	 * Removes the mapping from an edge to its custom edge.
 	 * @param edge
 	 */
@@ -796,7 +796,7 @@ public class CustomGraph extends Graph2D {
 
 	
 	
-	/*
+	/**
 	 * Returns the neighbourhood matrix.
 	 * 
 	 * @return The neighbourhood matrix. 
@@ -820,7 +820,7 @@ public class CustomGraph extends Graph2D {
 		return neighbourhoodMatrix;
 	}
 
-	/*
+	/**
 	 * Returns the set of all neighbours of a given node.
 	 * 
 	 * @param node The node under observation.
@@ -846,7 +846,7 @@ public class CustomGraph extends Graph2D {
 		return neighbourSet;
 	}
 
-	/*
+	/**
 	 * Returns the set of all positive neighbours of a given node.
 	 * 
 	 * @param node The node under observation.
@@ -879,7 +879,7 @@ public class CustomGraph extends Graph2D {
 		return positiveNeighbour;
 	}
 
-	/*
+	/**
 	 * Returns the set of all negative neighbours of a given node.
 	 * 
 	 * @param node The node under observation.
@@ -913,7 +913,7 @@ public class CustomGraph extends Graph2D {
 		return negativeNeighbour;
 	}
 
-	/*
+	/**
 	 * Returns the set of all positive edges incident to a given node.
 	 * 
 	 * @param node The node under observation.
@@ -940,7 +940,7 @@ public class CustomGraph extends Graph2D {
 		return positiveEdges;
 	}
 
-	/*
+	/**
 	 * Returns the set of all positive incoming edges for a given node.
 	 * 
 	 * @param node The node under observation.
@@ -967,7 +967,7 @@ public class CustomGraph extends Graph2D {
 		return positiveInEdges;
 	}
 
-	/*
+	/**
 	 * Returns the set of all positive outgoing edges for a given node.
 	 * 
 	 * @param node The node under observation.
@@ -994,7 +994,7 @@ public class CustomGraph extends Graph2D {
 		return positiveOutEdges;
 	}
 
-	/*
+	/**
 	 * Returns the set of all negative edges incident to a given node.
 	 * 
 	 * @param node The node under observation.
@@ -1021,7 +1021,7 @@ public class CustomGraph extends Graph2D {
 		return negativeEdges;
 	}
 
-	/*
+	/**
 	 * Returns the set of all negative incoming edges for a given node.
 	 * 
 	 * @param node The node under observation.
@@ -1048,7 +1048,7 @@ public class CustomGraph extends Graph2D {
 		return negativeInEdges;
 	}
 
-	/*
+	/**
 	 * Returns the set of all negative outgoing edges for a given node.
 	 * 
 	 * @param node The node under observation.
@@ -1077,7 +1077,7 @@ public class CustomGraph extends Graph2D {
 	
 	/////////////////////////// PERSISTENCE CALLBACK METHODS
 	
-	/*
+	/**
 	 * PostLoad Method.
 	 * Creates node and edge objects from the custom nodes and edges and sets the mappings between the two.
 	 * The mapping indices are reset to omit rising numbers due to deletions and reinsertions.

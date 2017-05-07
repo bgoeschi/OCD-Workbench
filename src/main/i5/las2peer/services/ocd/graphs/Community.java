@@ -188,7 +188,7 @@ public class Community {
 	
 	/////////////////////////// PERSISTENCE CALLBACK METHODS
 	
-	/*
+	/**
 	 * PreRemove Method.
 	 * Removes all membership mappings.
 	 */

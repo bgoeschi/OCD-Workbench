@@ -176,7 +176,7 @@ public class ServiceClass extends RESTService {
 	
     /**
      * Get the graph as adjacency matrix by its index
-     * @param graphId 
+     * @param graphId Index of the requested graph
      * @return adjacency matrix. Entry (i,j) in row i and column j has value 1 if node i and j are linked.
      */
 	public int[][] getGraphAsAdjacencyMatrix(long graphId) {		
@@ -202,8 +202,8 @@ public class ServiceClass extends RESTService {
 			
 	/**
 	 * Get the membership matrix representing the community structure.
-	 * @param graphId 
-	 * @param coverId  
+	 * @param graphId Index of the requested graph
+	 * @param coverId Index of the requested community cover
 	 * 
 	 * @return The membership matrix. rows: nodes and columns: communities.
 	 * Entry (i,j) in row i and column j represents belonging factor of the node with index i

@@ -222,9 +222,9 @@ public class Cover {
 		
 	
 	
-	/*
+	/**
 	 * Sets the communities from a membership matrix. All metric logs (besides optionally the execution time) will be removed from the cover.
-	 * Note that the membership matrix (and consequently the cover) will automatically be row normalized.
+	 * Note that the membesrship matrix (and consequently the cover) will automatically be row normalized.
 	 * @param memberships A membership matrix, with non negative entries. Each row i contains the belonging factors of the node with index i
 	 * of the corresponding graph. Hence the number of rows corresponds the number of graph nodes and the number of columns the
 	 * number of communities.

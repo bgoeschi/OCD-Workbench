@@ -248,14 +248,14 @@ public class ServiceTest {
 		serviceNode.registerReceiver(testServiceAgent);
 		
 		
-		int[][] matrix = (int[][]) serviceNode.invoke(adam, ServiceNameVersion.fromString(testServiceClass) + "@1.0", "getGraphAsAdjacencyMatrix", new Serializable[] { SawmillGraphId });
+		double[][] matrix = (double[][]) serviceNode.invoke(adam, ServiceNameVersion.fromString(testServiceClass) + "@1.0", "getGraphAsAdjacencyMatrix", new Serializable[] { SawmillGraphId });
 
 		assertEquals(36, matrix.length);
-		assertEquals(1, matrix[0][1]);
-		assertEquals(0, matrix[3][8]);
-		assertEquals(1, matrix[16][19]);
-		assertEquals(1, matrix[19][16]);
-		assertEquals(1, matrix[34][35]);
+		assertEquals(1, 1, matrix[0][1]);
+		assertEquals(0, 0, matrix[3][8]);
+		assertEquals(1, 1, matrix[16][19]);
+		assertEquals(1, 1, matrix[19][16]);
+		assertEquals(1, 1, matrix[34][35]);
 		
 		
 	}

@@ -15,14 +15,12 @@ import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
-import i5.las2peer.services.ocd.graphs.Community;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
 import i5.las2peer.services.ocd.graphs.CoverId;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.CustomGraphId;
-import i5.las2peer.services.ocd.graphs.CustomNode;
 import i5.las2peer.services.ocd.graphs.GraphCreationLog;
 import i5.las2peer.services.ocd.graphs.GraphCreationType;
 import i5.las2peer.services.ocd.graphs.GraphProcessor;
@@ -50,7 +48,6 @@ import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
 import y.base.Edge;
 import y.base.EdgeCursor;
-import y.base.Graph;
 import y.base.Node;
 import y.base.NodeCursor;
 
@@ -84,7 +81,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.la4j.matrix.Matrix;
 import org.la4j.matrix.sparse.CCSMatrix;
 
 
@@ -175,33 +171,62 @@ public class ServiceClass extends RESTService {
 	//////////// GRAPH ////////////
 	
     /**
-     * Get the graph as adjacency matrix by its index
+     * Get the graph as adjacency matrix by its index. Used as RMI Interface.
      * @param graphId Index of the requested graph
      * @return adjacency matrix. Entry (i,j) in row i and column j has value 1 if node i and j are linked.
+     * un/directed. un/weighted.
      */
-	public int[][] getGraphAsAdjacencyMatrix(long graphId) {		
+	public double[][] getGraphAsAdjacencyMatrix(long graphId) {		
     	
 		// Get stored graph by id		
 	    CustomGraph graph = getGraphById(graphId);
 		
-		//Transform graph into simple adjacency matrix 
+		//Transform graph into adjacency matrix 
 		int size = graph.nodeCount();
-		int [][] adjMatrix = new int[size][size];
+		double [][] adjMatrix = new double[size][size];
 		
 		for (EdgeCursor ec = graph.edges(); ec.ok(); ec.next()) {  
 			  Edge edge = ec.edge();  
-			  adjMatrix[edge.source().index()][edge.target().index()] = 1;
-			  adjMatrix[edge.target().index()][edge.source().index()] = 1;
+			  adjMatrix[edge.source().index()][edge.target().index()] = graph.getEdgeWeight(edge);
+			  if(!graph.isOfType(GraphType.DIRECTED)) {
+				  adjMatrix[edge.target().index()][edge.source().index()] = graph.getEdgeWeight(edge);
+			  }
 		}  
 		
 		return adjMatrix;
     }		
 		
 	
+    /**
+     * Get the graph as adjacency matrix by its index. Used as RMI Interface.
+     * @param graphId Index of the requested graph
+     * @return adjacency list. unweighted. directed.
+     */
+	public ArrayList<ArrayList<Integer>> getGraphAsAdjacencyList(long graphId) {		
+    	
+		// Get stored graph by id		
+	    CustomGraph graph = getGraphById(graphId);
+		
+		//Transform graph into adjacency list
+		ArrayList<ArrayList<Integer>> adjList = new ArrayList<ArrayList<Integer>>();
+		
+		for (NodeCursor nc = graph.nodes(); nc.ok(); nc.next()) {  
+			  Node node = nc.node();  
+			  ArrayList<Integer> list = new ArrayList<Integer>();
+			  
+			  for (NodeCursor nnc = node.neighbors(); nc.ok(); nc.next()) {  
+			  list.add(nnc.node().index());
+			  }
+		}  
+		
+		return adjList;
+    }
+	
+	
 	//////////// COVER ////////////
 			
 	/**
-	 * Get the membership matrix representing the community structure.
+	 * Get the membership matrix representing the community structure. Used as RMI Interface.
 	 * @param graphId Index of the requested graph
 	 * @param coverId Index of the requested community cover
 	 * 
@@ -212,9 +237,25 @@ public class ServiceClass extends RESTService {
 	public double[][] getMemberships(long graphId, long coverId) {		
 
 	    Cover cover = getCoverById(graphId, coverId);	    
-	    double[][] matrix = cover.getPrimitveMatrix();
+	    double[][] matrix = cover.getRmiMembershipMatrix();
 	   
 	    return matrix;		
+	}
+	
+	/**
+	 * Get the Algorithm used for a cover. Used as RMI Interface.
+	 * @param graphId Index of the requested graph
+	 * @param coverId Index of the requested community cover
+	 * 
+	 * @return the algorithm name
+	 * 
+	 */
+	public String getCoverAlgorithm(long graphId, long coverId) {		
+
+	    Cover cover = getCoverById(graphId, coverId);	    
+	    String alg = cover.getCreationMethod().getType().toString();
+	   
+	    return alg;		
 	}
 
 	
@@ -758,6 +799,61 @@ public class ServiceClass extends RESTService {
     			}
     		}
 	    	return Response.ok(requestHandler.writeConfirmationXml()).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Get additional data about the graphs properties. These are not the meta informations like creation method 
+     * but network structure information like density, average degree
+     * @param graphIdStr The graph id.
+     * @return A xml with the data.
+     * Or an error xml.
+     * 
+     * @author Christoph
+     */
+    @GET
+    @Path("graphs/{graphId}/properties")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Get additional graph property information.")
+    public Response getGraphProperties(
+    		@PathParam("graphId") String graphIdStr)
+    {
+    	try {
+    		
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();	 
+    		
+    		long graphId = 0;
+			try {
+				graphId = Integer.parseInt(graphIdStr);
+			}
+			catch (Exception e) {
+				requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Path Parameter Invalid");
+			}    		
+    		   	
+	    	CustomGraph graph = service.getGraphById(graphId);
+		    if(graph == null) {
+		    	requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
+		    }		    
+		    	
+		    	Map<String, String> parameters = new HashMap<String, String>();
+		    	parameters.put("nodes", String.valueOf(graph.nodeCount()));
+		    	parameters.put("edges", String.valueOf(graph.edgeCount()));
+		    	parameters.put("density", String.valueOf(graph.getDensity()));
+		    	parameters.put("average degree", String.valueOf(graph.getAverageDegree()));
+
+		    	
+	    	return Response.ok(requestHandler.writeParameters(parameters)).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);
@@ -2240,6 +2336,7 @@ public class ServiceClass extends RESTService {
   }  
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////	
 
 ///////////////////////////////////////////////////////////
 //////// Utility Methods

@@ -193,34 +193,7 @@ public class Cover {
 			}
 		}
 		return memberships;
-	}
-	
-	
-	/**
-	 * Get the membership matrix as java primitive
-	 * Used for remote method invocation service interface
-	 * @return The membership matrix. Contains one row for each node and one column for each community.
-	 */
-	public double[][] getPrimitveMatrix() {
-		
-		double[][] matrix = new double[graph.nodeCount()][communities.size()];
-		Map<CustomNode, Node> reverseNodeMap = new HashMap<CustomNode, Node>();
-		NodeCursor nodes = graph.nodes();
-		while(nodes.ok()) {
-			Node node = nodes.node();
-			reverseNodeMap.put(graph.getCustomNode(node), node);
-			nodes.next();
-		}
-		for(int i=0; i<communities.size(); i++) {
-			Community community = communities.get(i);
-			for(Map.Entry<Node, Double> membership : community.getMemberships().entrySet()) {
-				matrix[membership.getKey().index()][i] = membership.getValue();
-			}
-		}
-		return matrix;
-	}		
-		
-	
+	}	
 	
 	/**
 	 * Sets the communities from a membership matrix. All metric logs (besides optionally the execution time) will be removed from the cover.
@@ -268,7 +241,37 @@ public class Cover {
 	public void setMemberships(Matrix memberships) {
 		setMemberships(memberships, false);
 	}
-
+	
+	
+	/////// Membership Representations used for Service RMI Interface ///////
+	
+	/**
+	 * Get the membership matrix as primitive java
+	 * Used for remote method invocation service interface
+	 * @return The membership matrix. Contains one row for each node and one column for each community. The matrix values denote the belonging factor.
+	 * 
+	 */
+	public double[][] getRmiMembershipMatrix() {
+		
+		double[][] matrix = new double[graph.nodeCount()][communities.size()];
+		Map<CustomNode, Node> reverseNodeMap = new HashMap<CustomNode, Node>();
+		NodeCursor nodes = graph.nodes();
+		while(nodes.ok()) {
+			Node node = nodes.node();
+			reverseNodeMap.put(graph.getCustomNode(node), node);
+			nodes.next();
+		}
+		for(int i=0; i<communities.size(); i++) {
+			Community community = communities.get(i);
+			for(Map.Entry<Node, Double> membership : community.getMemberships().entrySet()) {
+				matrix[membership.getKey().index()][i] = membership.getValue();
+			}
+		}
+		return matrix;
+	}
+	
+	////////////////////////////////////////////////////////////////
+	
 	/**
 	 * Getter for the cover name.
 	 * @return The name.

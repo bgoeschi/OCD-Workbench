@@ -108,6 +108,7 @@ public class SignedDMIDAlgorithm implements OcdAlgorithm {
 	 * Returns the list of global leaders.
 	 * 
 	 * @param graph The graph whose leaders will be detected.
+	 * @param leadershipVector vector 
 	 * 
 	 * @return A list containing all nodes which are global leaders.
 	 */

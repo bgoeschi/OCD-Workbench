@@ -1,4 +1,4 @@
-package i5.las2peer.services.ocd.metrics.centrality;
+package i5.las2peer.services.ocd.algorithms.centrality;
 
 import org.junit.Test;
 

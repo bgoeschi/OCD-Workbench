@@ -2173,6 +2173,7 @@ public class ServiceClass extends RESTService {
     		requestHandler.log(Level.SEVERE, "", e);
     		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
+    }
     
     /**
      * Returns all graph creation type names.

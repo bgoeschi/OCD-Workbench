@@ -13,6 +13,7 @@ import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputFormat;
 import i5.las2peer.services.ocd.algorithms.ContentBasedWeightingAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithmFactory;
+import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
 import i5.las2peer.services.ocd.graphs.Cover;
@@ -162,6 +163,11 @@ public class ServiceClass extends RESTService {
 	 */
 	private OcdMetricFactory metricFactory = new OcdMetricFactory();
 	
+	/**
+	 * The factory used for creating centrality algorithms.
+	 */
+	private CentralityAlgorithmFactory centralityFactory = new CentralityAlgorithmFactory();
+	
 	
 	//////////////////////////////////////////////////////////////////
 	///////// RMI Methods
@@ -277,6 +283,7 @@ public class ServiceClass extends RESTService {
 		private final OcdBenchmarkFactory benchmarkFactory = service.benchmarkFactory;
 		private final OcdAlgorithmFactory algorithmFactory = service.algorithmFactory;
 		private final OcdMetricFactory metricFactory = service.metricFactory;
+		private final CentralityAlgorithmFactory centralityFactory = service.centralityFactory;
     
     /**
      * Simple function to validate a user login.
@@ -1439,6 +1446,18 @@ public class ServiceClass extends RESTService {
     		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
     }
+    
+    @POST
+    @Path("covers/graphs/{graphId}/algorithms")
+    @Produces(MediaType.TEXT_XML)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+    public Response runCentralityAlgorithm() {
+    	return null;
+    }
    
 ////////////////////////////////////////////////////////////////////////////
 ////////////// BENCHMARKS
@@ -2131,6 +2150,29 @@ public class ServiceClass extends RESTService {
     		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
     }
+    
+    /**
+     * Returns all centrality measure names.
+     * @return The centrality measures in a names xml.
+     * Or an error xml.
+     */
+    @Path("centrality")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "Centrality measures information",
+		notes = "Returns all centrality measure names.")
+    public Response getCentralityNames()
+    {
+    	try {
+			return Response.ok(requestHandler.writeCentralityMeasureNames()).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
     
     /**
      * Returns all graph creation type names.

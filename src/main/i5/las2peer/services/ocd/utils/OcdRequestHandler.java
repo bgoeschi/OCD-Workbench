@@ -90,6 +90,18 @@ public class OcdRequestHandler extends RequestHandler {
 				namesElt.appendChild(nameElt);
 			}
 		}
+		doc.appendChild(namesElt);
+		return writeDoc(doc);
+	}
+	
+	/**
+	 * Creates an XML document containing all centrality measure names.
+	 * @return The document.
+	 * @throws ParserConfigurationException
+	 */
+	public String writeCentralityMeasureNames() throws ParserConfigurationException {
+		Document doc = getDocument();
+		Element namesElt = doc.createElement("Names");
 		for(CentralityCreationType e : CentralityCreationType.class.getEnumConstants()) {
 			Element nameElt = doc.createElement("Name");
 			nameElt.appendChild(doc.createTextNode(e.name()));
@@ -97,6 +109,5 @@ public class OcdRequestHandler extends RequestHandler {
 		}
 		doc.appendChild(namesElt);
 		return writeDoc(doc);
-	}
-	
+	}	
 }

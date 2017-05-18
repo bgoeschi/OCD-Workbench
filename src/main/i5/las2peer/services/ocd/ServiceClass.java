@@ -1446,18 +1446,6 @@ public class ServiceClass extends RESTService {
     		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
     }
-    
-    @POST
-    @Path("covers/graphs/{graphId}/algorithms")
-    @Produces(MediaType.TEXT_XML)
-    @Consumes(MediaType.TEXT_PLAIN)
-    @ApiResponses(value = {
-    		@ApiResponse(code = 200, message = "Success"),
-    		@ApiResponse(code = 401, message = "Unauthorized")
-    })
-    public Response runCentralityAlgorithm() {
-    	return null;
-    }
    
 ////////////////////////////////////////////////////////////////////////////
 ////////////// BENCHMARKS
@@ -2156,6 +2144,7 @@ public class ServiceClass extends RESTService {
      * @return The centrality measures in a names xml.
      * Or an error xml.
      */
+    @GET
     @Path("centrality")
     @Produces(MediaType.TEXT_XML)
     @ApiResponses(value = {

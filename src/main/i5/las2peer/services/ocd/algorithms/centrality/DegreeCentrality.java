@@ -29,6 +29,20 @@ public class DegreeCentrality implements CentralityAlgorithm {
 		return res;
 	}
 	
+	public double[] getValues(Graph graph) {
+		this.graph = graph;
+		NodeCursor n = graph.nodes();
+		double[] res = new double[graph.nodeCount()];
+		int i = 0;
+		while(n.ok()) {
+			Node node = n.node();
+			res[i] = node.degree();
+			i++;
+			n.next();
+		}
+		return res;
+	}
+	
 	public double[] getNormalizedValues() {
 		double [] res = getValues();
 		

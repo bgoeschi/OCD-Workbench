@@ -3,9 +3,7 @@ package i5.las2peer.services.ocd.graphs;
 import java.security.InvalidParameterException;
 import java.util.Locale;
 
-import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithm;
-import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 
 /**
  * Analogous to CoverCreationType but for centrality algorithms.

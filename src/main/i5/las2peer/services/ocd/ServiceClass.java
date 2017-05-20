@@ -13,9 +13,11 @@ import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputFormat;
 import i5.las2peer.services.ocd.algorithms.ContentBasedWeightingAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithmFactory;
+import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithm;
 import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
+import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
@@ -49,6 +51,7 @@ import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
 import y.base.Edge;
 import y.base.EdgeCursor;
+import y.base.Graph;
 import y.base.Node;
 import y.base.NodeCursor;
 
@@ -1446,7 +1449,81 @@ public class ServiceClass extends RESTService {
     		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
     }
-   
+ 
+//////////////////////////////////////////////////////////////////////////
+//////////// CENTRALITY MEASURES
+//////////////////////////////////////////////////////////////////////////
+    
+    /**
+     * Creates a new CentralityMap by running a CentralityAlgorithm on an existing graph.
+     * @param graphIdStr The id of the graph to run the algorithm on, must have the creation method status completed.
+     * @param nameStr The name for the CentralityMap.
+     * @param creationTypeStr The name of a CentralityCreationType corresponding to a CentralityAlgorithm.
+     * Defines the CentralityAlgorithm to execute.
+     * @return The id of the cover being calculated which is reserved for the algorithm result.
+     * Or an error xml.
+     */
+    @POST
+    @Path("centrality/graphs/{graphId}/algorithms")
+    @Produces(MediaType.TEXT_XML)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Creates a new CentralityMap by running a centrality algorithm on an existing graph.")
+    public Response calculateCentrality(
+    		@PathParam("graphId") String graphIdStr,
+    		@DefaultValue("unnamed") @QueryParam("name") String nameStr,
+    		@DefaultValue("DEGREE_CENTRALITY") @QueryParam("algorithm") String creationTypeStr)
+    {
+    	try {
+    		long graphId;
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    		CentralityCreationType algorithmType;
+    		try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+    		try {
+    			algorithmType = CentralityCreationType.valueOf(creationTypeStr);
+    			if(algorithmType == CentralityCreationType.UNDEFINED) {
+    				requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified algorithm type is not valid for this request: " + algorithmType.name());
+    				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm type is not valid for this request: " + algorithmType.name());
+    			}
+    		}
+	    	catch (Exception e) {
+	    		requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm does not exist.");
+	    	}
+    		CentralityAlgorithm algorithm;
+    		algorithm = centralityFactory.getInstance(algorithmType);
+    		// Test
+    		Graph graph = new Graph();
+    		
+    		Node n[] = new Node[5];  
+    		for (int i = 0; i < 5; i++) {
+    			n[i] = graph.createNode();
+    		}
+    		
+    		graph.createEdge(n[0], n[2]);
+    		graph.createEdge(n[1], n[2]);
+    		graph.createEdge(n[2], n[3]);
+    		graph.createEdge(n[3], n[4]);
+    		
+    		algorithm.getValues(graph);
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    	return null;
+    }
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////// BENCHMARKS
 ////////////////////////////////////////////////////////////////////////////

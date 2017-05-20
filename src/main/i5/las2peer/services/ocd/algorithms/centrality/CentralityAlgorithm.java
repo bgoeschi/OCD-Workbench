@@ -4,6 +4,7 @@ import java.util.Set;
 
 import i5.las2peer.services.ocd.graphs.CentralityCreationMethod;
 import i5.las2peer.services.ocd.graphs.GraphType;
+import y.base.Graph;
 
 public interface CentralityAlgorithm extends CentralityCreationMethod {
 	/**
@@ -11,6 +12,8 @@ public interface CentralityAlgorithm extends CentralityCreationMethod {
 	 * @return Array that contains the centrality values
 	 */
 	public double[] getValues();
+	
+	public double[] getValues(Graph graph);
 	
 	/**
 	 * Returns all graph types the algorithm is compatible with.

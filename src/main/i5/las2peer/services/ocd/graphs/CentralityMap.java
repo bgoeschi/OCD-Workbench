@@ -7,7 +7,7 @@ import y.base.Node;
 
 public class CentralityMap {
 	private CustomGraph graph;
-	private Map<Node, Double> map = new HashMap<Node, Double>();
+	private Map<Integer, Double> map = new HashMap<Integer, Double>();
 	private CentralityCreationType type;
 	
 	public CentralityMap(CustomGraph graph, CentralityCreationType type) {
@@ -16,14 +16,17 @@ public class CentralityMap {
 	}
 	
 	public void setNodeValue(Node node, double value) {
-		// TODO: Does this work?
 		if(graph.contains(node)) {
-			map.put(node, value);
+			map.put(node.index(), value);
 		}
 	}
 	
-	public double getNodeValue(CustomNode node) {
-		return map.get(node);
+	public double getNodeValue(Node node) {
+		return map.get(node.index());
+	}
+	
+	public double getNodeIndexValue(int index) {
+		return map.get(index);
 	}
 
 	public CentralityCreationType getType() {
@@ -32,5 +35,10 @@ public class CentralityMap {
 
 	public void setType(CentralityCreationType type) {
 		this.type = type;
+	}
+
+	@Override
+	public String toString() {
+		return "map=" + map;
 	}
 }

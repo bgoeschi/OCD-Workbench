@@ -18,6 +18,7 @@ import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithmFactory
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
+import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
@@ -49,6 +50,7 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
+import y.algo.Centrality;
 import y.base.Edge;
 import y.base.EdgeCursor;
 import y.base.Graph;
@@ -1498,22 +1500,44 @@ public class ServiceClass extends RESTService {
 	    		requestHandler.log(Level.WARNING, "user: " + username, e);
 				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm does not exist.");
 	    	}
-    		CentralityAlgorithm algorithm;
-    		algorithm = centralityFactory.getInstance(algorithmType);
-    		// Test
-    		CustomGraph graph = new CustomGraph();
-    		
-    		Node n[] = new Node[5];  
-    		for (int i = 0; i < 5; i++) {
-    			n[i] = graph.createNode();
-    		}
-    		
-    		graph.createEdge(n[0], n[2]);
-    		graph.createEdge(n[1], n[2]);
-    		graph.createEdge(n[2], n[3]);
-    		graph.createEdge(n[3], n[4]);
-    		
-    		System.out.println(algorithm.getValues(graph));	
+    		CentralityAlgorithm algorithm = centralityFactory.getInstance(algorithmType);
+    		CentralityMap map;
+	    	EntityManager em = requestHandler.getEntityManager();
+	    	CustomGraphId id = new CustomGraphId(graphId, username);
+	    	synchronized(threadHandler) {
+	    		EntityTransaction tx = em.getTransaction();
+		    	CustomGraph graph;
+		    	try {
+		    		tx.begin();
+					graph = em.find(CustomGraph.class, id);
+			    	if(graph == null) {
+			    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+						return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
+			    	}
+			    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
+			    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+						return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+			    	}
+			    	/*map = new CentralityMap(graph, algorithmType);
+			    	em.persist(map);
+					tx.commit();*/
+		    	}
+		    	catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+					throw e;
+				}
+				em.close();
+		    	/*
+		    	 * Registers and starts algorithm
+		    	 */
+				map = algorithm.getValues(graph);
+				
+				System.out.println(map);
+				//threadHandler.runAlgorithm(cover, algorithm, componentNodeCountFilter);
+	    	}
+	    	//return Response.ok(requestHandler.writeId(cover)).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);

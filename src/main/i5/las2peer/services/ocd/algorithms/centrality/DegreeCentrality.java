@@ -3,6 +3,8 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 import java.util.HashSet;
 import java.util.Set;
 
+import i5.las2peer.services.ocd.graphs.CentralityCreationType;
+import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import y.base.Node;
@@ -10,24 +12,26 @@ import y.base.NodeCursor;
 
 public class DegreeCentrality implements CentralityAlgorithm {
 	
-	public double[] getValues(CustomGraph graph) {
-		NodeCursor n = graph.nodes();
-		double[] res = new double[graph.nodeCount()];
-		int i = 0;
-		while(n.ok()) {
-			Node node = n.node();
-			res[i] = node.degree();
-			i++;
-			n.next();
+	public CentralityMap getValues(CustomGraph graph) {
+		NodeCursor nc = graph.nodes();
+		CentralityMap res = new CentralityMap(graph, CentralityCreationType.DEGREE_CENTRALITY);
+		
+		while(nc.ok()) {
+			Node node = nc.node();
+			res.setNodeValue(node, (double) node.degree());
+			nc.next();
 		}
 		return res;
 	}
 	
-	public double[] getNormalizedValues(CustomGraph graph) {
-		double [] res = getValues(graph);
+	public CentralityMap getNormalizedValues(CustomGraph graph) {
+		NodeCursor nc = graph.nodes();
+		CentralityMap res = new CentralityMap(graph, CentralityCreationType.DEGREE_CENTRALITY);
 		
-		for(int i = 0; i < res.length; i++) {
-			res[i] /= graph.nodeCount() - 1;
+		while(nc.ok()) {
+			Node node = nc.node();
+			res.setNodeValue(node, (double) node.degree()/(graph.nodeCount()-1));
+			nc.next();
 		}
 		return res;
 	}

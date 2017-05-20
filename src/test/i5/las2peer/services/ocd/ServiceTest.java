@@ -17,6 +17,7 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.webConnector.WebConnector;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
+import y.base.Node;
 
 import static org.junit.Assert.*;
 
@@ -259,9 +260,36 @@ public class ServiceTest {
 		
 		
 	}
+	
+	public void createCentralityMap() throws AdapterException, FileNotFoundException, ParserConfigurationException {
+		CustomGraph graph = new CustomGraph();
 		
+		Node nodes[] = new Node[5];  
+		for (int i = 0; i < 5; i++) {
+			nodes[i] = graph.createNode();
+		}
 		
+		graph.createEdge(nodes[0], nodes[2]);
+		graph.createEdge(nodes[1], nodes[2]);
+		graph.createEdge(nodes[2], nodes[3]);
+		graph.createEdge(nodes[3], nodes[4]);
 		
 	
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
+		try {
+			c.setLogin(Long.toString(adam.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", mainPath + "validate",
+					"");
+			assertEquals(200, result.getHttpCode());
+			System.out.println("Result of 'testValidateLogin': "
+					+ result.getResponse().trim());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+		
+		long id = graph.getId();
+		c.sendRequest("POST", mainPath + "centrality/graphs/" + id + "/algorithms", "");
 }

@@ -2,6 +2,7 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 
 import org.junit.Test;
 
+import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import y.base.Node;
 
@@ -10,27 +11,27 @@ public class DegreeCentralityTest {
 	public void testDegreeCentrality() {
 		CustomGraph graph = new CustomGraph();
 		
-		Node n[] = new Node[5];  
+		Node nodes[] = new Node[5];  
 		for (int i = 0; i < 5; i++) {
-			n[i] = graph.createNode();
+			nodes[i] = graph.createNode();
 		}
 		
-		graph.createEdge(n[0], n[2]);
-		graph.createEdge(n[1], n[2]);
-		graph.createEdge(n[2], n[3]);
-		graph.createEdge(n[3], n[4]);
+		graph.createEdge(nodes[0], nodes[2]);
+		graph.createEdge(nodes[1], nodes[2]);
+		graph.createEdge(nodes[2], nodes[3]);
+		graph.createEdge(nodes[3], nodes[4]);
 		
 		DegreeCentrality d = new DegreeCentrality();
-		double[] values = d.getValues(graph);
+		CentralityMap map = d.getValues(graph);
 		
-		for(double value : values) {
-			System.out.println(value);
+		for(Node n : nodes) {
+			System.out.println(map.getNodeValue(n));
 		}
 		
-		values = d.getNormalizedValues(graph);
+		map = d.getNormalizedValues(graph);
 		System.out.println("Normalized:");
-		for(double value : values) {
-			System.out.println(value);
+		for(Node n : nodes) {
+			System.out.println(map.getNodeValue(n));
 		}
 	}
 }

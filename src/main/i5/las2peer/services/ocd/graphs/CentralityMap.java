@@ -3,15 +3,14 @@ package i5.las2peer.services.ocd.graphs;
 import java.util.HashMap;
 import java.util.Map;
 
-import y.base.Graph;
 import y.base.Node;
 
 public class CentralityMap {
-	private Graph graph;
+	private CustomGraph graph;
 	private Map<Node, Double> map = new HashMap<Node, Double>();
 	private CentralityCreationType type;
 	
-	public CentralityMap(Graph graph, CentralityCreationType type) {
+	public CentralityMap(CustomGraph graph, CentralityCreationType type) {
 		this.graph = graph;
 		this.setType(type);
 	}
@@ -23,7 +22,7 @@ public class CentralityMap {
 		}
 	}
 	
-	public double getNodeValue(Node node) {
+	public double getNodeValue(CustomNode node) {
 		return map.get(node);
 	}
 

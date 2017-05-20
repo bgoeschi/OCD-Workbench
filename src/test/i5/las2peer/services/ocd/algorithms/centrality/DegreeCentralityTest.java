@@ -2,13 +2,13 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 
 import org.junit.Test;
 
-import y.base.Graph;
+import i5.las2peer.services.ocd.graphs.CustomGraph;
 import y.base.Node;
 
 public class DegreeCentralityTest {
 	@Test
 	public void testDegreeCentrality() {
-		Graph graph = new Graph();
+		CustomGraph graph = new CustomGraph();
 		
 		Node n[] = new Node[5];  
 		for (int i = 0; i < 5; i++) {
@@ -20,14 +20,14 @@ public class DegreeCentralityTest {
 		graph.createEdge(n[2], n[3]);
 		graph.createEdge(n[3], n[4]);
 		
-		DegreeCentrality d = new DegreeCentrality(graph);
-		double[] values = d.getValues();
+		DegreeCentrality d = new DegreeCentrality();
+		double[] values = d.getValues(graph);
 		
 		for(double value : values) {
 			System.out.println(value);
 		}
 		
-		values = d.getNormalizedValues();
+		values = d.getNormalizedValues(graph);
 		System.out.println("Normalized:");
 		for(double value : values) {
 			System.out.println(value);

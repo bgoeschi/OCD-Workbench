@@ -1457,7 +1457,6 @@ public class ServiceClass extends RESTService {
     /**
      * Creates a new CentralityMap by running a CentralityAlgorithm on an existing graph.
      * @param graphIdStr The id of the graph to run the algorithm on, must have the creation method status completed.
-     * @param nameStr The name for the CentralityMap.
      * @param creationTypeStr The name of a CentralityCreationType corresponding to a CentralityAlgorithm.
      * Defines the CentralityAlgorithm to execute.
      * @return The id of the cover being calculated which is reserved for the algorithm result.
@@ -1475,7 +1474,6 @@ public class ServiceClass extends RESTService {
 		notes = "Creates a new CentralityMap by running a centrality algorithm on an existing graph.")
     public Response calculateCentrality(
     		@PathParam("graphId") String graphIdStr,
-    		@DefaultValue("unnamed") @QueryParam("name") String nameStr,
     		@DefaultValue("DEGREE_CENTRALITY") @QueryParam("algorithm") String creationTypeStr)
     {
     	try {
@@ -1503,7 +1501,7 @@ public class ServiceClass extends RESTService {
     		CentralityAlgorithm algorithm;
     		algorithm = centralityFactory.getInstance(algorithmType);
     		// Test
-    		Graph graph = new Graph();
+    		CustomGraph graph = new CustomGraph();
     		
     		Node n[] = new Node[5];  
     		for (int i = 0; i < 5; i++) {
@@ -1515,7 +1513,7 @@ public class ServiceClass extends RESTService {
     		graph.createEdge(n[2], n[3]);
     		graph.createEdge(n[3], n[4]);
     		
-    		algorithm.getValues(graph);
+    		System.out.println(algorithm.getValues(graph));	
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);

@@ -13,6 +13,7 @@ import i5.las2peer.services.ocd.adapters.graphInput.GraphInputFormat;
 import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputAdapter;
 import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputAdapterFactory;
 import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputFormat;
+import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.metrics.OcdMetricLog;
@@ -262,6 +263,22 @@ public class RequestHandler {
 	}
 	
 	/**
+	 * Creates an XML document containing multiple CentralityMap ids.
+	 * @param maps The CentralityMaps.
+	 * @return The document.
+	 * @throws ParserConfigurationException
+	 */
+	public String writeCentralityMapIds(List<CentralityMap> maps) throws ParserConfigurationException {
+		Document doc = getDocument();
+		Element centralityMapElt = doc.createElement("CentralityMaps");
+		for(int i=0; i<maps.size(); i++) {
+			centralityMapElt.appendChild(getIdElt(maps.get(i), doc));
+		}
+		doc.appendChild(centralityMapElt);
+		return writeDoc(doc);
+	}
+	
+	/**
 	 * Creates an XML document containing meta information about multiple graphs.
 	 * @param graphs The graphs.
 	 * @return The document.
@@ -330,6 +347,18 @@ public class RequestHandler {
 	public String writeId(Cover cover) throws ParserConfigurationException {
 		Document doc = getDocument();
 		doc.appendChild(getIdElt(cover, doc));
+		return writeDoc(doc);
+	}
+	
+	/**
+	 * Creates an XML document containing the id of a single CentralityMap.
+	 * @param map The CentralityMap.
+	 * @return The document.
+	 * @throws ParserConfigurationException
+	 */
+	public String writeId(CentralityMap map) throws ParserConfigurationException {
+		Document doc = getDocument();
+		doc.appendChild(getIdElt(map, doc));
 		return writeDoc(doc);
 	}
 	
@@ -462,6 +491,25 @@ public class RequestHandler {
 		idElt.appendChild(graphIdElt);
 		coverElt.appendChild(idElt);
 		return coverElt;
+	}
+	
+	/**
+	 * Returns an XML element node representing the id of a CentralityMap.
+	 * @param cover The CentralityMap.
+	 * @param doc The document to create the element node for.
+	 * @return The element node.
+	 */
+	protected Node getIdElt(CentralityMap map, Document doc) {
+		Element centralityMapElt = doc.createElement("CentralityMap");
+		Element idElt = doc.createElement("Id");
+		Element centralityMapIdElt = doc.createElement("CentralityMapId");
+		centralityMapIdElt.appendChild(doc.createTextNode(Long.toString(map.getId())));
+		idElt.appendChild(centralityMapIdElt);
+		Element graphIdElt = doc.createElement("GraphId");
+		graphIdElt.appendChild(doc.createTextNode(Long.toString(map.getGraph().getId())));
+		idElt.appendChild(graphIdElt);
+		centralityMapElt.appendChild(idElt);
+		return centralityMapElt;
 	}
 	
 	/**

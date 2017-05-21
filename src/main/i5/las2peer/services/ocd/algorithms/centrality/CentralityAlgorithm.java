@@ -3,6 +3,7 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 import java.util.Set;
 
 import i5.las2peer.services.ocd.graphs.CentralityCreationMethod;
+import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -15,6 +16,12 @@ public interface CentralityAlgorithm extends CentralityCreationMethod {
 	 * @return An array containing the centrality values
 	 */
 	public CentralityMap getValues(CustomGraph graph);
+	
+	/**
+	 * Returns a log representing the concrete algorithm execution.
+	 * @return The log.
+	 */
+	public CentralityCreationType getAlgorithmType();
 	
 	/**
 	 * Returns all graph types the algorithm is compatible with.

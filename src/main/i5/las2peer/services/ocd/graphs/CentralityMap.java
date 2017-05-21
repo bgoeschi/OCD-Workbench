@@ -3,16 +3,82 @@ package i5.las2peer.services.ocd.graphs;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.OneToOne;
+
 import y.base.Node;
 
+@Entity
+@IdClass(CentralityMapId.class)
 public class CentralityMap {
-	private CustomGraph graph;
-	private Map<Integer, Double> map = new HashMap<Integer, Double>();
-	private CentralityCreationType type;
+	/*
+	 * Database column name definitions.
+	 */
+	public static final String graphIdColumnName = "GRAPH_ID";
+	public static final String graphUserColumnName = "USER_NAME";
+	public static final String idColumnName = "ID";
+	private static final String creationMethodColumnName = "CREATION_METHOD";
 	
-	public CentralityMap(CustomGraph graph, CentralityCreationType type) {
+	/**
+	 * System generated persistence id.
+	 */
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name = idColumnName)
+	private long id;
+	/**
+	 * The graph that the CentralityMap is based on.
+	 */
+	@Id
+	@JoinColumns( {
+		@JoinColumn(name = graphIdColumnName, referencedColumnName = CustomGraph.idColumnName),
+		@JoinColumn(name = graphUserColumnName, referencedColumnName = CustomGraph.userColumnName)
+	})
+	private CustomGraph graph;
+	
+	/**
+	 * Logged data about the algorithm that created the CentralityMap.
+	 */
+	@OneToOne(orphanRemoval = true, cascade={CascadeType.ALL})
+	@JoinColumn(name = creationMethodColumnName)
+	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED);
+
+	private Map<Integer, Double> map = new HashMap<Integer, Double>();
+	
+	/**
+	 * Creates a new instance.
+	 * Only for persistence purposes.
+	 */
+	protected CentralityMap() {
+		
+	}
+	
+	public CentralityMap(CustomGraph graph) {
 		this.graph = graph;
-		this.setType(type);
+	}
+	
+	/**
+	 * Getter for the id.
+	 * @return The id.
+	 */
+	public long getId() {
+		return id;
+	}
+	
+	/**
+	 * Getter for the graph that the CentralityMap is based on.
+	 * @return The graph.
+	 */
+	public CustomGraph getGraph() {
+		return graph;
 	}
 	
 	public void setNodeValue(Node node, double value) {
@@ -28,13 +94,26 @@ public class CentralityMap {
 	public double getNodeIndexValue(int index) {
 		return map.get(index);
 	}
-
-	public CentralityCreationType getType() {
-		return type;
+	
+	/**
+	 * Getter for the cover creation method.
+	 * @return The creation method.
+	 */
+	public CentralityCreationLog getCreationMethod() {
+		return creationMethod;
 	}
 
-	public void setType(CentralityCreationType type) {
-		this.type = type;
+	/**
+	 * Setter for the cover creation method.
+	 * @param creationMethod The creation method.
+	 */
+	public void setCreationMethod(CentralityCreationLog creationMethod) {
+		if(creationMethod != null) {
+			this.creationMethod = creationMethod;
+		}
+		else {
+			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED);
+		}
 	}
 
 	@Override

@@ -17,6 +17,7 @@ import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithm;
 import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
+import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
@@ -50,10 +51,8 @@ import io.swagger.annotations.Contact;
 import io.swagger.annotations.Info;
 import io.swagger.annotations.License;
 import io.swagger.annotations.SwaggerDefinition;
-import y.algo.Centrality;
 import y.base.Edge;
 import y.base.EdgeCursor;
-import y.base.Graph;
 import y.base.Node;
 import y.base.NodeCursor;
 
@@ -1457,6 +1456,45 @@ public class ServiceClass extends RESTService {
 //////////////////////////////////////////////////////////////////////////
     
     /**
+     * Returns the ids (or meta information) of multiple CentralityMaps.
+     * @return The covers.
+     * Or an error xml.
+     */
+    @GET
+    @Path("maps")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "Manage covers",
+		notes = "Returns the ids (or meta information) of multiple covers.")
+    public Response getCentralityMaps() {
+    	try {			
+			List<CentralityMap> queryResults;
+			EntityManager em = requestHandler.getEntityManager();
+			/*
+			 * Query
+			 */
+			String queryStr = "SELECT c from CentralityMap c";
+			/*
+			 * Gets each cover only once.
+			 */
+			queryStr += " GROUP BY c";
+			TypedQuery<CentralityMap> query = em.createQuery(queryStr, CentralityMap.class);
+			queryResults = query.getResultList();
+			em.close();
+			String responseStr;
+			responseStr = requestHandler.writeCentralityMapIds(queryResults);
+			return Response.ok(responseStr).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
      * Creates a new CentralityMap by running a CentralityAlgorithm on an existing graph.
      * @param graphIdStr The id of the graph to run the algorithm on, must have the creation method status completed.
      * @param creationTypeStr The name of a CentralityCreationType corresponding to a CentralityAlgorithm.
@@ -1507,6 +1545,7 @@ public class ServiceClass extends RESTService {
 	    	synchronized(threadHandler) {
 	    		EntityTransaction tx = em.getTransaction();
 		    	CustomGraph graph;
+		    	CentralityCreationLog log;
 		    	try {
 		    		tx.begin();
 					graph = em.find(CustomGraph.class, id);
@@ -1518,9 +1557,11 @@ public class ServiceClass extends RESTService {
 			    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
 						return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
 			    	}
-			    	/*map = new CentralityMap(graph, algorithmType);
+			    	map = new CentralityMap(graph);
+			    	log = new CentralityCreationLog(algorithmType);
+			    	map.setCreationMethod(log);
 			    	em.persist(map);
-					tx.commit();*/
+					tx.commit();
 		    	}
 		    	catch( RuntimeException e ) {
 					if( tx != null && tx.isActive() ) {
@@ -1537,13 +1578,12 @@ public class ServiceClass extends RESTService {
 				System.out.println(map);
 				//threadHandler.runAlgorithm(cover, algorithm, componentNodeCountFilter);
 	    	}
-	    	//return Response.ok(requestHandler.writeId(cover)).build();
+	    	return Response.ok(requestHandler.writeId(map)).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);
     		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
-    	return null;
     }
 
 ////////////////////////////////////////////////////////////////////////////

@@ -14,7 +14,7 @@ public class DegreeCentrality implements CentralityAlgorithm {
 	
 	public CentralityMap getValues(CustomGraph graph) {
 		NodeCursor nc = graph.nodes();
-		CentralityMap res = new CentralityMap(graph, CentralityCreationType.DEGREE_CENTRALITY);
+		CentralityMap res = new CentralityMap(graph);
 		
 		while(nc.ok()) {
 			Node node = nc.node();
@@ -26,7 +26,7 @@ public class DegreeCentrality implements CentralityAlgorithm {
 	
 	public CentralityMap getNormalizedValues(CustomGraph graph) {
 		NodeCursor nc = graph.nodes();
-		CentralityMap res = new CentralityMap(graph, CentralityCreationType.DEGREE_CENTRALITY);
+		CentralityMap res = new CentralityMap(graph);
 		
 		while(nc.ok()) {
 			Node node = nc.node();
@@ -41,5 +41,10 @@ public class DegreeCentrality implements CentralityAlgorithm {
 		Set<GraphType> compatibleTypes = new HashSet<GraphType>();
 		//TODO: compatibleTypes.add(GraphType.WEIGHTED);
 		return compatibleTypes;
+	}
+
+	@Override
+	public CentralityCreationType getAlgorithmType() {
+		return CentralityCreationType.DEGREE_CENTRALITY;
 	}
 }

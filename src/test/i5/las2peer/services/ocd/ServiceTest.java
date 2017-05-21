@@ -261,6 +261,7 @@ public class ServiceTest {
 		
 	}
 	
+	/*@Test
 	public void createCentralityMap() throws AdapterException, FileNotFoundException, ParserConfigurationException {
 		CustomGraph graph = new CustomGraph();
 		
@@ -274,7 +275,8 @@ public class ServiceTest {
 		graph.createEdge(nodes[2], nodes[3]);
 		graph.createEdge(nodes[3], nodes[4]);
 		
-	
+		createGraph(graph);
+		
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
@@ -292,4 +294,5 @@ public class ServiceTest {
 		
 		long id = graph.getId();
 		c.sendRequest("POST", mainPath + "centrality/graphs/" + id + "/algorithms", "");
+	}*/
 }

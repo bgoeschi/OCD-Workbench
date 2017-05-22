@@ -1,6 +1,9 @@
 package i5.las2peer.services.ocd.utils;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
+import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputAdapter;
+import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputAdapterFactory;
+import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputFormat;
 import i5.las2peer.services.ocd.adapters.coverInput.CoverInputAdapter;
 import i5.las2peer.services.ocd.adapters.coverInput.CoverInputAdapterFactory;
 import i5.las2peer.services.ocd.adapters.coverInput.CoverInputFormat;
@@ -80,6 +83,11 @@ public class RequestHandler {
 	 * The factory used for creating cover output adapters.
 	 */
 	private static CoverOutputAdapterFactory coverOutputAdapterFactory = new CoverOutputAdapterFactory();
+	
+	/**
+	 * The factory used for creating centrality output adapters.
+	 */
+	private static CentralityOutputAdapterFactory centralityOutputAdapterFactory = new CentralityOutputAdapterFactory();
 	
 	/**
 	 * The factory used for creating graph output adapters.
@@ -327,6 +335,30 @@ public class RequestHandler {
 	}
 	
 	/**
+	 * Creates an XML document containing meta information about multiple centrality maps.
+	 * @param covers The centrality maps.
+	 * @return The document.
+	 * @throws AdapterException
+	 * @throws ParserConfigurationException
+	 * @throws IOException
+	 * @throws SAXException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public String writeCentralityMapMetas(List<CentralityMap> maps) throws AdapterException, ParserConfigurationException, IOException, SAXException, InstantiationException, IllegalAccessException {
+		Document doc = getDocument();
+		Element mapsElt = doc.createElement("CentralityMaps");
+		for(CentralityMap map : maps) {
+			String metaDocStr = writeCentralityMap(map, CentralityOutputFormat.META_XML);
+			Node metaDocNode = parseDocumentToNode(metaDocStr);
+			Node importNode = doc.importNode(metaDocNode, true);
+			mapsElt.appendChild(importNode);
+		}
+		doc.appendChild(mapsElt);
+		return writeDoc(doc);
+	}
+	
+	/**
 	 * Creates an XML document containing the id of a single graph.
 	 * @param graph The graph.
 	 * @return The document.
@@ -405,6 +437,23 @@ public class RequestHandler {
 		CoverOutputAdapter adapter = coverOutputAdapterFactory.getInstance(outputFormat);
     	adapter.setWriter(writer);
 		adapter.writeCover(cover);
+		return writer.toString();
+	}
+	
+	/**
+	 * Creates a CentralityMap output.
+	 * @param cover The cover.
+	 * @return The CentralityMap output.
+	 * @throws AdapterException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ParserConfigurationException 
+	 */
+	public String writeCentralityMap(CentralityMap map, CentralityOutputFormat outputFormat) throws AdapterException, InstantiationException, IllegalAccessException, ParserConfigurationException {
+		Writer writer = new StringWriter();
+		CentralityOutputAdapter adapter = centralityOutputAdapterFactory.getInstance(outputFormat);
+    	adapter.setWriter(writer);
+		adapter.writeCentralityMap(map);
 		return writer.toString();
 	}
 	

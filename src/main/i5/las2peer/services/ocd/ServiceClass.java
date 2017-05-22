@@ -5,7 +5,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.restMapper.annotations.ServicePath;
 import i5.las2peer.security.UserAgent;
-
+import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputFormat;
 import i5.las2peer.services.ocd.adapters.coverInput.CoverInputFormat;
 import i5.las2peer.services.ocd.adapters.coverOutput.CoverOutputFormat;
 import i5.las2peer.services.ocd.adapters.graphInput.GraphInputFormat;
@@ -20,6 +20,7 @@ import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.graphs.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
@@ -1456,8 +1457,14 @@ public class ServiceClass extends RESTService {
 //////////////////////////////////////////////////////////////////////////
     
     /**
-     * Returns the ids (or meta information) of multiple CentralityMaps.
-     * @return The covers.
+     * Returns the ids (or meta information) of the calculated centrality maps.
+     * @param firstIndexStr Optional query parameter. The result list index of the first id to return. Defaults to 0.
+     * @param lengthStr Optional query parameter. The number of ids to return. Defaults to Long.MAX_VALUE.
+     * @param includeMetaStr Optional query parameter. If TRUE, instead of the ids the META XML of each graph is returned. Defaults to FALSE.
+     * @param executionStatusesStr Optional query parameter. If set only those covers are returned whose creation method status corresponds to one of the given ExecutionStatus names.
+     * Multiple status names are separated using the "-" delimiter.
+     * @param graphIdStr Optional query parameter. If set only those covers are returned that are based on the corresponding graph.
+     * @return The centrality maps.
      * Or an error xml.
      */
     @GET
@@ -1467,25 +1474,80 @@ public class ServiceClass extends RESTService {
     		@ApiResponse(code = 200, message = "Success"),
     		@ApiResponse(code = 401, message = "Unauthorized")
     })
-	@ApiOperation(value = "Manage covers",
-		notes = "Returns the ids (or meta information) of multiple covers.")
-    public Response getCentralityMaps() {
-    	try {			
+	@ApiOperation(value = "Manage centrality maps",
+		notes = "Returns the ids (or meta information) of multiple centrality maps.")
+    public Response getMaps(
+    		@DefaultValue("0") @QueryParam("firstIndex") String firstIndexStr,
+    		@DefaultValue("") @QueryParam("length") String lengthStr,
+    		@DefaultValue("FALSE") @QueryParam("includeMeta") String includeMetaStr,
+    		@DefaultValue("") @QueryParam("graphId") String graphIdStr)
+    {
+    	try {
+			String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+			long graphId = 0;
+			if(!graphIdStr.equals("")) {
+	    		try {
+	    			graphId = Long.parseLong(graphIdStr);
+	    		}
+	    		catch (Exception e) {
+	    			requestHandler.log(Level.WARNING, "user: " + username, e);
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+	    		}
+			}
 			List<CentralityMap> queryResults;
 			EntityManager em = requestHandler.getEntityManager();
 			/*
 			 * Query
 			 */
-			String queryStr = "SELECT c from CentralityMap c";
+			String queryStr = "SELECT c from CentralityMap c"
+					+ " JOIN c." + CentralityMap.GRAPH_FIELD_NAME + " g"
+					+ " JOIN c." + CentralityMap.CREATION_METHOD_FIELD_NAME + " a";
+			queryStr += " WHERE g." + CustomGraph.USER_NAME_FIELD_NAME + " = :username";
+			//		+ " AND a." + CentralityCreationLog.STATUS_ID_FIELD_NAME + " IN :execStatusIds";
+			if(!graphIdStr.equals("")) {
+				queryStr += " AND g." + CustomGraph.ID_FIELD_NAME + " = " + graphId;
+			}
 			/*
-			 * Gets each cover only once.
+			 * Gets each CentralityMap only once.
 			 */
 			queryStr += " GROUP BY c";
 			TypedQuery<CentralityMap> query = em.createQuery(queryStr, CentralityMap.class);
+			try {
+				int firstIndex = Integer.parseInt(firstIndexStr);
+				query.setFirstResult(firstIndex);
+			}
+			catch (Exception e) {
+				requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "First index is not valid.");
+			}
+			try {
+				if(!lengthStr.equals("")) {
+					int length = Integer.parseInt(lengthStr);
+					query.setMaxResults(length);
+				}
+			}
+			catch (Exception e) {
+				requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Length is not valid.");
+			}
+			boolean includeMeta;
+			try {
+				includeMeta = requestHandler.parseBoolean(includeMetaStr);
+	    	}
+			catch (Exception e) {
+	    		requestHandler.log(Level.WARNING, "", e);
+	    		return requestHandler.writeError(Error.PARAMETER_INVALID, "Include meta is not a boolean value.");
+	    	}
+			query.setParameter("username", username);
 			queryResults = query.getResultList();
 			em.close();
 			String responseStr;
-			responseStr = requestHandler.writeCentralityMapIds(queryResults);
+			if(includeMeta) {
+				responseStr = requestHandler.writeCentralityMapMetas(queryResults);
+			}
+			else {
+				responseStr = requestHandler.writeCentralityMapIds(queryResults);
+			}
 			return Response.ok(responseStr).build();
     	}
     	catch (Exception e) {
@@ -1579,6 +1641,200 @@ public class ServiceClass extends RESTService {
 				//threadHandler.runAlgorithm(cover, algorithm, componentNodeCountFilter);
 	    	}
 	    	return Response.ok(requestHandler.writeId(map)).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Returns a CentralityMap in a specified format.
+     * @param graphIdStr The id of the graph that the CentralityMap is based on.
+     * @param mapIdStr The CentralityMap id.
+     * @param centralityOutputFormatStr The CentralityMap output format.
+     * @return The CentralityMap output.
+     * Or an error xml.
+     */
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+    @Path("centrality/{mapId}/graphs/{graphId}")
+	@ApiOperation(value = "",
+		notes = "Returns a centrality map in a specified format.")
+    public Response getCentralityMap(
+    		@PathParam("graphId") String graphIdStr,
+    		@PathParam("mapId") String mapIdStr,
+    		@DefaultValue("DEFAULT_XML") @QueryParam("outputFormat") String centralityOutputFormatStr)
+    {
+    	try {
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    		long graphId;
+    		try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+    		long mapId;
+    		try {
+    			mapId = Long.parseLong(mapIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Cover id is not valid.");
+    		}
+    		CentralityOutputFormat format;
+    		try {
+		    	format = CentralityOutputFormat.valueOf(centralityOutputFormatStr);
+    		}
+	    	catch (Exception e) {
+	    		requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified cover output format does not exist.");
+	    	}
+    		EntityManager em = requestHandler.getEntityManager();
+	    	CustomGraphId gId = new CustomGraphId(graphId, username);
+	    	CentralityMapId cId = new CentralityMapId(mapId, gId);
+			/*
+			 * Finds CentralityMap
+			 */
+			EntityTransaction tx = em.getTransaction();
+	    	CentralityMap map;
+	    	try {
+				tx.begin();
+				map = em.find(CentralityMap.class, cId);
+				tx.commit();
+			}
+	    	catch( RuntimeException e ) {
+				if( tx != null && tx.isActive() ) {
+					tx.rollback();
+				}
+				throw e;
+			}
+	    	if(map == null) {
+	    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+	    	}
+	    	return Response.ok(requestHandler.writeCentralityMap(map, format)).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Deletes a CentralityMap.
+     * If the CentralityMap is still being created by an algorithm, the algorithm is terminated.
+     * @param mapIdStr The CentralityMap id.
+     * @param graphIdStr The graph id of the graph corresponding the CentralityMap.
+     * @return A confirmation xml.
+     * Or an error xml.
+     */
+    @DELETE
+    @Path("centrality/{mapId}/graphs/{graphId}")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Deletes a centrality map.")
+    public Response deleteCentralityMap(
+    		@PathParam("mapId") String mapIdStr,
+    		@PathParam("graphId") String graphIdStr)
+    {
+    	try {
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    		long graphId;
+    		try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+    		long mapId;
+    		try {
+    			mapId = Long.parseLong(mapIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map id is not valid.");
+    		}
+    		EntityManager em = requestHandler.getEntityManager();
+	    	CustomGraphId gId = new CustomGraphId(graphId, username);
+	    	CentralityMapId cId = new CentralityMapId(mapId, gId);
+	    	
+	    	EntityTransaction tx = em.getTransaction();
+	    	CentralityMap map;
+	    	try {
+				tx.begin();
+				map = em.find(CentralityMap.class, cId);
+				tx.commit();
+			}
+	    	catch( RuntimeException e ) {
+				if( tx != null && tx.isActive() ) {
+					tx.rollback();
+				}
+				throw e;
+			}
+	    	if(map == null) {
+	    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+	    	}
+	    	/*
+	    	 * Checks whether cover is being calculated by a ground truth benchmark and if so deletes the graph instead.
+	    	 */
+	    	/*if(cover.getCreationMethod().getType().correspondsGroundTruthBenchmark() && cover.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
+	    		return this.deleteGraph(graphIdStr);
+	    	}*/
+	    	/*
+	    	 * Deletes the cover.
+	    	 */
+    		synchronized(threadHandler) {
+    			tx = em.getTransaction();
+		    	try {
+					tx.begin();
+					map = em.find(CentralityMap.class, cId);
+					tx.commit();
+				}
+		    	catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+					throw e;
+				}
+		    	if(map == null) {
+		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+		    	}
+		    	/*
+		    	 * Interrupts algorithms and metrics.
+		    	 */
+		    	// TODO: threadHandler.interruptAll(map);
+		    	/*
+		    	 * Removes cover
+		    	 */
+		    	tx = em.getTransaction();
+		    	try {
+					tx.begin();
+					em.remove(map);
+					tx.commit();
+				}
+		    	catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+					throw e;
+				}
+    			em.close();
+    			return Response.ok(requestHandler.writeConfirmationXml()).build();
+    		}
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);

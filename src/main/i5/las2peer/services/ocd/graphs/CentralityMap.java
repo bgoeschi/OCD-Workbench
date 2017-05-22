@@ -27,6 +27,13 @@ public class CentralityMap {
 	public static final String idColumnName = "ID";
 	private static final String creationMethodColumnName = "CREATION_METHOD";
 	
+	/*
+	 * Field name definitions for JPQL queries.
+	 */
+	public static final String GRAPH_FIELD_NAME = "graph";
+	public static final String CREATION_METHOD_FIELD_NAME  = "creationMethod";
+	public static final String ID_FIELD_NAME = "id";
+	
 	/**
 	 * System generated persistence id.
 	 */

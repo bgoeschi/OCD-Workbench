@@ -397,8 +397,10 @@ public class ThreadHandler {
 						requestHandler.log(Level.SEVERE, "Centrality map deleted while algorithm running.");
 						throw new IllegalStateException();
 					}
+					//map.setMemberships(calculatedMap.getMemberships());
 					//OcdMetricLog calculatedExecTime = calculatedMap.getMetrics().get(0);
 					//OcdMetricLog log = new OcdMetricLog(calculatedExecTime.getType(), calculatedExecTime.getValue(), calculatedExecTime.getParameters(), map);
+					//log.setStatus(ExecutionStatus.COMPLETED);
 					//map.addMetric(log);
 					map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
 					tx.commit();
@@ -432,6 +434,7 @@ public class ThreadHandler {
     			}
     			em.close();
 			}	
+	    	//unsynchedInterruptAlgorithm(mapId);
 		}
 	}
 	

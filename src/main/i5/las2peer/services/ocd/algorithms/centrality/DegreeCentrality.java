@@ -3,6 +3,7 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 import java.util.HashSet;
 import java.util.Set;
 
+import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
@@ -15,6 +16,7 @@ public class DegreeCentrality implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			Node node = nc.node();

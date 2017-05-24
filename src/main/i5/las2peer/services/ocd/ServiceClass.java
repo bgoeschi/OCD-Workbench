@@ -1635,10 +1635,7 @@ public class ServiceClass extends RESTService {
 				em.close();
 		    	/*
 		    	 * Registers and starts algorithm
-		    	 */
-				//map = algorithm.getValues(graph);
-				
-				System.out.println(map);
+		    	 */	
 				//threadHandler.runCentralityAlgorithm(map, algorithm);
 	    	}
 	    	return Response.ok(requestHandler.writeId(map)).build();

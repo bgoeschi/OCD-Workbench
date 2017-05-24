@@ -266,14 +266,11 @@ public class ServiceTest {
 		CustomGraph graph = new CustomGraph();
 		
 		Node nodes[] = new Node[5];  
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 2; i++) {
 			nodes[i] = graph.createNode();
 		}
 		
-		graph.createEdge(nodes[0], nodes[2]);
-		graph.createEdge(nodes[1], nodes[2]);
-		graph.createEdge(nodes[2], nodes[3]);
-		graph.createEdge(nodes[3], nodes[4]);
+		graph.createEdge(nodes[0], nodes[1]);
 		
 		createGraph(graph);
 		

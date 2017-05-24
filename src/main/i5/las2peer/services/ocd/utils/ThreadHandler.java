@@ -1,7 +1,11 @@
 package i5.las2peer.services.ocd.utils;
 
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
+import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithm;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
+import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
+import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.graphs.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverId;
@@ -41,6 +45,11 @@ public class ThreadHandler {
 	private static Map<CoverId, Future<CoverCreationLog>> algorithms = new HashMap<CoverId, Future<CoverCreationLog>>();
 	
 	/**
+	 * Mapping from the id of a CentralityMap in calculation to the future of the algorithm calculating it.
+	 */
+	private static Map<CentralityMapId, Future<CentralityCreationLog>> centralityAlgorithms = new HashMap<CentralityMapId, Future<CentralityCreationLog>>();
+	
+	/**
 	 * Mapping from the id of a metric being calculated to the future of its execution.
 	 */
 	private static Map<OcdMetricLogId, Future<OcdMetricLog>> metrics = new HashMap<OcdMetricLogId, Future<OcdMetricLog>>();
@@ -74,6 +83,22 @@ public class ThreadHandler {
 		synchronized (algorithms) {
 			Future<CoverCreationLog> future = executor.<CoverCreationLog>submit(runnable, log);
 			algorithms.put(coverId, future);
+		}
+	}
+	
+	/**
+	 * Runs a CentralityAlgorithm.
+	 * @param cover The cover that is already persisted but not holding any valid information aside the graph and id.
+	 * @param algorithm The algorithm to calculate the cover with.
+	 */
+	public void runCentralityAlgorithm(CentralityMap map, CentralityAlgorithm algorithm) {
+		CustomGraphId gId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
+		CentralityMapId mapId = new CentralityMapId(map.getId(), gId);
+		CentralityAlgorithmRunnable runnable = new CentralityAlgorithmRunnable(map, algorithm, this);
+		CentralityCreationLog log = map.getCreationMethod();
+		synchronized (centralityAlgorithms) {
+			Future<CentralityCreationLog> future = executor.<CentralityCreationLog>submit(runnable, log);
+			centralityAlgorithms.put(mapId, future);
 		}
 	}
 	
@@ -342,6 +367,71 @@ public class ThreadHandler {
     			em.close();
 			}	
 	    	unsynchedInterruptAlgorithm(coverId);
+		}
+	}
+	
+	/**
+	 * Merges a calculated CentralityMap to the persistence context.
+	 * Is called from the runnable itself.
+	 * @param calculatedMap The calculated cover.
+	 * May be null if error is true.
+	 * @param mapId The id reserved for the calculated cover.
+	 * @param error States whether an error occurred (true) during execution.
+	 */
+	public void createCentralityMap(CentralityMap calculatedMap, CentralityMapId mapId, boolean error) {
+    	synchronized (centralityAlgorithms) {
+    		if(Thread.interrupted()) {
+    			Thread.currentThread().interrupt();
+    			return;
+    		}
+    		if(!error) {
+    			EntityManager em = requestHandler.getEntityManager();
+    			EntityTransaction tx = em.getTransaction();
+		    	try {
+					tx.begin();
+					CentralityMap map = em.find(CentralityMap.class, mapId);
+					if(map == null) {
+						/*
+						 * Should not happen.
+						 */
+						requestHandler.log(Level.SEVERE, "Centrality map deleted while algorithm running.");
+						throw new IllegalStateException();
+					}
+					//OcdMetricLog calculatedExecTime = calculatedMap.getMetrics().get(0);
+					//OcdMetricLog log = new OcdMetricLog(calculatedExecTime.getType(), calculatedExecTime.getValue(), calculatedExecTime.getParameters(), map);
+					//map.addMetric(log);
+					map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
+					tx.commit();
+		    	} catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+					error = true;
+				}
+		    	em.close();
+    		}
+    		if(error) {
+    			EntityManager em = requestHandler.getEntityManager();
+    			EntityTransaction tx = em.getTransaction();
+    			try {
+					tx.begin();
+					Cover cover = em.find(Cover.class, mapId);
+					if(cover == null) {
+						/*
+						 * Should not happen.
+						 */
+						requestHandler.log(Level.SEVERE, "Cover deleted while algorithm running.");
+						throw new IllegalStateException();
+					}
+					cover.getCreationMethod().setStatus(ExecutionStatus.ERROR);
+					tx.commit();
+    			} catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+    			}
+    			em.close();
+			}	
 		}
 	}
 	

@@ -1,18 +1,20 @@
 package i5.las2peer.services.ocd.graphs;
 
-/*import i5.las2peer.services.ocd.utils.ExecutionStatus;
+import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;*/
+//import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
-//import javax.persistence.ElementCollection;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+//import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
 /**
  * A log representation for a CentralityCreationMethod.
@@ -27,7 +29,7 @@ public class CentralityCreationLog {
 	 */
 	private static final String idColumnName = "ID";
 	private static final String typeColumnName = "TYPE";
-	//private static final String statusIdColumnName = "STATUS";
+	private static final String statusIdColumnName = "STATUS";
 	
 	/*
 	 * Field names.
@@ -54,13 +56,13 @@ public class CentralityCreationLog {
 	/**
 	 * The status of the corresponding execution.
 	 */
-	//@Column(name = statusIdColumnName)
-	//private int statusId = ExecutionStatus.WAITING.getId();
+	@Column(name = statusIdColumnName)
+	private int statusId = ExecutionStatus.WAITING.getId();
 	/**
 	 * The graph types the creation method is compatible with.
 	 */
-	//@ElementCollection
-	//private Set<Integer> compatibleGraphTypes = new HashSet<Integer>();
+	@ElementCollection
+	private Set<Integer> compatibleGraphTypes = new HashSet<Integer>();
 	
 	/**
 	 * Creates a new instance.
@@ -76,7 +78,7 @@ public class CentralityCreationLog {
 	 * @param compatibleGraphTypes The graph types which are compatible with the creation method.
 	 */
 	//public CentralityCreationLog(CoverCreationType type, Map<String, String> parameters, Set<GraphType> compatibleGraphTypes) {
-	public CentralityCreationLog(CentralityCreationType type) {
+	public CentralityCreationLog(CentralityCreationType type, Set<GraphType> compatibleGraphTypes) {
 		if(type != null) {
 			this.typeId = type.getId();
 		}
@@ -88,12 +90,12 @@ public class CentralityCreationLog {
 		}
 		else {
 			this.parameters = new HashMap<String, String>();
-		}
+		}*/
 		if(compatibleGraphTypes != null) {
 			for(GraphType graphType : compatibleGraphTypes) {
 				this.compatibleGraphTypes.add(graphType.getId());
 			}
-		}*/
+		}
 	}
 
 	/**
@@ -124,28 +126,28 @@ public class CentralityCreationLog {
 	 * Returns the graph types the corresponding creation method is compatible with.
 	 * @return The graph types.
 	 */
-	/*public Set<GraphType> getCompatibleGraphTypes() {
+	public Set<GraphType> getCompatibleGraphTypes() {
 		Set<GraphType> compatibleGraphTypes = new HashSet<GraphType>();
 		for(int id : this.compatibleGraphTypes) {
 			compatibleGraphTypes.add(GraphType.lookupType(id));
 		}
 		return compatibleGraphTypes;
-	}*/
+	}
 	
 	/**
 	 * Returns the execution status of the corresponding creation method.
 	 * @return The status.
 	 */
-	/*public ExecutionStatus getStatus() {
+	public ExecutionStatus getStatus() {
 		return ExecutionStatus.lookupStatus(statusId);
-	}*/
+	}
 	
 	/**
 	 * Sets the execution status of the corresponding creation method.
 	 * @param status The status.
 	 */
-	/*public void setStatus(ExecutionStatus status) {
+	public void setStatus(ExecutionStatus status) {
 		this.statusId = status.getId();
-	}*/
+	}
 	
 }

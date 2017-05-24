@@ -1620,8 +1620,9 @@ public class ServiceClass extends RESTService {
 						return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
 			    	}
 			    	map = new CentralityMap(graph);
-			    	log = new CentralityCreationLog(algorithmType);
+			    	log = new CentralityCreationLog(algorithmType, algorithm.compatibleGraphTypes());
 			    	map.setCreationMethod(log);
+			    	map = algorithm.getValues(graph);
 			    	em.persist(map);
 					tx.commit();
 		    	}
@@ -1635,10 +1636,10 @@ public class ServiceClass extends RESTService {
 		    	/*
 		    	 * Registers and starts algorithm
 		    	 */
-				map = algorithm.getValues(graph);
+				//map = algorithm.getValues(graph);
 				
 				System.out.println(map);
-				//threadHandler.runAlgorithm(cover, algorithm, componentNodeCountFilter);
+				//threadHandler.runCentralityAlgorithm(map, algorithm);
 	    	}
 	    	return Response.ok(requestHandler.writeId(map)).build();
     	}

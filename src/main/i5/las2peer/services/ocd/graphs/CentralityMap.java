@@ -1,6 +1,7 @@
 package i5.las2peer.services.ocd.graphs;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -56,7 +57,7 @@ public class CentralityMap {
 	 */
 	@OneToOne(orphanRemoval = true, cascade={CascadeType.ALL})
 	@JoinColumn(name = creationMethodColumnName)
-	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED);
+	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
 
 	private Map<Integer, Double> map = new HashMap<Integer, Double>();
 	
@@ -88,6 +89,14 @@ public class CentralityMap {
 		return graph;
 	}
 	
+	public Map<Integer, Double> getMap() {
+		return map;
+	}
+	
+	public void setMap(Map<Integer, Double> map) {
+		this.map = map;
+	}
+	
 	public void setNodeValue(Node node, double value) {
 		if(graph.contains(node)) {
 			map.put(node.index(), value);
@@ -103,7 +112,7 @@ public class CentralityMap {
 	}
 	
 	/**
-	 * Getter for the cover creation method.
+	 * Getter for the CentralityMap creation method.
 	 * @return The creation method.
 	 */
 	public CentralityCreationLog getCreationMethod() {
@@ -111,7 +120,7 @@ public class CentralityMap {
 	}
 
 	/**
-	 * Setter for the cover creation method.
+	 * Setter for the CentralityMap creation method.
 	 * @param creationMethod The creation method.
 	 */
 	public void setCreationMethod(CentralityCreationLog creationMethod) {
@@ -119,7 +128,7 @@ public class CentralityMap {
 			this.creationMethod = creationMethod;
 		}
 		else {
-			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED);
+			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
 		}
 	}
 

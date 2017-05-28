@@ -170,93 +170,96 @@ public class ServiceClass extends RESTService {
 	
 	//////////// GRAPH ////////////
 	
-    /**
-     * Get the graph as adjacency matrix by its index. Used as RMI Interface.
-     * @param graphId Index of the requested graph
-     * @return adjacency matrix. Entry (i,j) in row i and column j has value 1 if node i and j are linked.
-     * un/directed. un/weighted.
-     */
-	public double[][] getGraphAsAdjacencyMatrix(long graphId) {		
-    	
-		// Get stored graph by id		
-	    CustomGraph graph = getGraphById(graphId);
-		
-		//Transform graph into adjacency matrix 
-		int size = graph.nodeCount();
-		double [][] adjMatrix = new double[size][size];
-		
-		for (EdgeCursor ec = graph.edges(); ec.ok(); ec.next()) {  
-			  Edge edge = ec.edge();  
-			  adjMatrix[edge.source().index()][edge.target().index()] = graph.getEdgeWeight(edge);
-			  if(!graph.isOfType(GraphType.DIRECTED)) {
-				  adjMatrix[edge.target().index()][edge.source().index()] = graph.getEdgeWeight(edge);
-			  }
-		}  
-		
-		return adjMatrix;
-    }		
-		
 	
-    /**
-     * Get the graph as adjacency matrix by its index. Used as RMI Interface.
-     * @param graphId Index of the requested graph
-     * @return adjacency list. unweighted. directed.
-     */
-	public ArrayList<ArrayList<Integer>> getGraphAsAdjacencyList(long graphId) {		
-    	
-		// Get stored graph by id		
-	    CustomGraph graph = getGraphById(graphId);
+	/**  
+	 * Transforms the stored CustomGraph into a HashMap. The HashMap include the graph as adjacency list.
+	 * 
+	 * This method is intended to be used by other las2peer services for remote method invocation. It returns only default types and classes. 
+	 * Convert it to the service's own graph class.
+	 * 
+	 * 
+	 * @param graphId Id of the requested stored graph
+	 * @return HashMap
+	 * 
+	 */
+	public Map<String, Object> getGraphById(long graphId) {		
 		
-		//Transform graph into adjacency list
-		ArrayList<ArrayList<Integer>> adjList = new ArrayList<ArrayList<Integer>>();
+		CustomGraph graph = getStoredGraphById(graphId); 
+		Integer nodeCount = graph.nodeCount();
+		Integer edgeCount = graph.edgeCount();
+		Boolean directed = graph.getTypes().contains(GraphType.DIRECTED);
+		Boolean weighted = graph.getTypes().contains(GraphType.WEIGHTED);
 		
+		Map<String, Object> graphData=new HashMap<String, Object>();
+		graphData.put("nodes", nodeCount);
+		graphData.put("edges", edgeCount);
+		graphData.put("directed", directed);
+		graphData.put("weighted", weighted);
+		
+		
+		ArrayList<ArrayList<Integer>> adjList = new ArrayList<ArrayList<Integer>>(nodeCount);		
+		
+		int key = 0;
+		HashMap<Node, Integer> nodeKeyMap = new HashMap<Node, Integer>(nodeCount);
 		for (NodeCursor nc = graph.nodes(); nc.ok(); nc.next()) {  
 			  Node node = nc.node();  
-			  ArrayList<Integer> list = new ArrayList<Integer>();
 			  
-			  for (NodeCursor nnc = node.neighbors(); nc.ok(); nc.next()) {  
-			  list.add(nnc.node().index());
-			  }
-		}  
+			  ArrayList<Integer> list = new ArrayList<Integer>();
+			  adjList.add(key, list);
+			  
+			  nodeKeyMap.put(node, key);			  
+			  key++;			  
+		}
 		
-		return adjList;
-    }
+		for (EdgeCursor ec = graph.edges(); ec.ok(); ec.next()) {  
+			 Edge edge = ec.edge();
+			 Node source = edge.source();
+			 Node target = edge.target();
+			 
+			 adjList.get(nodeKeyMap.get(source)).add(nodeKeyMap.get(target));
+		 }		
+		
+
+		graphData.put("graph", adjList);		
+		
+		return graphData;		
+	}
+	 
+	
 	
 	
 	//////////// COVER ////////////
 			
 	/**
-	 * Get the membership matrix representing the community structure. Used as RMI Interface.
+	 * Get the membership matrix representing the community structure. 
+	 * 
+	 * This method is intended to be used by other las2peer services for remote method invocation. It returns only default types and classes.
+	 * Convert it to the service's own graph class
+	 * 
 	 * @param graphId Index of the requested graph
 	 * @param coverId Index of the requested community cover
 	 * 
-	 * @return The membership matrix. rows: nodes and columns: communities.
+	 * @return hasMap including the membership matrix. rows: nodes and columns: communities.
 	 * Entry (i,j) in row i and column j represents belonging factor of the node with index i
 	 * 
 	 */
-	public double[][] getMemberships(long graphId, long coverId) {		
+	public Map<String, Object> getMembershipsById(long graphId, long coverId) {		
 
-	    Cover cover = getCoverById(graphId, coverId);	    
+	    Cover cover = getStoredCoverById(graphId, coverId);
+	    Integer communityCount = cover.communityCount();
+	    String algorithm = cover.getCreationMethod().getType().toString();
+	    
+	    
+	    Map<String, Object> coverData=new HashMap<String, Object>();
+		coverData.put("communities", communityCount);
+		coverData.put("algorithm", algorithm);	    
+	    
 	    double[][] matrix = cover.getRmiMembershipMatrix();
-	   
-	    return matrix;		
+	    coverData.put("cover", matrix);
+	    
+	    return coverData;		
 	}
-	
-	/**
-	 * Get the Algorithm used for a cover. Used as RMI Interface.
-	 * @param graphId Index of the requested graph
-	 * @param coverId Index of the requested community cover
-	 * 
-	 * @return the algorithm name
-	 * 
-	 */
-	public String getCoverAlgorithm(long graphId, long coverId) {		
 
-	    Cover cover = getCoverById(graphId, coverId);	    
-	    String alg = cover.getCreationMethod().getType().toString();
-	   
-	    return alg;		
-	}
 
 	
 	//////////////////////////////////////////////////////////////////
@@ -840,7 +843,7 @@ public class ServiceClass extends RESTService {
 				return requestHandler.writeError(Error.PARAMETER_INVALID, "Path Parameter Invalid");
 			}    		
     		   	
-	    	CustomGraph graph = service.getGraphById(graphId);
+	    	CustomGraph graph = service.getStoredGraphById(graphId);
 		    if(graph == null) {
 		    	requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
 				return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
@@ -1428,7 +1431,7 @@ public class ServiceClass extends RESTService {
 				}
 				em.close();
 		    	/*
-		    	 * Registers and starts algorithm
+		    	 * Registers and starts algorithmex
 		    	 */
 				threadHandler.runAlgorithm(cover, algorithm, componentNodeCountFilter);
 	    	}
@@ -2347,7 +2350,7 @@ public class ServiceClass extends RESTService {
 	 * @param graphId 
 	 * @return CustomGraph
 	 */
-	private CustomGraph getGraphById(long graphId) {		
+	public CustomGraph getStoredGraphById(long graphId) {		
 
 		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();	    	
 	    EntityManager em = requestHandler.getEntityManager();
@@ -2379,7 +2382,7 @@ public class ServiceClass extends RESTService {
      * @param graphId
      * @return Cover
      */
-	private Cover getCoverById(long coverId, long graphId) {		
+	public Cover getStoredCoverById(long coverId, long graphId) {		
 
     	String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
     	EntityManager em = requestHandler.getEntityManager();

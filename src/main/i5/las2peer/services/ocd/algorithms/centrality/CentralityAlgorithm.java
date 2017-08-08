@@ -13,7 +13,7 @@ public interface CentralityAlgorithm extends CentralityCreationMethod {
 	/**
 	 * Calculates the centrality values for all the nodes in the graph
 	 * @param graph The graph on which the centrality values are calculated
-	 * @return An array containing the centrality values
+	 * @return A map containing the centrality values
 	 */
 	public CentralityMap getValues(CustomGraph graph);
 	

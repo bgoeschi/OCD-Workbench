@@ -35,7 +35,6 @@ public class CentralityAlgorithmRunnable implements Runnable {
 	 * Creates a new instance.
 	 * @param map Sets the CentralityMap.
 	 * @param algorithm Sets the CentralityAlgorithm.
-	 * @param componentNodeCountFilter Sets the component node count filter.
 	 * @param threadHandler Sets the thread handler.
 	 */
 	public CentralityAlgorithmRunnable(CentralityMap map, CentralityAlgorithm algorithm, ThreadHandler threadHandler) {

@@ -44,6 +44,7 @@ public class OcdAlgorithmExecutor {
 		processor.makeCompatible(graphCopy, algorithm.compatibleGraphTypes());
 		if(algorithm.getAlgorithmType().toString().equalsIgnoreCase(CoverCreationType.WORD_CLUSTERING_REF_ALGORITHM.toString())||algorithm.getAlgorithmType().toString().equalsIgnoreCase(CoverCreationType.COST_FUNC_OPT_CLUSTERING_ALGORITHM.toString())){
 			ExecutionTime executionTime = new ExecutionTime();
+			//TODO: I think it should be detectOverlappingCommunities(graphCopy) - Tobias
 			Cover cover = algorithm.detectOverlappingCommunities(graph);
 			cover.setCreationMethod(new CoverCreationLog(algorithm.getAlgorithmType(), algorithm.getParameters(), algorithm.compatibleGraphTypes()));
 			cover.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);

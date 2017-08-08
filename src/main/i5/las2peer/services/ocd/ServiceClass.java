@@ -418,7 +418,7 @@ public class ServiceClass extends RESTService {
 	    	}
 	    	catch (Exception e) {
 	    		requestHandler.log(Level.WARNING, "user: " + username, e);
-	    		return requestHandler.writeError(Error.PARAMETER_INVALID, "Do make undirected ist not a boolean value.");
+	    		return requestHandler.writeError(Error.PARAMETER_INVALID, "Do make undirected is not a boolean value.");
 	    	}
 	    	graph.setUserName(username);
 	    	graph.setName(URLDecoder.decode(nameStr, "UTF-8"));
@@ -726,7 +726,7 @@ public class ServiceClass extends RESTService {
      * All covers based on the graph are removed as well.
      * If a benchmark is currently calculating the graph the execution is terminated.
      * If an algorithm is currently calculating a cover based on the graph it is terminated.
-     * If a metric is currently running on a cover based on the grap it is terminated.
+     * If a metric is currently running on a cover based on the graph it is terminated.
      * @param graphIdStr The graph id.
      * @return A confirmation xml.
      * Or an error xml.
@@ -1561,7 +1561,7 @@ public class ServiceClass extends RESTService {
      * @param graphIdStr The id of the graph to run the algorithm on, must have the creation method status completed.
      * @param creationTypeStr The name of a CentralityCreationType corresponding to a CentralityAlgorithm.
      * Defines the CentralityAlgorithm to execute.
-     * @return The id of the cover being calculated which is reserved for the algorithm result.
+     * @return The id of the CentralityMap being calculated which is reserved for the algorithm result.
      * Or an error xml.
      */
     @POST
@@ -1622,7 +1622,7 @@ public class ServiceClass extends RESTService {
 			    	map = new CentralityMap(graph);
 			    	log = new CentralityCreationLog(algorithmType, algorithm.compatibleGraphTypes());
 			    	map.setCreationMethod(log);
-			    	map = algorithm.getValues(graph);
+			    	//map = algorithm.getValues(graph);
 			    	em.persist(map);
 					tx.commit();
 		    	}
@@ -1636,7 +1636,7 @@ public class ServiceClass extends RESTService {
 		    	/*
 		    	 * Registers and starts algorithm
 		    	 */	
-				//threadHandler.runCentralityAlgorithm(map, algorithm);
+				threadHandler.runCentralityAlgorithm(map, algorithm);
 	    	}
 	    	return Response.ok(requestHandler.writeId(map)).build();
     	}

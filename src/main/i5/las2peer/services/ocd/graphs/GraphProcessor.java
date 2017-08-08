@@ -348,4 +348,20 @@ public class GraphProcessor {
 		}
 		return graphCopy;
 	}
+	
+	/**
+	 * Inverts all edge weights in the graph
+	 * 
+	 * @author Tobias
+	 */
+	public void invertEdgeWeights(CustomGraph graph) {
+		EdgeCursor edges = graph.edges();
+		
+		while(edges.ok()) {
+			Edge edge = edges.edge();
+			graph.setEdgeWeight(edge, 1/graph.getEdgeWeight(edge));
+			
+			edges.next();
+		}
+	}
 }

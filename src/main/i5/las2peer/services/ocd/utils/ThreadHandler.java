@@ -28,8 +28,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- * Handles the execution and synchronization of threads for running algorithms, benchmarks and metrics.
- * @author Sebastian
+ * Handles the execution and synchronization of threads for running OCD algorithms, centrality algorithms, benchmarks and metrics.
+ * @author Sebastian, Tobias
  *
  */
 public class ThreadHandler {
@@ -88,8 +88,8 @@ public class ThreadHandler {
 	
 	/**
 	 * Runs a CentralityAlgorithm.
-	 * @param cover The cover that is already persisted but not holding any valid information aside the graph and id.
-	 * @param algorithm The algorithm to calculate the cover with.
+	 * @param map The centrality map that is already persisted but not holding any valid information aside the graph and id.
+	 * @param algorithm The algorithm to calculate the centrality values with.
 	 */
 	public void runCentralityAlgorithm(CentralityMap map, CentralityAlgorithm algorithm) {
 		CustomGraphId gId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
@@ -397,6 +397,7 @@ public class ThreadHandler {
 						requestHandler.log(Level.SEVERE, "Centrality map deleted while algorithm running.");
 						throw new IllegalStateException();
 					}
+					map.setMap(calculatedMap.getMap());
 					map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
 					tx.commit();
 		    	} catch( RuntimeException e ) {
@@ -429,7 +430,7 @@ public class ThreadHandler {
     			}
     			em.close();
 			}	
-	    	//unsynchedInterruptAlgorithm(mapId);
+	    	unsynchedInterruptAlgorithm(mapId);
 		}
 	}
 	
@@ -488,6 +489,18 @@ public class ThreadHandler {
 		if(future != null) {
 			future.cancel(true);
 			algorithms.remove(future);
+		}
+	}
+	
+	/**
+	 * Interrupts a centrality algorithm execution without synchronization.
+	 * @param mapId The id of the reserved persisted centrality map being calculated by the algorithm.
+	 */
+	private void unsynchedInterruptAlgorithm(CentralityMapId mapId) {
+		Future<CentralityCreationLog> future = centralityAlgorithms.get(mapId);
+		if(future != null) {
+			future.cancel(true);
+			centralityAlgorithms.remove(future);
 		}
 	}
 	

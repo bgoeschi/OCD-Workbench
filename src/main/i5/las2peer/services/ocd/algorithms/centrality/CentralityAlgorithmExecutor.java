@@ -2,6 +2,7 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 
 import i5.las2peer.services.ocd.algorithms.utils.CentralityAlgorithmException;
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
+import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphProcessor;
@@ -28,7 +29,10 @@ public class CentralityAlgorithmExecutor {
 		processor.makeCompatible(graphCopy, algorithm.compatibleGraphTypes());
 		// TODO: Execution time speichern
 		//ExecutionTime executionTime = new ExecutionTime();
-		CentralityMap map = algorithm.getValues(graph);
+		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY) {
+			processor.invertEdgeWeights(graphCopy);
+		}
+		CentralityMap map = algorithm.getValues(graphCopy);
 		map.setCreationMethod(new CentralityCreationLog(algorithm.getAlgorithmType(), algorithm.compatibleGraphTypes()));
 		map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
 		//executionTime.setCoverExecutionTime(map);

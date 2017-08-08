@@ -10,38 +10,30 @@ import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import y.base.Node;
 import y.base.NodeCursor;
+import y.algo.ShortestPaths;
 
-public class DegreeCentrality implements CentralityAlgorithm {
+public class ClosenessCentrality implements CentralityAlgorithm {
 	
 	public CentralityMap getValues(CustomGraph graph) {
 		NodeCursor nc = graph.nodes();
-		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.compatibleGraphTypes()));
 		
+		CentralityMap res = new CentralityMap(graph);
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CLOSENESS_CENTRALITY, this.compatibleGraphTypes()));
+		
+		double[] edgeWeights = graph.getEdgeWeights();
 		while(nc.ok()) {
 			Node node = nc.node();
-			/**
-			 * In an undirected graph each edge corresponds to two edges (a->b and b->a) and
-			 * directed graphs are made undirected before the execution.
-			 * Since each edge should only be counted once, the degree is divided by 2.
-			**/
-			res.setNodeValue(node, graph.getWeightedNodeDegree(node)/2);
+			double[] dist = new double[graph.nodeCount()];
+			ShortestPaths.dijkstra(graph, node, true, edgeWeights, dist);
+			double distSum = 0.0;
+			for(double d : dist) {
+				distSum += d;
+			}
+			res.setNodeValue(node, (graph.nodeCount()-1)/distSum);
 			nc.next();
 		}
 		return res;
 	}
-	
-	/*public CentralityMap getNormalizedValues(CustomGraph graph) {
-		NodeCursor nc = graph.nodes();
-		CentralityMap res = new CentralityMap(graph);
-		
-		while(nc.ok()) {
-			Node node = nc.node();
-			res.setNodeValue(node, (double) node.degree()/(graph.nodeCount()));
-			nc.next();
-		}
-		return res;
-	}*/
 
 	@Override
 	public Set<GraphType> compatibleGraphTypes() {
@@ -52,6 +44,6 @@ public class DegreeCentrality implements CentralityAlgorithm {
 
 	@Override
 	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.DEGREE_CENTRALITY;
+		return CentralityCreationType.CLOSENESS_CENTRALITY;
 	}
 }

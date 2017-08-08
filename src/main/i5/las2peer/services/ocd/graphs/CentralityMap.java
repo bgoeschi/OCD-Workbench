@@ -99,8 +99,12 @@ public class CentralityMap {
 	
 	public void setNodeValue(Node node, double value) {
 		if(graph.contains(node)) {
-			map.put(node.index(), value);
+			map.put(graph.nodeCount()-node.index()-1, value);
 		}
+	}
+	
+	public void setNodeIndexValue(int index, double value) {
+		map.put(index, value);
 	}
 	
 	public double getNodeValue(Node node) {

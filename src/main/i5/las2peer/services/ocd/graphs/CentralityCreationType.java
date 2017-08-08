@@ -17,7 +17,27 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to degree centrality
 	 */
-	DEGREE_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.DegreeCentrality.class, 1);
+	DEGREE_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.DegreeCentrality.class, 1),
+	
+	/**
+	 * Type corresponding to in-degree
+	 */
+	IN_DEGREE(i5.las2peer.services.ocd.algorithms.centrality.InDegree.class, 2),
+	
+	/**
+	 * Type corresponding to out-degree
+	 */
+	OUT_DEGREE(i5.las2peer.services.ocd.algorithms.centrality.OutDegree.class, 3),
+	
+	/**
+	 * Type corresponding to eccentricity
+	 */
+	ECCENTRICITY(i5.las2peer.services.ocd.algorithms.centrality.Eccentricity.class, 4),
+	
+	/**
+	 * Type corresponding to closeness centrality
+	 */
+	CLOSENESS_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.ClosenessCentrality.class, 5);
 	
 	/**
 	 * The class corresponding to the type

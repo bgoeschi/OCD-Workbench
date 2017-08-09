@@ -34,10 +34,11 @@ public class DegreeCentrality implements CentralityAlgorithm {
 	/*public CentralityMap getNormalizedValues(CustomGraph graph) {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			Node node = nc.node();
-			res.setNodeValue(node, (double) node.degree()/(graph.nodeCount()));
+			res.setNodeValue(node, (double) node.degree()/2*(graph.nodeCount()));
 			nc.next();
 		}
 		return res;

@@ -28,7 +28,7 @@ public class DegreeCentralityTest {
 			System.out.println(map.getNodeValue(n));
 		}
 		
-		map = d.getNormalizedValues(graph);
+		map = d.getValues(graph);
 		System.out.println("Normalized:");
 		for(Node n : nodes) {
 			System.out.println(map.getNodeValue(n));

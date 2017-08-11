@@ -59,7 +59,7 @@ public class CentralityMap {
 	@JoinColumn(name = creationMethodColumnName)
 	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
 
-	private Map<Integer, Double> map = new HashMap<Integer, Double>();
+	private Map<String, Double> map = new HashMap<String, Double>();
 	
 	/**
 	 * Creates a new instance.
@@ -89,30 +89,22 @@ public class CentralityMap {
 		return graph;
 	}
 	
-	public Map<Integer, Double> getMap() {
+	public Map<String, Double> getMap() {
 		return map;
 	}
 	
-	public void setMap(Map<Integer, Double> map) {
+	public void setMap(Map<String, Double> map) {
 		this.map = map;
 	}
 	
 	public void setNodeValue(Node node, double value) {
 		if(graph.contains(node)) {
-			map.put(graph.nodeCount()-node.index()-1, value);
+			map.put(graph.getNodeName(node), value);
 		}
 	}
 	
-	public void setNodeIndexValue(int index, double value) {
-		map.put(index, value);
-	}
-	
 	public double getNodeValue(Node node) {
-		return map.get(node.index());
-	}
-	
-	public double getNodeIndexValue(int index) {
-		return map.get(index);
+		return map.get(graph.getNodeName(node));
 	}
 	
 	/**

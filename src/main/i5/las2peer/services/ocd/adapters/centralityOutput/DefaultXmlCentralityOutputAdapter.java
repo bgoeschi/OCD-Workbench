@@ -62,11 +62,11 @@ public class DefaultXmlCentralityOutputAdapter extends AbstractCentralityOutputA
 			while(nodes.ok()) {
 				node = nodes.node();
 				Element nodeElt = doc.createElement("Node");
-				Element nodeIdElt = doc.createElement("Id");
-				nodeIdElt.appendChild(doc.createTextNode( ((Integer)node.index()).toString()) );
+				Element nodeIdElt = doc.createElement("Name");
+				nodeIdElt.appendChild(doc.createTextNode(map.getGraph().getNodeName(node)) );
 				nodeElt.appendChild(nodeIdElt);
 				Element nodeValueElt = doc.createElement("Value");
-				nodeValueElt.appendChild(doc.createTextNode( ((Double)map.getNodeIndexValue(node.index())).toString()) );
+				nodeValueElt.appendChild(doc.createTextNode( ((Double)map.getNodeValue(node)).toString()) );
 				nodeElt.appendChild(nodeValueElt);
 				centralityValuesElt.appendChild(nodeElt);
 				nodes.next();

@@ -1622,7 +1622,6 @@ public class ServiceClass extends RESTService {
 			    	map = new CentralityMap(graph);
 			    	log = new CentralityCreationLog(algorithmType, algorithm.compatibleGraphTypes());
 			    	map.setCreationMethod(log);
-			    	//map = algorithm.getValues(graph);
 			    	em.persist(map);
 					tx.commit();
 		    	}

@@ -42,7 +42,7 @@ public class Coreness implements CentralityAlgorithm {
 					Node node = nc.node();
 					
 					if(node.degree()/2 <= k) { //divide by two because in undirected graphs one edge is counted as two edges
-						res.setNodeIndexValue(indices.get(node), k);
+						res.setNodeValue(node, k);
 						graph.removeNode(node);
 						nodeRemoved = true;
 					}
@@ -51,7 +51,6 @@ public class Coreness implements CentralityAlgorithm {
 			}
 			k++;
 		}
-		System.out.println("Finish");
 		return res;
 	}
 

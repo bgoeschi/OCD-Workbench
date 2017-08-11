@@ -42,7 +42,17 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to LocalRank
 	 */
-	LOCAL_RANK(i5.las2peer.services.ocd.algorithms.centrality.LocalRank.class, 6);
+	LOCAL_RANK(i5.las2peer.services.ocd.algorithms.centrality.LocalRank.class, 6),
+	
+	/**
+	 * Type corresponding to ClusterRank
+	 */
+	CLUSTER_RANK(i5.las2peer.services.ocd.algorithms.centrality.ClusterRank.class, 7),
+	
+	/**
+	 * Type corresponding to Corensess
+	 */
+	CORENESS(i5.las2peer.services.ocd.algorithms.centrality.Coreness.class, 8);
 	
 	/**
 	 * The class corresponding to the type

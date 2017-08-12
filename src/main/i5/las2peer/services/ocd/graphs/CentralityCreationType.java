@@ -52,7 +52,22 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to Corensess
 	 */
-	CORENESS(i5.las2peer.services.ocd.algorithms.centrality.Coreness.class, 8);
+	CORENESS(i5.las2peer.services.ocd.algorithms.centrality.Coreness.class, 8),
+	
+	/**
+	 * Type corresponding to H-Index
+	 */
+	H_INDEX(i5.las2peer.services.ocd.algorithms.centrality.HIndex.class, 9),
+	
+	/**
+	 * Type corresponding to Integration
+	 */
+	HARMONIC_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.HarmonicCentrality.class, 10),
+	
+	/**
+	 * Type corresponding to Integration
+	 */
+	INTEGRATION(i5.las2peer.services.ocd.algorithms.centrality.Integration.class, 11);
 	
 	/**
 	 * The class corresponding to the type

@@ -29,7 +29,7 @@ public class CentralityAlgorithmExecutor {
 		processor.makeCompatible(graphCopy, algorithm.compatibleGraphTypes());
 		// TODO: Execution time speichern
 		//ExecutionTime executionTime = new ExecutionTime();
-		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY) {
+		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.INTEGRATION) {
 			processor.invertEdgeWeights(graphCopy);
 		}
 		CentralityMap map = algorithm.getValues(graphCopy);

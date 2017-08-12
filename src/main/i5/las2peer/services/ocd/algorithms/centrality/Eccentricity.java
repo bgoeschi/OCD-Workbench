@@ -20,7 +20,6 @@ public class Eccentricity implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.ECCENTRICITY, this.compatibleGraphTypes()));
 		
-		//boolean directed = graph.getTypes().contains(GraphType.DIRECTED) ? true : false;
 		double[] edgeWeights = graph.getEdgeWeights();
 		while(nc.ok()) {
 			Node node = nc.node();

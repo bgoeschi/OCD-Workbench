@@ -60,14 +60,24 @@ public enum CentralityCreationType {
 	H_INDEX(i5.las2peer.services.ocd.algorithms.centrality.HIndex.class, 9),
 	
 	/**
-	 * Type corresponding to Integration
+	 * Type corresponding to harmonic centrality
 	 */
 	HARMONIC_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.HarmonicCentrality.class, 10),
 	
 	/**
-	 * Type corresponding to Integration
+	 * Type corresponding to integration
 	 */
-	INTEGRATION(i5.las2peer.services.ocd.algorithms.centrality.Integration.class, 11);
+	INTEGRATION(i5.las2peer.services.ocd.algorithms.centrality.Integration.class, 11),
+	
+	/**
+	 * Type corresponding to radiality
+	 */
+	RADIALITY(i5.las2peer.services.ocd.algorithms.centrality.Radiality.class, 12),
+	
+	/**
+	 * Type corresponding to betweenness centrality
+	 */
+	BETWEENNESS_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BetweennessCentrality.class, 13);
 	
 	/**
 	 * The class corresponding to the type

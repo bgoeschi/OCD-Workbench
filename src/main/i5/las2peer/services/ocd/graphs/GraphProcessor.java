@@ -364,4 +364,19 @@ public class GraphProcessor {
 			edges.next();
 		}
 	}
+	
+	/**
+	 * Reverse all edge directions in the graph
+	 * 
+	 * @author Tobias
+	 */
+	public void reverseEdgeDirections(CustomGraph graph) {
+		EdgeCursor edges = graph.edges();
+		
+		while(edges.ok()) {
+			Edge edge = edges.edge();
+			graph.reverseEdge(edge);
+			edges.next();
+		}
+	}
 }

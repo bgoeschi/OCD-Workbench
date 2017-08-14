@@ -29,8 +29,11 @@ public class CentralityAlgorithmExecutor {
 		processor.makeCompatible(graphCopy, algorithm.compatibleGraphTypes());
 		// TODO: Execution time speichern
 		//ExecutionTime executionTime = new ExecutionTime();
-		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.INTEGRATION) {
+		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.BETWEENNESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.INTEGRATION || algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY) {
 			processor.invertEdgeWeights(graphCopy);
+		}
+		if(algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY) {
+			processor.reverseEdgeDirections(graphCopy);
 		}
 		CentralityMap map = algorithm.getValues(graphCopy);
 		map.setCreationMethod(new CentralityCreationLog(algorithm.getAlgorithmType(), algorithm.compatibleGraphTypes()));

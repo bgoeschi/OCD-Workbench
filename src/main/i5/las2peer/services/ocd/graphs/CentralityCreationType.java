@@ -77,7 +77,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to betweenness centrality
 	 */
-	BETWEENNESS_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BetweennessCentrality.class, 13);
+	BETWEENNESS_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BetweennessCentrality.class, 13),
+	
+	/**
+	 * Type corresponding to flow betweenness
+	 */
+	FLOW_BETWEENNESS(i5.las2peer.services.ocd.algorithms.centrality.FlowBetweenness.class, 14);
 	
 	/**
 	 * The class corresponding to the type

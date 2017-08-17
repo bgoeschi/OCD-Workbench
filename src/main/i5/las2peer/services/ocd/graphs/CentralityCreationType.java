@@ -82,7 +82,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to flow betweenness
 	 */
-	FLOW_BETWEENNESS(i5.las2peer.services.ocd.algorithms.centrality.FlowBetweenness.class, 14);
+	FLOW_BETWEENNESS(i5.las2peer.services.ocd.algorithms.centrality.FlowBetweenness.class, 14),
+	
+	/**
+	 * Type corresponding to Katz centrality
+	 */
+	KATZ_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.KatzCentrality.class, 15);
 	
 	/**
 	 * The class corresponding to the type

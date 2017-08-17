@@ -1,7 +1,9 @@
 package i5.las2peer.services.ocd.graphs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -13,8 +15,11 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import i5.las2peer.services.ocd.metrics.centrality.CentralityMetricLog;
+import i5.las2peer.services.ocd.metrics.centrality.CentralityMetricType;
 import y.base.Node;
 
 @Entity
@@ -33,6 +38,7 @@ public class CentralityMap {
 	 */
 	public static final String GRAPH_FIELD_NAME = "graph";
 	public static final String CREATION_METHOD_FIELD_NAME  = "creationMethod";
+	public static final String METRICS_FIELD_NAME = "metrics";
 	public static final String ID_FIELD_NAME = "id";
 	
 	/**
@@ -58,7 +64,12 @@ public class CentralityMap {
 	@OneToOne(orphanRemoval = true, cascade={CascadeType.ALL})
 	@JoinColumn(name = creationMethodColumnName)
 	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
-
+	/**
+	 * The metric logs calculated for the cover.
+	 */
+	@OneToMany(mappedBy = "map", orphanRemoval = true, cascade={CascadeType.ALL})
+	private List<CentralityMetricLog> metrics = new ArrayList<CentralityMetricLog>();
+	
 	private Map<String, Double> map = new HashMap<String, Double>();
 	
 	/**
@@ -126,6 +137,58 @@ public class CentralityMap {
 		else {
 			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
 		}
+	}
+	
+	/**
+	 * Getter for the metric logs calculated for the CentralityMap.
+	 * @return The metric logs.
+	 */
+	public List<CentralityMetricLog> getMetrics() {
+		return metrics;
+	}
+
+	/**
+	 * Setter for the metric logs calculated for the CentralityMap.
+	 * @param metrics The metric logs.
+	 */
+	public void setMetrics(List<CentralityMetricLog> metrics) {
+		this.metrics.clear();
+		for(CentralityMetricLog metric : metrics) {
+			if(metric != null)
+				this.metrics.add(metric);
+		}
+	}
+
+	/**
+	 * Returns the first metric occurrence with the corresponding metric type.
+	 * @param metricType The metric type.
+	 * @return The metric. Null if no such metric exists.
+	 */
+	public CentralityMetricLog getMetric(CentralityMetricType metricType) {
+		for(CentralityMetricLog metric : this.metrics){
+			if(metricType == metric.getType()) {
+				return metric;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Adds a metric log to the CentralityMap.
+	 * @param metric The metric log.
+	 */
+	public void addMetric(CentralityMetricLog metric) {
+		if(metric != null) {
+			this.metrics.add(metric);
+		}
+	}
+	
+	/**
+	 * Removes a metric log from the CentralityMap.
+	 * @param metric The metric log.
+	 */
+	public void removeMetric(CentralityMetricLog metric) {
+		this.metrics.remove(metric);
 	}
 
 	@Override

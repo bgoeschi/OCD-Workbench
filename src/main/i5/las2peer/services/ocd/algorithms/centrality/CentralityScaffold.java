@@ -1,4 +1,4 @@
-package i5.las2peer.services.ocd.algorithms.centrality;
+/*package i5.las2peer.services.ocd.algorithms.centrality;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,3 +38,4 @@ public class CentralityScaffold implements CentralityAlgorithm {
 		return CentralityCreationType.TYPE;
 	}
 }
+*/

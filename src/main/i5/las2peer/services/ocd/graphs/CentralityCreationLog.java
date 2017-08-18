@@ -14,6 +14,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+//import i5.las2peer.services.ocd.utils.ExecutionStatus;
+
 /**
  * A log representation for a CentralityCreationMethod.
  * @author Tobias
@@ -56,7 +58,6 @@ public class CentralityCreationLog {
 	 */
 	@Column(name = statusIdColumnName)
 	private int statusId = ExecutionStatus.WAITING.getId();
-	
 	/**
 	 * The graph types the creation method is compatible with.
 	 */
@@ -148,4 +149,5 @@ public class CentralityCreationLog {
 	public void setStatus(ExecutionStatus status) {
 		this.statusId = status.getId();
 	}
+	
 }

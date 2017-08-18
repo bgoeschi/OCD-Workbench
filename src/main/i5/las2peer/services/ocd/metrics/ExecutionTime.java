@@ -1,9 +1,6 @@
 package i5.las2peer.services.ocd.metrics;
 
-import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
-import i5.las2peer.services.ocd.metrics.centrality.CentralityMetricLog;
-import i5.las2peer.services.ocd.metrics.centrality.CentralityMetricType;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
 import java.util.HashMap;
@@ -42,11 +39,5 @@ public class ExecutionTime {
 		OcdMetricLog metric = new OcdMetricLog(OcdMetricType.EXECUTION_TIME, (double)totalTime / 1000d, new HashMap<String, String>(), cover);
 		metric.setStatus(ExecutionStatus.COMPLETED);
 		cover.addMetric(metric);
-	}
-	
-	public void setCentralityExecutionTime(CentralityMap map) {
-		CentralityMetricLog metric = new CentralityMetricLog(CentralityMetricType.EXECUTION_TIME, (double)totalTime / 1000d, new HashMap<String, String>(), map);
-		metric.setStatus(ExecutionStatus.COMPLETED);
-		//map.addMetric(metric);
 	}
 }

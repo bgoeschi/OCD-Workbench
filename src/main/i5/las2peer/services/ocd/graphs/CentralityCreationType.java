@@ -87,7 +87,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to Katz centrality
 	 */
-	KATZ_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.KatzCentrality.class, 15);
+	KATZ_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.KatzCentrality.class, 15),
+	
+	/**
+	 * Type corresponding to subgraph centrality
+	 */
+	SUBGRAPH_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.SubgraphCentrality.class, 16);
 	
 	/**
 	 * The class corresponding to the type

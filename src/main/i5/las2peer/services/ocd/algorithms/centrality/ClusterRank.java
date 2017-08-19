@@ -14,12 +14,15 @@ import y.base.NodeCursor;
 
 public class ClusterRank implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CLUSTER_RANK, this.compatibleGraphTypes()));	
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			
 			//Calculate clustering coefficient

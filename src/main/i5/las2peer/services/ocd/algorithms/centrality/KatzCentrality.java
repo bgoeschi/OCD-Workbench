@@ -18,14 +18,13 @@ import y.base.NodeCursor;
 public class KatzCentrality implements CentralityAlgorithm {
 	private static final double EPSILON = 0.0000000000000000000000000000000000000000000000001;
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.KATZ_CENTRALITY, this.compatibleGraphTypes()));
 		
 		int n = graph.nodeCount();
 		Matrix A = new CCSMatrix(n, n);
-		
 		try {
 			A = graph.getNeighbourhoodMatrix();
 		} catch (InterruptedException e) {
@@ -39,6 +38,9 @@ public class KatzCentrality implements CentralityAlgorithm {
 		double a = 0.2;
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();	
 			
 			int i = node.index();
@@ -50,7 +52,6 @@ public class KatzCentrality implements CentralityAlgorithm {
 				}
 				k++;
 			}
-			System.out.println(k);
 			
 			res.setNodeValue(node, katzScore);
 			nc.next();

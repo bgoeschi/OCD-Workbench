@@ -14,8 +14,9 @@ public interface CentralityAlgorithm extends CentralityCreationMethod {
 	 * Calculates the centrality values for all the nodes in the graph
 	 * @param graph The graph on which the centrality values are calculated
 	 * @return A map containing the centrality values
+	 * @throws InterruptedException 
 	 */
-	public CentralityMap getValues(CustomGraph graph);
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException;
 	
 	/**
 	 * Returns a log representing the concrete algorithm execution.

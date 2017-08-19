@@ -13,7 +13,7 @@ import y.base.NodeCursor;
 
 public class LocalRank implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.LOCAL_RANK, this.compatibleGraphTypes()));
@@ -22,6 +22,9 @@ public class LocalRank implements CentralityAlgorithm {
 		Set<Integer> oneOrTwoStepNeighbors = new HashSet<Integer>();
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			localrank = 0;
 			

@@ -1480,6 +1480,7 @@ public class ServiceClass extends RESTService {
     		@DefaultValue("0") @QueryParam("firstIndex") String firstIndexStr,
     		@DefaultValue("") @QueryParam("length") String lengthStr,
     		@DefaultValue("FALSE") @QueryParam("includeMeta") String includeMetaStr,
+    		@DefaultValue("") @QueryParam("executionStatuses") String executionStatusesStr,
     		@DefaultValue("") @QueryParam("graphId") String graphIdStr)
     {
     	try {
@@ -1494,6 +1495,25 @@ public class ServiceClass extends RESTService {
 					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
 	    		}
 			}
+			List<Integer> executionStatusIds = new ArrayList<Integer>();
+			if(!executionStatusesStr.equals("")) {
+	    		try {
+	    			List<String> executionStatusesStrList = requestHandler.parseQueryMultiParam(executionStatusesStr);
+	    			for(String executionStatusStr : executionStatusesStrList) {
+    					ExecutionStatus executionStatus = ExecutionStatus.valueOf(executionStatusStr);
+    					executionStatusIds.add(executionStatus.getId());
+	    			}
+	    		}
+		    	catch (Exception e) {
+		    		requestHandler.log(Level.WARNING, "user: " + username, e);
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified execution status does not exist.");
+		    	}
+			}
+			else {
+				for(ExecutionStatus executionStatus : ExecutionStatus.values()) {
+					executionStatusIds.add(executionStatus.getId());
+				}
+			}
 			List<CentralityMap> queryResults;
 			EntityManager em = requestHandler.getEntityManager();
 			/*
@@ -1502,8 +1522,8 @@ public class ServiceClass extends RESTService {
 			String queryStr = "SELECT c from CentralityMap c"
 					+ " JOIN c." + CentralityMap.GRAPH_FIELD_NAME + " g"
 					+ " JOIN c." + CentralityMap.CREATION_METHOD_FIELD_NAME + " a";
-			queryStr += " WHERE g." + CustomGraph.USER_NAME_FIELD_NAME + " = :username";
-			//		+ " AND a." + CentralityCreationLog.STATUS_ID_FIELD_NAME + " IN :execStatusIds";
+			queryStr += " WHERE g." + CustomGraph.USER_NAME_FIELD_NAME + " = :username"
+					+ " AND a." + CentralityCreationLog.STATUS_ID_FIELD_NAME + " IN :execStatusIds";
 			if(!graphIdStr.equals("")) {
 				queryStr += " AND g." + CustomGraph.ID_FIELD_NAME + " = " + graphId;
 			}
@@ -1539,6 +1559,7 @@ public class ServiceClass extends RESTService {
 	    		return requestHandler.writeError(Error.PARAMETER_INVALID, "Include meta is not a boolean value.");
 	    	}
 			query.setParameter("username", username);
+			query.setParameter("execStatusIds", executionStatusIds);
 			queryResults = query.getResultList();
 			em.close();
 			String responseStr;

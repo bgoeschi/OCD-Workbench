@@ -13,12 +13,15 @@ import y.base.NodeCursor;
 
 public class DegreeCentrality implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			/**
 			 * In an undirected graph each edge corresponds to two edges (a->b and b->a) and
@@ -37,6 +40,9 @@ public class DegreeCentrality implements CentralityAlgorithm {
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			res.setNodeValue(node, (double) node.degree()/2*(graph.nodeCount()));
 			nc.next();

@@ -16,7 +16,7 @@ import y.base.NodeCursor;
 
 public class Integration implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.INTEGRATION, this.compatibleGraphTypes()));
@@ -26,6 +26,9 @@ public class Integration implements CentralityAlgorithm {
 		Map<Node, Integer> reachableNodes = new HashMap<Node, Integer>();
 		double maxDistance = 0;
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			double[] dist = new double[graph.nodeCount()];
 			

@@ -11,7 +11,7 @@ import i5.las2peer.services.ocd.graphs.GraphType;
 
 public class Radiality implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		Integration integrationAlgorithm = new Integration();
 		CentralityMap res = integrationAlgorithm.getValues(graph);
 		

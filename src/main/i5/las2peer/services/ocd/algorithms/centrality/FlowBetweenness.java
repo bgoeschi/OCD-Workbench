@@ -21,7 +21,7 @@ import y.util.Maps;
 
 public class FlowBetweenness implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.FLOW_BETWEENNESS, this.compatibleGraphTypes()));
@@ -37,6 +37,9 @@ public class FlowBetweenness implements CentralityAlgorithm {
 		DataProvider capacities = Maps.createIndexEdgeMap(intWeights);
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();	
 
 			double flowSum = 0.0;

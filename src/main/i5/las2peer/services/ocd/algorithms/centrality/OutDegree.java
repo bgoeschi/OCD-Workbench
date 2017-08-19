@@ -13,12 +13,15 @@ import y.base.NodeCursor;
 
 public class OutDegree implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.OUT_DEGREE, this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			res.setNodeValue(node, graph.getWeightedOutDegree(node));
 			nc.next();
@@ -26,17 +29,20 @@ public class OutDegree implements CentralityAlgorithm {
 		return res;
 	}
 	
-	public CentralityMap getNormalizedValues(CustomGraph graph) {
+	/*public CentralityMap getNormalizedValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			res.setNodeValue(node, (double) node.degree()/(graph.nodeCount()));
 			nc.next();
 		}
 		return res;
-	}
+	}*/
 
 	@Override
 	public Set<GraphType> compatibleGraphTypes() {

@@ -14,7 +14,7 @@ import y.algo.ShortestPaths;
 
 public class ClosenessCentrality implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		
 		CentralityMap res = new CentralityMap(graph);
@@ -22,6 +22,9 @@ public class ClosenessCentrality implements CentralityAlgorithm {
 		
 		double[] edgeWeights = graph.getEdgeWeights();
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			double[] dist = new double[graph.nodeCount()];
 			ShortestPaths.dijkstra(graph, node, true, edgeWeights, dist);

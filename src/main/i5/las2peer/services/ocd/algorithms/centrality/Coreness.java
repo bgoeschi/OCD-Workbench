@@ -15,7 +15,7 @@ import y.base.NodeCursor;
 
 public class Coreness implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CORENESS, this.compatibleGraphTypes()));
 		
@@ -31,7 +31,10 @@ public class Coreness implements CentralityAlgorithm {
 		//Execute k-core decomposition
 		int k = 0;
 		
-		while(!graph.isEmpty() && k < 10) {
+		while(!graph.isEmpty()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			boolean nodeRemoved = true;
 			
 			while(nodeRemoved == true) {

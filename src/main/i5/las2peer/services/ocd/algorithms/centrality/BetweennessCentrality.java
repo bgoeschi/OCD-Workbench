@@ -19,7 +19,7 @@ import y.base.NodeCursor;
 
 public class BetweennessCentrality implements CentralityAlgorithm {
 	
-	public CentralityMap getValues(CustomGraph graph) {
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		if(graph.getTypes().contains(GraphType.WEIGHTED)) {
 			return getValuesWeighted(graph);
 		}
@@ -35,6 +35,9 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 		nc.toFirst();
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node s = nc.node();	
 			
 			//Variable declaration
@@ -118,7 +121,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 		return res;
 	}
 	
-	private CentralityMap getValuesWeighted(CustomGraph graph) {
+	private CentralityMap getValuesWeighted(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.compatibleGraphTypes()));
@@ -130,6 +133,9 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 		nc.toFirst();
 		
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node s = nc.node();	
 			
 			//Variable declaration

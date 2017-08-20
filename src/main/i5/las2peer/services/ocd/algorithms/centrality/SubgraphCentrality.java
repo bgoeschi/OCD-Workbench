@@ -22,12 +22,7 @@ public class SubgraphCentrality implements CentralityAlgorithm {
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SUBGRAPH_CENTRALITY, this.compatibleGraphTypes()));
 		
 		int n = graph.nodeCount();
-		Matrix A = new CCSMatrix(n, n);
-		try {
-			A = graph.getNeighbourhoodMatrix();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		Matrix A = graph.getNeighbourhoodMatrix();
 		
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 0);

@@ -92,7 +92,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to subgraph centrality
 	 */
-	SUBGRAPH_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.SubgraphCentrality.class, 16);
+	SUBGRAPH_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.SubgraphCentrality.class, 16),
+	
+	/**
+	 * Type corresponding to eigenvector centrality
+	 */
+	EIGENVECTOR_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.EigenvectorCentrality.class, 17);
 	
 	/**
 	 * The class corresponding to the type

@@ -97,7 +97,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to eigenvector centrality
 	 */
-	EIGENVECTOR_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.EigenvectorCentrality.class, 17);
+	EIGENVECTOR_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.EigenvectorCentrality.class, 17),
+	
+	/**
+	 * Type corresponding to alpha centrality
+	 */
+	PAGERANK(i5.las2peer.services.ocd.algorithms.centrality.PageRank.class, 18);
 	
 	/**
 	 * The class corresponding to the type

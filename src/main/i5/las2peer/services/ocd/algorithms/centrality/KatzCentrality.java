@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.la4j.matrix.Matrix;
-import org.la4j.matrix.sparse.CCSMatrix;
 
 //import i5.las2peer.services.ocd.algorithms.utils.MatrixOperations;
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;

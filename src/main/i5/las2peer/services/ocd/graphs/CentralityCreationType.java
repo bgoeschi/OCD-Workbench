@@ -100,9 +100,14 @@ public enum CentralityCreationType {
 	EIGENVECTOR_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.EigenvectorCentrality.class, 17),
 	
 	/**
+	 * Type corresponding to PageRank
+	 */
+	PAGERANK(i5.las2peer.services.ocd.algorithms.centrality.PageRank.class, 18),
+	
+	/**
 	 * Type corresponding to alpha centrality
 	 */
-	PAGERANK(i5.las2peer.services.ocd.algorithms.centrality.PageRank.class, 18);
+	LEADERRANK(i5.las2peer.services.ocd.algorithms.centrality.LeaderRank.class, 19);
 	
 	/**
 	 * The class corresponding to the type

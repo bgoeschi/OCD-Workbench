@@ -34,7 +34,7 @@ public class MatrixOperations {
 	/**
 	 * Calculates the euclidean norm of the given vector
 	 */
-	private static double norm(Vector v) {
+	public static double norm(Vector v) {
 		double squareSum = 0.0;
 		for(int i = 0; i < v.length(); i++) {
 			squareSum += v.get(i) * v.get(i);

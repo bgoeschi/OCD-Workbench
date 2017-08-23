@@ -107,7 +107,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to alpha centrality
 	 */
-	LEADERRANK(i5.las2peer.services.ocd.algorithms.centrality.LeaderRank.class, 19);
+	LEADERRANK(i5.las2peer.services.ocd.algorithms.centrality.LeaderRank.class, 19),
+	
+	/**
+	 * Type corresponding to hyperlink-induced topic search (HITS)
+	 */
+	HITS(i5.las2peer.services.ocd.algorithms.centrality.HITS.class, 20);
 	
 	/**
 	 * The class corresponding to the type

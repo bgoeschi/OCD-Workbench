@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.la4j.matrix.Matrix;
-import org.la4j.matrix.sparse.CCSMatrix;
 
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
@@ -21,7 +20,6 @@ public class SubgraphCentrality implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SUBGRAPH_CENTRALITY, this.compatibleGraphTypes()));
 		
-		int n = graph.nodeCount();
 		Matrix A = graph.getNeighbourhoodMatrix();
 		
 		while(nc.ok()) {

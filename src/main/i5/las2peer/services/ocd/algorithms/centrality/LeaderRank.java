@@ -45,6 +45,9 @@ public class LeaderRank implements CentralityAlgorithm {
 		res.setNodeValue(groundNode, 0.0);
 		
 		for(int k = 0; k < 50; k++) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			while(nc.ok()) {
 				Node i = nc.node();
 				double weightedRankSum = 0.0;

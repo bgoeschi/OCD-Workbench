@@ -1,0 +1,124 @@
+package i5.las2peer.services.ocd.algorithms.centrality;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.la4j.matrix.Matrix;
+import org.la4j.matrix.sparse.CCSMatrix;
+import org.la4j.vector.Vector;
+
+import i5.las2peer.services.ocd.algorithms.utils.MatrixOperations;
+import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
+import i5.las2peer.services.ocd.graphs.CentralityCreationType;
+import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.graphs.CustomGraph;
+import i5.las2peer.services.ocd.graphs.GraphType;
+import y.base.Edge;
+import y.base.Node;
+import y.base.NodeCursor;
+
+public class SalsaHubScore implements CentralityAlgorithm {
+	
+	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
+		CentralityMap res = new CentralityMap(graph);
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_HUB_SCORE, this.compatibleGraphTypes()));
+		int n = graph.nodeCount();
+
+		//Create bipartite graph
+		CustomGraph bipartiteGraph = new CustomGraph();
+		Node[] nodes = graph.getNodeArray();
+		Edge[] edges = graph.getEdgeArray();
+		Map<Node, Node> hubNodeMap = new HashMap<Node, Node>();
+		Map<Node, Node> authorityNodeMap = new HashMap<Node, Node>();
+		Map<Node, Node> reverseHubNodeMap = new HashMap<Node, Node>();
+		
+		//Create the nodes of the new bipartite graph
+		for(Node node : nodes) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			if(node.outDegree() > 0) {
+				Node hubNode = bipartiteGraph.createNode();
+				hubNodeMap.put(node, hubNode);
+				reverseHubNodeMap.put(hubNode, node);
+			}
+			if(node.inDegree() > 0) {
+				Node authorityNode = bipartiteGraph.createNode();
+				authorityNodeMap.put(node, authorityNode);
+			}
+		}
+		
+		//Add the edges of the new bipartite graph
+		for(Edge edge : edges) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			Node oldSource = edge.source();
+			Node oldTarget = edge.target();
+			Node newSource = hubNodeMap.get(oldSource);
+			Node newTarget = authorityNodeMap.get(oldTarget);
+			Edge newEdge = bipartiteGraph.createEdge(newSource, newTarget);
+			bipartiteGraph.setEdgeWeight(newEdge, graph.getEdgeWeight(edge));
+		}
+		
+		//Construct matrix
+		Matrix hubMatrix = new CCSMatrix(n, n);
+		
+		for(Node ih : hubNodeMap.values()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			Node i = reverseHubNodeMap.get(ih);
+			NodeCursor stepOne = ih.successors();
+			while(stepOne.ok()) {
+				Node ka = stepOne.node();
+
+				NodeCursor stepTwo = ka.predecessors();
+				while(stepTwo.ok()) {
+					Node jh = stepTwo.node();
+					Node j = reverseHubNodeMap.get(jh);
+					
+					double edgeWeightIK = bipartiteGraph.getEdgeWeight(ih.getEdgeTo(ka));
+					double edgeWeightJK = bipartiteGraph.getEdgeWeight(jh.getEdgeTo(ka));
+					double weightedOutDegreeI = bipartiteGraph.getWeightedOutDegree(ih);
+					double weightedInDegreeK = bipartiteGraph.getWeightedInDegree(ka);
+					
+					double oldHij = hubMatrix.get(i.index(), j.index());
+					double newHij = oldHij + (double)edgeWeightIK/weightedOutDegreeI * (double)edgeWeightJK/weightedInDegreeK;
+					hubMatrix.set(i.index(), j.index(), newHij);
+					stepTwo.next();
+				}	
+				stepOne.next();
+			}
+		}
+		
+		//Calculate stationary distribution of hub Markov chain
+		Vector hubVector = MatrixOperations.calculateStationaryDistribution(hubMatrix);
+		
+		NodeCursor nc = graph.nodes();	
+		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
+			Node node = nc.node();
+			res.setNodeValue(node, hubVector.get(node.index()));
+			nc.next();
+		}
+		return res;
+	}
+
+	@Override
+	public Set<GraphType> compatibleGraphTypes() {
+		Set<GraphType> compatibleTypes = new HashSet<GraphType>();
+		compatibleTypes.add(GraphType.DIRECTED);
+		compatibleTypes.add(GraphType.WEIGHTED);
+		return compatibleTypes;
+	}
+
+	@Override
+	public CentralityCreationType getAlgorithmType() {
+		return CentralityCreationType.SALSA_HUB_SCORE;
+	}
+}

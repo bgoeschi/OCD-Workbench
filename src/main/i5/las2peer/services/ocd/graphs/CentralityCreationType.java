@@ -110,9 +110,24 @@ public enum CentralityCreationType {
 	LEADERRANK(i5.las2peer.services.ocd.algorithms.centrality.LeaderRank.class, 19),
 	
 	/**
-	 * Type corresponding to hyperlink-induced topic search (HITS)
+	 * Type corresponding to the hyperlink-induced topic search (HITS) hub score
 	 */
-	HITS(i5.las2peer.services.ocd.algorithms.centrality.HITS.class, 20);
+	HITS_HUB_SCORE(i5.las2peer.services.ocd.algorithms.centrality.HitsHubScore.class, 20),
+	
+	/**
+	 * Type corresponding to the hyperlink-induced topic search (HITS) authority score
+	 */
+	HITS_AUTHORITY_SCORE(i5.las2peer.services.ocd.algorithms.centrality.HitsAuthorityScore.class, 21),
+	
+	/**
+	 * Type corresponding to the SALSA hub score
+	 */
+	SALSA_HUB_SCORE(i5.las2peer.services.ocd.algorithms.centrality.SalsaHubScore.class, 22),
+	
+	/**
+	 * Type corresponding to the SALSA authority score
+	 */
+	SALSA_AUTHORITY_SCORE(i5.las2peer.services.ocd.algorithms.centrality.SalsaAuthorityScore.class, 23);
 	
 	/**
 	 * The class corresponding to the type

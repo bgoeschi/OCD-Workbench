@@ -15,12 +15,12 @@ import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import y.base.NodeCursor;
 
-public class HITS implements CentralityAlgorithm {
+public class HitsHubScore implements CentralityAlgorithm {
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HITS, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HITS_HUB_SCORE, this.compatibleGraphTypes()));
 		
 		int n = nc.size();
 		Matrix A = graph.getNeighbourhoodMatrix();
@@ -68,9 +68,9 @@ public class HITS implements CentralityAlgorithm {
 			hubWeights = hubWeights.divide(normH);
 		}
 		
-		//Set centrality values to the authority weights
+		//Set centrality values to the hub weights
 		while(nc.ok()) {
-			res.setNodeValue(nc.node(), authorityWeights.get(nc.node().index()));
+			res.setNodeValue(nc.node(), hubWeights.get(nc.node().index()));
 			nc.next();
 		}
 
@@ -86,6 +86,6 @@ public class HITS implements CentralityAlgorithm {
 
 	@Override
 	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.HITS;
+		return CentralityCreationType.HITS_HUB_SCORE;
 	}
 }

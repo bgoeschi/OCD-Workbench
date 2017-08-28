@@ -127,7 +127,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the SALSA authority score
 	 */
-	SALSA_AUTHORITY_SCORE(i5.las2peer.services.ocd.algorithms.centrality.SalsaAuthorityScore.class, 23);
+	SALSA_AUTHORITY_SCORE(i5.las2peer.services.ocd.algorithms.centrality.SalsaAuthorityScore.class, 23),
+	
+	/**
+	 * Type corresponding to the bargaining centrality
+	 */
+	BARGAINING_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BargainingCentrality.class, 24);
 	
 	/**
 	 * The class corresponding to the type

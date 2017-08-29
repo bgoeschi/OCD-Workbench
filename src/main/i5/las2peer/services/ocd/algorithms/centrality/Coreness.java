@@ -17,7 +17,7 @@ public class Coreness implements CentralityAlgorithm {
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CORENESS, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CORENESS, this.getParameters(), this.compatibleGraphTypes()));
 		
 		//Save indices of all nodes
 		Map<Node, Integer> indices = new HashMap<Node, Integer>();
@@ -66,5 +66,17 @@ public class Coreness implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.CORENESS;
+	}
+	
+	@Override
+	public HashMap<String, String> getParameters() {
+		return new HashMap<String, String>();
+	}
+	
+	@Override
+	public void setParameters(Map<String, String> parameters) throws IllegalArgumentException {
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
 	}
 }

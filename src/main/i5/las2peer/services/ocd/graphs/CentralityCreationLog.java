@@ -2,9 +2,9 @@ package i5.las2peer.services.ocd.graphs;
 
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
-//import java.util.HashMap;
+import java.util.HashMap;
 import java.util.HashSet;
-//import java.util.Map;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -13,8 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
-//import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
 /**
  * A log representation for a CentralityCreationMethod.
@@ -46,8 +44,8 @@ public class CentralityCreationLog {
 	/**
 	 * Parameters used by the creation method.
 	 */
-	//@ElementCollection
-	//private Map<String, String> parameters;
+	@ElementCollection
+	private Map<String, String> parameters;
 	/**
 	 * Id of the creation methods corresponding CentralityCreationType.
 	 */
@@ -77,20 +75,19 @@ public class CentralityCreationLog {
 	 * @param parameters The parameters used by the creation method.
 	 * @param compatibleGraphTypes The graph types which are compatible with the creation method.
 	 */
-	//public CentralityCreationLog(CoverCreationType type, Map<String, String> parameters, Set<GraphType> compatibleGraphTypes) {
-	public CentralityCreationLog(CentralityCreationType type, Set<GraphType> compatibleGraphTypes) {
+	public CentralityCreationLog(CentralityCreationType type, Map<String, String> parameters, Set<GraphType> compatibleGraphTypes) {
 		if(type != null) {
 			this.typeId = type.getId();
 		}
 		else {
 			this.typeId = CoverCreationType.UNDEFINED.getId();
 		}
-		/*if(parameters != null) {
+		if(parameters != null) {
 			this.parameters = parameters;
 		}
 		else {
 			this.parameters = new HashMap<String, String>();
-		}*/
+		}
 		if(compatibleGraphTypes != null) {
 			for(GraphType graphType : compatibleGraphTypes) {
 				this.compatibleGraphTypes.add(graphType.getId());
@@ -110,9 +107,9 @@ public class CentralityCreationLog {
 	 * Returns the parameters used by the corresponding creation method.
 	 * @return A mapping from each parameter name to the parameter value in String format.
 	 */
-	/*public Map<String, String> getParameters() {
+	public Map<String, String> getParameters() {
 		return parameters;
-	}*/
+	}
 
 	/**
 	 * Returns the log id.

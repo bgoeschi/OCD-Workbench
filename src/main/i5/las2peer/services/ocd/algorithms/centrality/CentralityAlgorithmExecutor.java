@@ -36,7 +36,7 @@ public class CentralityAlgorithmExecutor {
 			processor.reverseEdgeDirections(graphCopy);
 		}
 		CentralityMap map = algorithm.getValues(graphCopy);
-		map.setCreationMethod(new CentralityCreationLog(algorithm.getAlgorithmType(), algorithm.compatibleGraphTypes()));
+		map.setCreationMethod(new CentralityCreationLog(algorithm.getAlgorithmType(), algorithm.getParameters(), algorithm.compatibleGraphTypes()));
 		map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
 		//executionTime.setCoverExecutionTime(map);
 		return map;

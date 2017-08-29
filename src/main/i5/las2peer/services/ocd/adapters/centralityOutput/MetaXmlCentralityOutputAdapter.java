@@ -1,5 +1,7 @@
 package i5.las2peer.services.ocd.adapters.centralityOutput;
 
+import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 
 import org.w3c.dom.Document;
@@ -7,6 +9,7 @@ import org.w3c.dom.Element;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.utils.RequestHandler;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -48,9 +51,26 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			Element creationMethodTypeElt = doc.createElement("Type");
 			creationMethodTypeElt.appendChild(doc.createTextNode(map.getCreationMethod().getType().name()));
 			creationMethodElt.appendChild(creationMethodTypeElt);
-			/*Element creationMethodStatusElt = doc.createElement("Status");
+			
+			RequestHandler rh = new RequestHandler();
+			Element creationMethodParameters = doc.createElement("Parameters");
+			Map<String, String> parameters = map.getCreationMethod().getParameters();
+			for(String parameter : parameters.keySet()) {
+				Element creationMethodParameter = doc.createElement("Parameter");
+				Element creationMethodParameterName = doc.createElement("Name");
+				creationMethodParameterName.appendChild(doc.createTextNode(parameter));
+				Element creationMethodParameterValue = doc.createElement("Value");
+				creationMethodParameterValue.appendChild(doc.createTextNode(parameters.get(parameter)));
+				creationMethodParameter.appendChild(creationMethodParameterName);
+				creationMethodParameter.appendChild(creationMethodParameterValue);
+				creationMethodParameters.appendChild(creationMethodParameter);
+			}
+			//creationMethodParameters.appendChild(doc.createTextNode(rh.writeParameters(map.getCreationMethod().getParameters())));
+			creationMethodElt.appendChild(creationMethodParameters);
+			
+			Element creationMethodStatusElt = doc.createElement("Status");
 			creationMethodStatusElt.appendChild(doc.createTextNode(map.getCreationMethod().getStatus().name()));
-			creationMethodElt.appendChild(creationMethodStatusElt);*/
+			creationMethodElt.appendChild(creationMethodStatusElt);
 			mapElt.appendChild(creationMethodElt);
 			/*
 			 * Metrics

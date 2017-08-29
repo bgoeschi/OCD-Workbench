@@ -1597,7 +1597,7 @@ public class ServiceClass extends RESTService {
 		notes = "Creates a new CentralityMap by running a centrality algorithm on an existing graph.")
     public Response calculateCentrality(
     		@PathParam("graphId") String graphIdStr,
-    		@DefaultValue("DEGREE_CENTRALITY") @QueryParam("algorithm") String creationTypeStr)
+    		@DefaultValue("DEGREE_CENTRALITY") @QueryParam("algorithm") String creationTypeStr, String content)
     {
     	try {
     		long graphId;
@@ -1621,7 +1621,20 @@ public class ServiceClass extends RESTService {
 	    		requestHandler.log(Level.WARNING, "user: " + username, e);
 				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm does not exist.");
 	    	}
-    		CentralityAlgorithm algorithm = centralityFactory.getInstance(algorithmType);
+    		CentralityAlgorithm algorithm;
+    		Map<String, String> parameters;
+    		Map<String, String> parametersCopy = new HashMap<String, String>();
+    		try {
+    			parameters = requestHandler.parseParameters(content);
+    			for(String parameter : parameters.keySet()) {
+    				parametersCopy.put(parameter, parameters.get(parameter));
+    			}
+    			algorithm = centralityFactory.getInstance(algorithmType, parameters);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Parameters are not valid.");
+    		}
     		CentralityMap map;
 	    	EntityManager em = requestHandler.getEntityManager();
 	    	CustomGraphId id = new CustomGraphId(graphId, username);
@@ -1641,7 +1654,7 @@ public class ServiceClass extends RESTService {
 						return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
 			    	}
 			    	map = new CentralityMap(graph);
-			    	log = new CentralityCreationLog(algorithmType, algorithm.compatibleGraphTypes());
+			    	log = new CentralityCreationLog(algorithmType, parametersCopy, algorithm.compatibleGraphTypes());
 			    	map.setCreationMethod(log);
 			    	em.persist(map);
 					tx.commit();
@@ -2365,6 +2378,49 @@ public class ServiceClass extends RESTService {
 			}
 			else {
 				OcdAlgorithm defaultInstance = algorithmFactory.getInstance(creationType, new HashMap<String, String>());
+				return Response.ok(requestHandler.writeParameters(defaultInstance.getParameters())).build();
+			}
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Returns the default parameters of a centrality algorithm.
+     * @param centralityCreationTypeStr A centrality creation type corresponding to a centrality algorithm.
+     * @return A parameter xml.
+     * Or an error xml.
+     */
+    @GET
+    @Path("centrality/{CentralityCreationType}/parameters/default")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Returns the default parameters of an algorithm.")
+    public Response getCentralityAlgorithmDefaultParams(
+    		@PathParam("CentralityCreationType") String centralityCreationTypeStr)
+    {
+    	try {
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    		CentralityCreationType creationType;
+    		try {
+    			creationType = CentralityCreationType.valueOf(centralityCreationTypeStr);
+    		}
+	    	catch (Exception e) {
+	    		requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality creation type does not exist.");
+	    	}
+			if(!centralityFactory.isInstantiatable(creationType)) {
+				requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified centrality creation type is not instantiatable: " + creationType.name());
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality creation type is not instantiatable: " + creationType.name());
+			}
+			else {
+				CentralityAlgorithm defaultInstance = centralityFactory.getInstance(creationType, new HashMap<String, String>());
 				return Response.ok(requestHandler.writeParameters(defaultInstance.getParameters())).build();
 			}
     	}

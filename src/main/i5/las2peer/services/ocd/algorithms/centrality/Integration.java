@@ -19,7 +19,7 @@ public class Integration implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.INTEGRATION, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.INTEGRATION, this.getParameters(), this.compatibleGraphTypes()));
 		
 		//Calculate the sum of distances and the number of reachable nodes for all nodes and find the diameter of the graph
 		double[] edgeWeights = graph.getEdgeWeights();
@@ -74,5 +74,17 @@ public class Integration implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.INTEGRATION;
+	}
+	
+	@Override
+	public HashMap<String, String> getParameters() {
+		return new HashMap<String, String>();
+	}
+	
+	@Override
+	public void setParameters(Map<String, String> parameters) throws IllegalArgumentException {
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
 	}
 }

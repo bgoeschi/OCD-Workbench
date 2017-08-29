@@ -1,6 +1,8 @@
 package i5.las2peer.services.ocd.algorithms.centrality;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.la4j.matrix.Matrix;
@@ -20,7 +22,7 @@ public class HitsHubScore implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HITS_HUB_SCORE, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HITS_HUB_SCORE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		int n = nc.size();
 		Matrix A = graph.getNeighbourhoodMatrix();
@@ -87,5 +89,17 @@ public class HitsHubScore implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.HITS_HUB_SCORE;
+	}
+	
+	@Override
+	public HashMap<String, String> getParameters() {
+		return new HashMap<String, String>();
+	}
+	
+	@Override
+	public void setParameters(Map<String, String> parameters) throws IllegalArgumentException {
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
 	}
 }

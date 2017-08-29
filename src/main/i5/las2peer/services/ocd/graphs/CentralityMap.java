@@ -57,7 +57,7 @@ public class CentralityMap {
 	 */
 	@OneToOne(orphanRemoval = true, cascade={CascadeType.ALL})
 	@JoinColumn(name = creationMethodColumnName)
-	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
+	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashMap<String, String>(), new HashSet<GraphType>());
 
 	private Map<String, Double> map = new HashMap<String, Double>();
 	
@@ -124,7 +124,7 @@ public class CentralityMap {
 			this.creationMethod = creationMethod;
 		}
 		else {
-			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashSet<GraphType>());
+			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashMap<String, String>(), new HashSet<GraphType>());
 		}
 	}
 

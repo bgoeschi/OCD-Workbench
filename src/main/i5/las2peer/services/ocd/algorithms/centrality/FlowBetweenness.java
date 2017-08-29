@@ -24,7 +24,7 @@ public class FlowBetweenness implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.FLOW_BETWEENNESS, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.FLOW_BETWEENNESS, this.getParameters(), this.compatibleGraphTypes()));
 		
 		Node[] nodeArray = graph.getNodeArray();
 		
@@ -90,5 +90,17 @@ public class FlowBetweenness implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.FLOW_BETWEENNESS;
+	}
+	
+	@Override
+	public HashMap<String, String> getParameters() {
+		return new HashMap<String, String>();
+	}
+	
+	@Override
+	public void setParameters(Map<String, String> parameters) throws IllegalArgumentException {
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
 	}
 }

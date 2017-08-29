@@ -23,7 +23,7 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_AUTHORITY_SCORE, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_AUTHORITY_SCORE, this.getParameters(), this.compatibleGraphTypes()));
 		int n = graph.nodeCount();
 
 		//Create bipartite graph
@@ -120,5 +120,17 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.SALSA_AUTHORITY_SCORE;
+	}
+	
+	@Override
+	public HashMap<String, String> getParameters() {
+		return new HashMap<String, String>();
+	}
+	
+	@Override
+	public void setParameters(Map<String, String> parameters) throws IllegalArgumentException {
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
 	}
 }

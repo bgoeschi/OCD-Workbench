@@ -413,15 +413,15 @@ public class ThreadHandler {
     			EntityTransaction tx = em.getTransaction();
     			try {
 					tx.begin();
-					Cover cover = em.find(Cover.class, mapId);
-					if(cover == null) {
+					CentralityMap map = em.find(CentralityMap.class, mapId);
+					if(map == null) {
 						/*
 						 * Should not happen.
 						 */
-						requestHandler.log(Level.SEVERE, "Cover deleted while algorithm running.");
+						requestHandler.log(Level.SEVERE, "Centrality map deleted while algorithm running.");
 						throw new IllegalStateException();
 					}
-					cover.getCreationMethod().setStatus(ExecutionStatus.ERROR);
+					map.getCreationMethod().setStatus(ExecutionStatus.ERROR);
 					tx.commit();
     			} catch( RuntimeException e ) {
 					if( tx != null && tx.isActive() ) {

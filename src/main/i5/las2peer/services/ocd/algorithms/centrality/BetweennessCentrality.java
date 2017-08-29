@@ -26,7 +26,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 		
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 0);
@@ -124,7 +124,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 	private CentralityMap getValuesWeighted(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 0);
@@ -240,5 +240,17 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.BETWEENNESS_CENTRALITY;
+	}
+	
+	@Override
+	public HashMap<String, String> getParameters() {
+		return new HashMap<String, String>();
+	}
+	
+	@Override
+	public void setParameters(Map<String, String> parameters) throws IllegalArgumentException {
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
 	}
 }

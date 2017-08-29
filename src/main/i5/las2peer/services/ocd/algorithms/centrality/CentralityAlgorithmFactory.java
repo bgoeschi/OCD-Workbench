@@ -1,9 +1,11 @@
 package i5.las2peer.services.ocd.algorithms.centrality;
 
-import i5.las2peer.services.ocd.graphs.CentralityCreationType;
-import i5.las2peer.services.ocd.utils.SimpleFactory;
+import java.util.Map;
 
-public class CentralityAlgorithmFactory implements SimpleFactory<CentralityAlgorithm, CentralityCreationType> {
+import i5.las2peer.services.ocd.graphs.CentralityCreationType;
+import i5.las2peer.services.ocd.utils.ConditionalParameterizableFactory;
+
+public class CentralityAlgorithmFactory implements ConditionalParameterizableFactory<CentralityAlgorithm, CentralityCreationType> {
 
 	public boolean isInstantiatable(CentralityCreationType creationType) {
 		if(creationType.correspondsAlgorithm()) {
@@ -15,9 +17,10 @@ public class CentralityAlgorithmFactory implements SimpleFactory<CentralityAlgor
 	}
 
 	@Override
-	public CentralityAlgorithm getInstance(CentralityCreationType creationType) throws InstantiationException, IllegalAccessException {
+	public CentralityAlgorithm getInstance(CentralityCreationType creationType, Map<String, String> parameters) throws InstantiationException, IllegalAccessException {
 		if(isInstantiatable(creationType)) {
 			CentralityAlgorithm algorithm = (CentralityAlgorithm) creationType.getCreationMethodClass().newInstance();
+			algorithm.setParameters(parameters);
 			return algorithm;
 		}
 		throw new IllegalStateException("This creation type is not an instantiatable algorithm.");

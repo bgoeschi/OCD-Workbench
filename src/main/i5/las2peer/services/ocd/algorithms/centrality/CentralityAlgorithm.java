@@ -7,8 +7,9 @@ import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
+import i5.las2peer.services.ocd.utils.Parameterizable;
 
-public interface CentralityAlgorithm extends CentralityCreationMethod {
+public interface CentralityAlgorithm extends Parameterizable, CentralityCreationMethod {
 	
 	/**
 	 * Calculates the centrality values for all the nodes in the graph

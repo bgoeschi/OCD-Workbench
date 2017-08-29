@@ -8,7 +8,7 @@ import y.base.Node;
 
 public class DegreeCentralityTest {
 	@Test
-	public void testDegreeCentrality() {
+	public void testDegreeCentrality() throws InterruptedException {
 		CustomGraph graph = new CustomGraph();
 		
 		Node nodes[] = new Node[5];  

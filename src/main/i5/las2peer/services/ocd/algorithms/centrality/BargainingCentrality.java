@@ -1,6 +1,8 @@
 package i5.las2peer.services.ocd.algorithms.centrality;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.la4j.matrix.Matrix;
@@ -17,13 +19,18 @@ import y.base.Node;
 import y.base.NodeCursor;
 
 public class BargainingCentrality implements CentralityAlgorithm {
-	private static final double ALPHA = 1;
-	private static final double BETA = 0.5;
+	private double alpha = 1;
+	private double beta = 0.1;
+	
+	/*
+	 * PARAMETER NAMES
+	 */
+	protected static final String BETA_NAME = "beta";
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BARGAINING_CENTRALITY, this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BARGAINING_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
 		
 		int n = nc.size();
 		Matrix R = graph.getNeighbourhoodMatrix();
@@ -41,7 +48,7 @@ public class BargainingCentrality implements CentralityAlgorithm {
 					Node j = neighbors.node();
 					double Rij = R.get(i.index(), j.index());
 					double cj = c.get(j.index());
-					sum += (ALPHA + BETA * cj) * Rij;
+					sum += (alpha + beta * cj) * Rij;
 					neighbors.next();
 				}	
 				c.set(i.index(), sum);
@@ -73,5 +80,23 @@ public class BargainingCentrality implements CentralityAlgorithm {
 	@Override
 	public CentralityCreationType getAlgorithmType() {
 		return CentralityCreationType.BARGAINING_CENTRALITY;
+	}
+
+	@Override
+	public void setParameters(Map<String, String> parameters) {
+		if(parameters.containsKey(BETA_NAME)) {
+			beta = Double.parseDouble(parameters.get(BETA_NAME));
+			parameters.remove(BETA_NAME);
+		}
+		if(parameters.size() > 0) {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	@Override
+	public Map<String, String> getParameters() {
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put(BETA_NAME, Double.toString(beta));
+		return parameters;
 	}
 }

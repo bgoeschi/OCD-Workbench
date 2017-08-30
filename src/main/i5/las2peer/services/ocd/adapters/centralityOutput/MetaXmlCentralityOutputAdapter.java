@@ -9,7 +9,6 @@ import org.w3c.dom.Element;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
-import i5.las2peer.services.ocd.utils.RequestHandler;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -51,8 +50,9 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			Element creationMethodTypeElt = doc.createElement("Type");
 			creationMethodTypeElt.appendChild(doc.createTextNode(map.getCreationMethod().getType().name()));
 			creationMethodElt.appendChild(creationMethodTypeElt);
-			
-			RequestHandler rh = new RequestHandler();
+			/*
+			 * Parameters
+			 */
 			Element creationMethodParameters = doc.createElement("Parameters");
 			Map<String, String> parameters = map.getCreationMethod().getParameters();
 			for(String parameter : parameters.keySet()) {
@@ -65,9 +65,10 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 				creationMethodParameter.appendChild(creationMethodParameterValue);
 				creationMethodParameters.appendChild(creationMethodParameter);
 			}
-			//creationMethodParameters.appendChild(doc.createTextNode(rh.writeParameters(map.getCreationMethod().getParameters())));
 			creationMethodElt.appendChild(creationMethodParameters);
-			
+			/*
+			 * Status
+			 */
 			Element creationMethodStatusElt = doc.createElement("Status");
 			creationMethodStatusElt.appendChild(doc.createTextNode(map.getCreationMethod().getStatus().name()));
 			creationMethodElt.appendChild(creationMethodStatusElt);

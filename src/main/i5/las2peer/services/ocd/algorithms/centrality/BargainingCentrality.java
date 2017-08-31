@@ -25,7 +25,7 @@ public class BargainingCentrality implements CentralityAlgorithm {
 	/*
 	 * PARAMETER NAMES
 	 */
-	protected static final String BETA_NAME = "beta";
+	protected static final String BETA_NAME = "Beta";
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();

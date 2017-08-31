@@ -72,6 +72,13 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			Element creationMethodStatusElt = doc.createElement("Status");
 			creationMethodStatusElt.appendChild(doc.createTextNode(map.getCreationMethod().getStatus().name()));
 			creationMethodElt.appendChild(creationMethodStatusElt);
+			/*
+			 * Execution Time
+			 */
+			Element creationMethodExecutionTimeElt = doc.createElement("ExecutionTime");
+			creationMethodExecutionTimeElt.appendChild(doc.createTextNode(Long.toString(map.getCreationMethod().getExecutionTime())));
+			creationMethodElt.appendChild(creationMethodExecutionTimeElt);
+			
 			mapElt.appendChild(creationMethodElt);
 			/*
 			 * Metrics

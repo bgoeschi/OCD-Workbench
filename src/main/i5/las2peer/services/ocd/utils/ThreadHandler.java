@@ -399,6 +399,7 @@ public class ThreadHandler {
 					}
 					map.setMap(calculatedMap.getMap());
 					map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
+					map.getCreationMethod().setExecutionTime(calculatedMap.getCreationMethod().getExecutionTime());
 					tx.commit();
 		    	} catch( RuntimeException e ) {
 					if( tx != null && tx.isActive() ) {

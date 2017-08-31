@@ -28,6 +28,7 @@ public class CentralityCreationLog {
 	private static final String idColumnName = "ID";
 	private static final String typeColumnName = "TYPE";
 	private static final String statusIdColumnName = "STATUS";
+	private static final String executionTimeColumnName = "EXECUTION_TIME";
 	
 	/*
 	 * Field names.
@@ -56,6 +57,11 @@ public class CentralityCreationLog {
 	 */
 	@Column(name = statusIdColumnName)
 	private int statusId = ExecutionStatus.WAITING.getId();
+	/**
+	 * The execution time of the algorithm
+	 */
+	@Column(name = executionTimeColumnName)
+	private long executionTime;
 	/**
 	 * The graph types the creation method is compatible with.
 	 */
@@ -147,4 +153,11 @@ public class CentralityCreationLog {
 		this.statusId = status.getId();
 	}
 	
+	public long getExecutionTime() {
+		return executionTime;
+	}
+	
+	public void setExecutionTime(long time) {
+		executionTime = time;
+	}
 }

@@ -132,7 +132,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the bargaining centrality
 	 */
-	BARGAINING_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BargainingCentrality.class, 24);
+	BARGAINING_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BargainingCentrality.class, 24),
+	
+	/**
+	 * Type corresponding to the alpha centrality
+	 */
+	ALPHA_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.AlphaCentrality.class, 25);
 	
 	/**
 	 * The class corresponding to the type

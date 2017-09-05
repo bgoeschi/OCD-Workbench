@@ -17,7 +17,10 @@ import i5.las2peer.tools.CryptoException;
 import i5.las2peer.webConnector.WebConnector;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
+import y.base.Edge;
+import y.base.EdgeCursor;
 import y.base.Node;
+import y.base.NodeCursor;
 
 import static org.junit.Assert.*;
 
@@ -26,6 +29,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -34,6 +39,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 
 /**
  * Test Class testing the Service calls
@@ -209,7 +215,7 @@ public class ServiceTest {
 					+ SawmillGraphId + "?outputFormat=META_XML", "");
 			assertEquals(200, result.getHttpCode());
 			System.out.println("Result of 'testGetGraphs' on Sawmill: "
-					+ result.getResponse().trim());
+					+ result.getResponse().trim());			
 			result = c.sendRequest("GET", mainPath + "graphs/" + DolphinsGraphId
 					+ "?outputFormat=META_XML", "");
 			assertEquals(200, result.getHttpCode());
@@ -246,17 +252,23 @@ public class ServiceTest {
 		ServiceAgent testServiceAgent = ServiceAgent
 				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass + "@1.0"), "a pass");
 		testServiceAgent.unlockPrivateKey("a pass");
-		serviceNode.registerReceiver(testServiceAgent);
+		serviceNode.registerReceiver(testServiceAgent);		
 		
+		@SuppressWarnings("unchecked")
+		HashMap<String, Object> map = (HashMap<String, Object>) serviceNode.invoke(adam, ServiceNameVersion.fromString(testServiceClass) + "@1.0", "getGraphById", new Serializable[] { SawmillGraphId });
+		@SuppressWarnings("unchecked")
+		ArrayList<ArrayList<Integer>> network = (ArrayList<ArrayList<Integer>>) map.get("graph");
+		int nodes = (int) map.get("nodes");
+		int edges = (int) map.get("edges");	
 		
-		double[][] matrix = (double[][]) serviceNode.invoke(adam, ServiceNameVersion.fromString(testServiceClass) + "@1.0", "getGraphAsAdjacencyMatrix", new Serializable[] { SawmillGraphId });
+		assertEquals(36, nodes);
+		assertEquals(36, network.size());
+		assertEquals(124, edges);
+		assertEquals(1, (int) network.get(0).get(0));
+		assertEquals(28, (int) network.get(0).get(3));
 
-		assertEquals(36, matrix.length);
-		assertEquals(1, 1, matrix[0][1]);
-		assertEquals(0, 0, matrix[3][8]);
-		assertEquals(1, 1, matrix[16][19]);
-		assertEquals(1, 1, matrix[19][16]);
-		assertEquals(1, 1, matrix[34][35]);
+		
+
 		
 		
 	}

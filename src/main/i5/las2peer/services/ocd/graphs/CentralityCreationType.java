@@ -137,7 +137,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the alpha centrality
 	 */
-	ALPHA_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.AlphaCentrality.class, 25);
+	ALPHA_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.AlphaCentrality.class, 25),
+	
+	/**
+	 * Type corresponding to the current flow betweenness centrality
+	 */
+	CURRENT_FLOW_BETWEENNESS(i5.las2peer.services.ocd.algorithms.centrality.CurrentFlowBetweenness.class, 26);
 	
 	/**
 	 * The class corresponding to the type

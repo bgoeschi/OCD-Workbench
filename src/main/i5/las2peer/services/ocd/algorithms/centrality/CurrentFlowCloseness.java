@@ -42,6 +42,9 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 		//Create laplacian matrix
 		nc.toFirst();
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			int i = node.index();
 			L.set(i, i, graph.getWeightedInDegree(node));
@@ -49,6 +52,9 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 		}
 		EdgeCursor ec = graph.edges();
 		while(ec.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Edge edge = ec.edge();
 			L.set(edge.source().index(), edge.target().index(), -graph.getEdgeWeight(edge));
 			ec.next();
@@ -70,10 +76,16 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 		
 		nc.toFirst();
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node v = nc.node();
 			
 			NodeCursor nc2 = graph.nodes();
 			while(nc2.ok()) {
+				if(Thread.interrupted()) {
+					throw new InterruptedException();
+				}
 				Node w = nc2.node();
 				double increaseW = C.get(v.index(), v.index());
 				double increaseV = increaseW - 2 * C.get(w.index(), v.index());
@@ -87,6 +99,9 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 		
 		nc.toFirst();
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			res.setNodeValue(node, (double)1/res.getNodeValue(node));
 			nc.next();

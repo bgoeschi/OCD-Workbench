@@ -147,7 +147,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the current flow closeness centrality
 	 */
-	CURRENT_FLOW_CLOSENESS(i5.las2peer.services.ocd.algorithms.centrality.CurrentFlowCloseness.class, 27);
+	CURRENT_FLOW_CLOSENESS(i5.las2peer.services.ocd.algorithms.centrality.CurrentFlowCloseness.class, 27),
+	
+	/**
+	 * Type corresponding to the centroid value
+	 */
+	CENTROID_VALUE(i5.las2peer.services.ocd.algorithms.centrality.CentroidValue.class, 28);
 	
 	/**
 	 * The class corresponding to the type

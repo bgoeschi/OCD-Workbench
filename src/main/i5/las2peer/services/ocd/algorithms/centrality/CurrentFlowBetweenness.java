@@ -32,6 +32,9 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		
 		//Create laplacian matrix
 		while(nc.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Node node = nc.node();
 			int i = node.index();
 			L.set(i, i, graph.getWeightedInDegree(node));
@@ -39,6 +42,9 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		}
 		EdgeCursor ec = graph.edges();
 		while(ec.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Edge edge = ec.edge();
 			L.set(edge.source().index(), edge.target().index(), -graph.getEdgeWeight(edge));
 			ec.next();
@@ -65,6 +71,9 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		 */
 		ec.toFirst();
 		while(ec.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Edge edge = ec.edge();
 			Node s = edge.source();
 			Node t = edge.target();
@@ -81,6 +90,9 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		Matrix B = new CCSMatrix(m, n);
 		int edgeIndex = 0;
 		while(ec.ok()) {
+			if(Thread.interrupted()) {
+				throw new InterruptedException();
+			}
 			Edge edge = ec.edge();
 			int s = edge.source().index();
 			int t = edge.target().index();

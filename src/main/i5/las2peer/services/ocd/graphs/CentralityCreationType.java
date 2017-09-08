@@ -142,7 +142,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the current flow betweenness centrality
 	 */
-	CURRENT_FLOW_BETWEENNESS(i5.las2peer.services.ocd.algorithms.centrality.CurrentFlowBetweenness.class, 26);
+	CURRENT_FLOW_BETWEENNESS(i5.las2peer.services.ocd.algorithms.centrality.CurrentFlowBetweenness.class, 26),
+	
+	/**
+	 * Type corresponding to the current flow closeness centrality
+	 */
+	CURRENT_FLOW_CLOSENESS(i5.las2peer.services.ocd.algorithms.centrality.CurrentFlowCloseness.class, 27);
 	
 	/**
 	 * The class corresponding to the type

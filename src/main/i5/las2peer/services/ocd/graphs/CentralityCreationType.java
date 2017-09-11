@@ -157,7 +157,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the residual closeness
 	 */
-	RESIDUAL_ClOSENESS(i5.las2peer.services.ocd.algorithms.centrality.ResidualCloseness.class, 29);
+	RESIDUAL_ClOSENESS(i5.las2peer.services.ocd.algorithms.centrality.ResidualCloseness.class, 29),
+	
+	/**
+	 * Type corresponding to the bridging coefficient
+	 */
+	BRIDGING_COEFFICIENT(i5.las2peer.services.ocd.algorithms.centrality.BridgingCoefficient.class, 30);
 	
 	/**
 	 * The class corresponding to the type

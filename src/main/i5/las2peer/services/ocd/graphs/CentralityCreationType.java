@@ -162,7 +162,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the bridging coefficient
 	 */
-	BRIDGING_COEFFICIENT(i5.las2peer.services.ocd.algorithms.centrality.BridgingCoefficient.class, 30);
+	BRIDGING_COEFFICIENT(i5.las2peer.services.ocd.algorithms.centrality.BridgingCoefficient.class, 30),
+	
+	/**
+	 * Type corresponding to the bridging centrality
+	 */
+	BRIDGING_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BridgingCentrality.class, 31);
 	
 	/**
 	 * The class corresponding to the type

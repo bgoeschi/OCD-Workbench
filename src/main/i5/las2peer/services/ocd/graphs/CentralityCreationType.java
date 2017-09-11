@@ -152,7 +152,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the centroid value
 	 */
-	CENTROID_VALUE(i5.las2peer.services.ocd.algorithms.centrality.CentroidValue.class, 28);
+	CENTROID_VALUE(i5.las2peer.services.ocd.algorithms.centrality.CentroidValue.class, 28),
+	
+	/**
+	 * Type corresponding to the residual closeness
+	 */
+	RESIDUAL_ClOSENESS(i5.las2peer.services.ocd.algorithms.centrality.ResidualCloseness.class, 29);
 	
 	/**
 	 * The class corresponding to the type

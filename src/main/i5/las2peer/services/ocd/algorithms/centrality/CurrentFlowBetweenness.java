@@ -102,7 +102,7 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 			edgeIndex++;
 		}
 		
-		Matrix P = B.multiply(C);
+		Matrix F = B.multiply(C);
 		
 		int normalizationFactor = (n-2)*(n-1);
 		Node[] nodeArray = graph.getNodeArray();
@@ -116,18 +116,18 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 			Node node = nc.node();	
 			double throughputSum = 0.0;	
 			
-			for(int i = 0; i < n; i++) {
-				for(int j = i+1; j < n; j++) {
-					if(i != node.index() && j != node.index()) {
-						Node source = nodeArray[i];
-						Node target = nodeArray[j];
+			for(int sourceIndex = 0; sourceIndex < n; sourceIndex++) {
+				for(int targetIndex = sourceIndex+1; targetIndex < n; targetIndex++) {
+					if(sourceIndex != node.index() && targetIndex != node.index()) {
+						Node s = nodeArray[sourceIndex];
+						Node t = nodeArray[targetIndex];
 						
 						ec.toFirst();
 						edgeIndex = 0;
 						while(ec.ok()) {
 							Edge edge = ec.edge();
 							if(edge.target() == node || edge.source() == node) {
-								throughputSum += Math.abs(P.get(edgeIndex, source.index()) - P.get(edgeIndex, target.index()));
+								throughputSum += Math.abs(F.get(edgeIndex, s.index()) - F.get(edgeIndex, t.index()));
 							}
 							ec.next();
 							edgeIndex++;
@@ -136,7 +136,7 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 				}
 			}
 
-			res.setNodeValue(node, (double)1/normalizationFactor * throughputSum/2);
+			res.setNodeValue(node, 1.0/normalizationFactor * throughputSum/2);
 			nc.next();
 		}
 		return res;

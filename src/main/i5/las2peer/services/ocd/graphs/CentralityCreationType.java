@@ -167,7 +167,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the bridging centrality
 	 */
-	BRIDGING_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BridgingCentrality.class, 31);
+	BRIDGING_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.BridgingCentrality.class, 31),
+	
+	/**
+	 * Type corresponding to the neighborhood coreness
+	 */
+	NEIGHBORHOOD_CORENESS(i5.las2peer.services.ocd.algorithms.centrality.NeighborhoodCoreness.class, 32);
 	
 	/**
 	 * The class corresponding to the type

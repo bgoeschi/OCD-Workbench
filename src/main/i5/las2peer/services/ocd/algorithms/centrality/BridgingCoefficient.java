@@ -44,9 +44,9 @@ public class BridgingCoefficient implements CentralityAlgorithm {
 					double neighborLeavingProbability = 0.0;
 					for(int j = 0; j < n; j++) {
 						double neighborEdgeWeight = A.get(i, j);
-						if(neighborEdgeWeight > 0) {
+						if(neighborEdgeWeight > 0 && j != v) {
 							neighborWeightedOutDegree += neighborEdgeWeight;
-							if(j != v && A.get(v, j) == 0) {
+							if(A.get(v, j) == 0) {
 								neighborLeavingProbability += nodeEdgeWeight * neighborEdgeWeight;
 							}
 						}

@@ -172,7 +172,12 @@ public enum CentralityCreationType {
 	/**
 	 * Type corresponding to the neighborhood coreness
 	 */
-	NEIGHBORHOOD_CORENESS(i5.las2peer.services.ocd.algorithms.centrality.NeighborhoodCoreness.class, 32);
+	NEIGHBORHOOD_CORENESS(i5.las2peer.services.ocd.algorithms.centrality.NeighborhoodCoreness.class, 32),
+	
+	/**
+	 * Type corresponding to the stress centrality
+	 */
+	STRESS_CENTRALITY(i5.las2peer.services.ocd.algorithms.centrality.StressCentrality.class, 33);
 	
 	/**
 	 * The class corresponding to the type

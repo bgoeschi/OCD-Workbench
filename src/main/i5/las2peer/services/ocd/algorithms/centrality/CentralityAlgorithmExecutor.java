@@ -27,7 +27,7 @@ public class CentralityAlgorithmExecutor {
 		CustomGraph graphCopy = new CustomGraph(graph);
 		GraphProcessor processor = new GraphProcessor();
 		processor.makeCompatible(graphCopy, algorithm.compatibleGraphTypes());
-		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.BETWEENNESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.INTEGRATION || algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY || algorithm.getAlgorithmType() == CentralityCreationType.RESIDUAL_ClOSENESS) {
+		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.BETWEENNESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.STRESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.INTEGRATION || algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY || algorithm.getAlgorithmType() == CentralityCreationType.RESIDUAL_ClOSENESS) {
 			processor.invertEdgeWeights(graphCopy);
 		}
 		if(algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY) {

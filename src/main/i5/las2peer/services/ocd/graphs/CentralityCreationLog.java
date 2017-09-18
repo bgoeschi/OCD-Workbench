@@ -86,7 +86,7 @@ public class CentralityCreationLog {
 			this.typeId = type.getId();
 		}
 		else {
-			this.typeId = CoverCreationType.UNDEFINED.getId();
+			this.typeId = CentralityCreationType.UNDEFINED.getId();
 		}
 		if(parameters != null) {
 			this.parameters = parameters;

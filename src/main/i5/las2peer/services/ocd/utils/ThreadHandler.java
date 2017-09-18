@@ -16,6 +16,8 @@ import i5.las2peer.services.ocd.metrics.KnowledgeDrivenMeasure;
 import i5.las2peer.services.ocd.metrics.OcdMetricLog;
 import i5.las2peer.services.ocd.metrics.OcdMetricLogId;
 import i5.las2peer.services.ocd.metrics.StatisticalMeasure;
+import i5.las2peer.services.ocd.simulation.GraphSimulation;
+import i5.las2peer.services.ocd.simulation.SimulationRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -95,6 +97,22 @@ public class ThreadHandler {
 		CustomGraphId gId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
 		CentralityMapId mapId = new CentralityMapId(map.getId(), gId);
 		CentralityAlgorithmRunnable runnable = new CentralityAlgorithmRunnable(map, algorithm, this);
+		CentralityCreationLog log = map.getCreationMethod();
+		synchronized (centralityAlgorithms) {
+			Future<CentralityCreationLog> future = executor.<CentralityCreationLog>submit(runnable, log);
+			centralityAlgorithms.put(mapId, future);
+		}
+	}
+	
+	/**
+	 * Runs a simulation.
+	 * @param map The centrality map that is already persisted but not holding any valid information aside the graph and id.
+	 * @param simulation The simulation to calculate the centrality values with
+	 */
+	public void runSimulation(CentralityMap map, GraphSimulation simulation) {
+		CustomGraphId gId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
+		CentralityMapId mapId = new CentralityMapId(map.getId(), gId);
+		SimulationRunnable runnable = new SimulationRunnable(map, simulation, this);
 		CentralityCreationLog log = map.getCreationMethod();
 		synchronized (centralityAlgorithms) {
 			Future<CentralityCreationLog> future = executor.<CentralityCreationLog>submit(runnable, log);

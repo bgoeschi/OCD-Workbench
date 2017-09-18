@@ -4,6 +4,7 @@ import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
 import i5.las2peer.services.ocd.graphs.GraphCreationType;
 import i5.las2peer.services.ocd.metrics.OcdMetricType;
+import i5.las2peer.services.ocd.simulation.SimulationType;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -109,5 +110,22 @@ public class OcdRequestHandler extends RequestHandler {
 		}
 		doc.appendChild(namesElt);
 		return writeDoc(doc);
-	}	
+	}
+	
+	/**
+	 * Creates an XML document containing all simulation names.
+	 * @return The document.
+	 * @throws ParserConfigurationException
+	 */
+	public String writeSimulationNames() throws ParserConfigurationException {
+		Document doc = getDocument();
+		Element namesElt = doc.createElement("Names");
+		for(SimulationType e : SimulationType.class.getEnumConstants()) {
+			Element nameElt = doc.createElement("Name");
+			nameElt.appendChild(doc.createTextNode(e.name()));
+			namesElt.appendChild(nameElt);
+		}
+		doc.appendChild(namesElt);
+		return writeDoc(doc);
+	}
 }

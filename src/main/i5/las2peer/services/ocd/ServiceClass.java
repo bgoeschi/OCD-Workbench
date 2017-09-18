@@ -38,6 +38,10 @@ import i5.las2peer.services.ocd.metrics.OcdMetricLog;
 import i5.las2peer.services.ocd.metrics.OcdMetricLogId;
 import i5.las2peer.services.ocd.metrics.OcdMetricType;
 import i5.las2peer.services.ocd.metrics.StatisticalMeasure;
+import i5.las2peer.services.ocd.simulation.GraphSimulation;
+import i5.las2peer.services.ocd.simulation.SimulationFactory;
+import i5.las2peer.services.ocd.simulation.SimulationType;
+import i5.las2peer.services.ocd.simulation.SirSimulation;
 import i5.las2peer.services.ocd.utils.Error;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 import i5.las2peer.services.ocd.utils.OcdRequestHandler;
@@ -162,6 +166,11 @@ public class ServiceClass extends RESTService {
 	 * The factory used for creating algorithms.
 	 */
 	private OcdAlgorithmFactory algorithmFactory = new OcdAlgorithmFactory();
+	
+	/**
+	 * The factory used for creating simulations.
+	 */
+	private SimulationFactory simulationFactory = new SimulationFactory();
 	
 	/**
 	 * The factory used for creating metrics.
@@ -292,6 +301,7 @@ public class ServiceClass extends RESTService {
 		private final OcdAlgorithmFactory algorithmFactory = service.algorithmFactory;
 		private final OcdMetricFactory metricFactory = service.metricFactory;
 		private final CentralityAlgorithmFactory centralityFactory = service.centralityFactory;
+		private final SimulationFactory simulationFactory = service.simulationFactory;
     
     /**
      * Simple function to validate a user login.
@@ -1828,7 +1838,7 @@ public class ServiceClass extends RESTService {
 	    		return this.deleteGraph(graphIdStr);
 	    	}*/
 	    	/*
-	    	 * Deletes the cover.
+	    	 * Deletes the centrality map.
 	    	 */
     		synchronized(threadHandler) {
     			tx = em.getTransaction();
@@ -1852,7 +1862,7 @@ public class ServiceClass extends RESTService {
 		    	 */
 		    	// TODO: threadHandler.interruptAll(map);
 		    	/*
-		    	 * Removes cover
+		    	 * Removes centrality map
 		    	 */
 		    	tx = em.getTransaction();
 		    	try {
@@ -1869,6 +1879,100 @@ public class ServiceClass extends RESTService {
     			em.close();
     			return Response.ok(requestHandler.writeConfirmationXml()).build();
     		}
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+////////////////////////////////////////////////////////////////////////////
+////////////// SIMULATIONS
+////////////////////////////////////////////////////////////////////////////
+    
+    @POST
+    @Path("simulation/graphs/{graphId}/")
+    @Produces(MediaType.TEXT_XML)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Runs SIR simulation for every possible source node in the graph.")
+    public Response runSirSimulation(
+    		@PathParam("graphId") String graphIdStr, 
+    		@DefaultValue("SIR") @QueryParam("simulation") String creationTypeStr, String content)
+    {
+    	try {
+    		long graphId;
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    		SimulationType simulationType;
+    		GraphSimulation simulation;
+    		try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+    		try {
+    			simulationType = SimulationType.valueOf(creationTypeStr);
+    		}
+	    	catch (Exception e) {
+	    		requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified simulation does not exist.");
+	    	}
+    		Map<String, String> parameters;
+    		Map<String, String> parametersCopy = new HashMap<String, String>();
+    		try {
+    			parameters = requestHandler.parseParameters(content);
+    			for(String parameter : parameters.keySet()) {
+    				parametersCopy.put(parameter, parameters.get(parameter));
+    			}
+    			simulation = simulationFactory.getInstance(simulationType, parameters);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Parameters are not valid.");
+    		}
+    		CentralityMap map;
+	    	EntityManager em = requestHandler.getEntityManager();
+	    	CustomGraphId id = new CustomGraphId(graphId, username);
+	    	synchronized(threadHandler) {
+	    		EntityTransaction tx = em.getTransaction();
+		    	CustomGraph graph;
+		    	CentralityCreationLog log;
+		    	try {
+		    		tx.begin();
+					graph = em.find(CustomGraph.class, id);
+			    	if(graph == null) {
+			    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+						return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
+			    	}
+			    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
+			    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+						return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+			    	}
+			    	map = new CentralityMap(graph);
+			    	log = new CentralityCreationLog(CentralityCreationType.GROUND_TRUTH, parametersCopy, simulation.compatibleGraphTypes());
+			    	map.setCreationMethod(log);
+			    	em.persist(map);
+					tx.commit();
+		    	}
+		    	catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+					throw e;
+				}
+				em.close();
+		    	/*
+		    	 * Registers and starts algorithm
+		    	 */	
+				threadHandler.runSimulation(map, simulation);
+	    	}
+	    	return Response.ok(requestHandler.writeId(map)).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);
@@ -2397,7 +2501,7 @@ public class ServiceClass extends RESTService {
      * Or an error xml.
      */
     @GET
-    @Path("centrality/{CentralityCreationType}/parameters/default")
+    @Path("centralities/{CentralityCreationType}/parameters/default")
     @Produces(MediaType.TEXT_XML)
     @ApiResponses(value = {
     		@ApiResponse(code = 200, message = "Success"),
@@ -2424,6 +2528,49 @@ public class ServiceClass extends RESTService {
 			}
 			else {
 				CentralityAlgorithm defaultInstance = centralityFactory.getInstance(creationType, new HashMap<String, String>());
+				return Response.ok(requestHandler.writeParameters(defaultInstance.getParameters())).build();
+			}
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Returns the default parameters of a simulation.
+     * @param simulationTypeStr A simulation type corresponding to a simulation.
+     * @return A parameter xml.
+     * Or an error xml.
+     */
+    @GET
+    @Path("simulations/{SimulationType}/parameters/default")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Returns the default parameters of a simulation.")
+    public Response getSimulationDefaultParams(
+    		@PathParam("SimulationType") String simulationTypeStr)
+    {
+    	try {
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+    		SimulationType simulationType;
+    		try {
+    			simulationType = SimulationType.valueOf(simulationTypeStr);
+    		}
+	    	catch (Exception e) {
+	    		requestHandler.log(Level.WARNING, "user: " + username, e);
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified simulation type does not exist.");
+	    	}
+			if(!simulationFactory.isInstantiatable(simulationType)) {
+				requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified simulation type is not instantiatable: " + simulationType.name());
+				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified simulation type is not instantiatable: " + simulationType.name());
+			}
+			else {
+				GraphSimulation defaultInstance = simulationFactory.getInstance(simulationType, new HashMap<String, String>());
 				return Response.ok(requestHandler.writeParameters(defaultInstance.getParameters())).build();
 			}
     	}
@@ -2613,11 +2760,11 @@ public class ServiceClass extends RESTService {
     
     /**
      * Returns all centrality measure names.
-     * @return The centrality measures in a names xml.
+     * @return The centrality measures names in an xml.
      * Or an error xml.
      */
     @GET
-    @Path("centrality")
+    @Path("centralities")
     @Produces(MediaType.TEXT_XML)
     @ApiResponses(value = {
     		@ApiResponse(code = 200, message = "Success"),
@@ -2629,6 +2776,31 @@ public class ServiceClass extends RESTService {
     {
     	try {
 			return Response.ok(requestHandler.writeCentralityMeasureNames()).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Returns all simulation names.
+     * @return The simulation names in an xml.
+     * Or an error xml.
+     */
+    @GET
+    @Path("simulations")
+    @Produces(MediaType.TEXT_XML)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "Simulations information",
+		notes = "Returns all simulation names.")
+    public Response getSimulationNames()
+    {
+    	try {
+			return Response.ok(requestHandler.writeSimulationNames()).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);

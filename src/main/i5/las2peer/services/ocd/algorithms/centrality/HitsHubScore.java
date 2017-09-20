@@ -15,6 +15,7 @@ import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
+import y.base.Node;
 import y.base.NodeCursor;
 
 public class HitsHubScore implements CentralityAlgorithm {
@@ -23,8 +24,18 @@ public class HitsHubScore implements CentralityAlgorithm {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HITS_HUB_SCORE, this.getParameters(), this.compatibleGraphTypes()));
-		
 		int n = nc.size();
+		
+		// If the graph contains no edges
+		if(graph.edgeCount() == 0) {
+			while(nc.ok()) {
+				Node node = nc.node();
+				res.setNodeValue(node, 0);
+				nc.next();
+			}
+			return res;
+		}
+		
 		Matrix A = graph.getNeighbourhoodMatrix();
 		Vector hubWeights = new BasicVector(n);
 		Vector authorityWeights = new BasicVector(n);

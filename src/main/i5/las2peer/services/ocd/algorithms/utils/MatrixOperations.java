@@ -23,7 +23,7 @@ public class MatrixOperations {
 			x.set(i, 1.0);
 		}
 
-		for(int i = 0; i < 50; i++) { //iterations set rather small, so the method does not take that long for bigger matrices
+		for(int i = 0; i < 50; i++) { // iterations set rather small, so the method does not take that long for bigger matrices
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
 			}
@@ -55,11 +55,11 @@ public class MatrixOperations {
 	 * @throws InterruptedException
 	 */
 	public static Vector calculateStationaryDistribution(Matrix matrix) throws InterruptedException {
-		//The matrix is transposed so the power iteration gives us a left eigenvector
+		// The matrix is transposed so the power iteration gives us a left eigenvector
 		matrix = matrix.transpose();	
 		Vector x = calculatePrincipalEigenvector(matrix);	
 		x = matrix.multiply(x);
-		//The entries are divided by the sum of all entries so the sum is 1
+		// The entries are divided by the sum of all entries so the sum is 1
 		x = x.divide(x.sum());
 		
 		return x;

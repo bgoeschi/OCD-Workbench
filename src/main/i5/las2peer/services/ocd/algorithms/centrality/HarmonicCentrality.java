@@ -22,6 +22,12 @@ public class HarmonicCentrality implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HARMONIC_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
 		
+		// If there is only a single node
+		if(graph.nodeCount() == 1) {
+			res.setNodeValue(nc.node(), 0);
+			return res;
+		}
+		
 		double[] edgeWeights = graph.getEdgeWeights();
 		while(nc.ok()) {
 			if(Thread.interrupted()) {

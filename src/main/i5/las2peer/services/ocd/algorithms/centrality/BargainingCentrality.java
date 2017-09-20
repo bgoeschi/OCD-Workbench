@@ -32,6 +32,16 @@ public class BargainingCentrality implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BARGAINING_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
 		
+		// If the graph contains no edges
+		if(graph.edgeCount() == 0) {
+			while(nc.ok()) {
+				Node node = nc.node();
+				res.setNodeValue(node, 0);
+				nc.next();
+			}
+			return res;
+		}
+		
 		int n = nc.size();
 		Matrix R = graph.getNeighbourhoodMatrix();
 		Vector c = new BasicVector(n);

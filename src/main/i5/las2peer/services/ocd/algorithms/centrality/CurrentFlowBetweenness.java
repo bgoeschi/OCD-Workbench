@@ -27,6 +27,16 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CURRENT_FLOW_BETWEENNESS, this.getParameters(), this.compatibleGraphTypes()));
 		
+		// If the graph contains no edges
+		if(graph.edgeCount() == 0) {
+			while(nc.ok()) {
+				Node node = nc.node();
+				res.setNodeValue(node, 0);
+				nc.next();
+			}
+			return res;
+		}
+		
 		int n = nc.size();
 		Matrix L = new CCSMatrix(n, n);
 		

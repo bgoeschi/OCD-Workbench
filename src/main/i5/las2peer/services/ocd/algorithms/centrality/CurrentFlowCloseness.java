@@ -36,6 +36,11 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 			nc.next();
 		}
 		
+		// If the graph contains no edges
+		if(graph.edgeCount() == 0) {
+			return res;
+		}
+		
 		int n = nc.size();
 		Matrix L = new CCSMatrix(n, n);
 		

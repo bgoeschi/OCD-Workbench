@@ -25,6 +25,17 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_AUTHORITY_SCORE, this.getParameters(), this.compatibleGraphTypes()));
 		int n = graph.nodeCount();
+		
+		// If the graph contains no edges
+		if(graph.edgeCount() == 0) {
+			NodeCursor nc = graph.nodes();
+			while(nc.ok()) {
+				Node node = nc.node();
+				res.setNodeValue(node, 0);
+				nc.next();
+			}
+			return res;
+		}
 
 		// Create bipartite graph
 		CustomGraph bipartiteGraph = new CustomGraph();

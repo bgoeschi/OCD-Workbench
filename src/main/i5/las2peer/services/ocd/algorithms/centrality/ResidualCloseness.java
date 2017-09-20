@@ -23,9 +23,18 @@ public class ResidualCloseness implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.RESIDUAL_ClOSENESS, this.getParameters(), this.compatibleGraphTypes()));
+		NodeCursor nc = graph.nodes();
+		
+		// If there are less than 3 nodes
+		if(graph.nodeCount() < 3) {
+			while(nc.ok()) {
+				res.setNodeValue(nc.node(), 0);
+				nc.next();
+			}
+			return res;
+		}
 		
 		// Calculate the network closeness (for normalization)
-		NodeCursor nc = graph.nodes();
 		double[] edgeWeights = graph.getEdgeWeights();
 		double networkCloseness = 0.0;
 		

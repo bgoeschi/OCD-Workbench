@@ -69,20 +69,20 @@ public class Eccentricity implements CentralityAlgorithm {
 				if(d > max)
 					max = d;
 			}
-			//Find the biggest and smallest eccentricity values in the network
+			// Find the biggest and smallest eccentricity values in the network
 			if(max < ecmin)
 				ecmin = max;
 			if(max > ecmax)
 				ecmax = max;
 			
-			//Save non-normalized values for later
+			// Save non-normalized values for later
 			ecvalues[i] = max;
 			
 			nc.next();
 			i++;
 		}
 		
-		//Normalize values
+		// Normalize values
 		nc.toFirst();
 		for(double e : ecvalues) {
 			Node node = nc.node();

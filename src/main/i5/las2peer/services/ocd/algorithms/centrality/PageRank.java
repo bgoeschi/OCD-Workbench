@@ -23,7 +23,7 @@ public class PageRank implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.PAGERANK, this.getParameters(), this.compatibleGraphTypes()));
 		
-		//Set initial PageRank of all nodes to 1
+		// Set initial PageRank of all nodes to 1
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 1.0);
 			nc.next();
@@ -31,7 +31,6 @@ public class PageRank implements CentralityAlgorithm {
 		nc.toFirst();
 		
 		int n = nc.size();
-		
 		for(int k = 0; k < 50; k++) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -44,21 +43,17 @@ public class PageRank implements CentralityAlgorithm {
 				while(inLinks.ok()) {
 					Edge eji = inLinks.edge();
 					Node j = eji.source();
-
 					weightedRankSum += graph.getEdgeWeight(eji) * res.getNodeValue(j) / graph.getWeightedOutDegree(j);
-					
 					inLinks.next();
-				}
-				
+				}	
 				double newValue = d * weightedRankSum + (1-d) * 1/n;
-				res.setNodeValue(i, newValue);
-				
+				res.setNodeValue(i, newValue);	
 				nc.next();
 			}
 			nc.toFirst();
 		}
 		
-		//Scale the values, so they sum to 1
+		// Scale the values, so they sum to 1
 		double sum = 0.0;
 		while(nc.ok()) {
 			sum += res.getNodeValue(nc.node());
@@ -70,8 +65,7 @@ public class PageRank implements CentralityAlgorithm {
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), factor * res.getNodeValue(nc.node()));
 			nc.next();
-		}
-		
+		}	
 		return res;
 	}
 

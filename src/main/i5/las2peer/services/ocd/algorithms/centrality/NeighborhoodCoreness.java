@@ -20,7 +20,7 @@ public class NeighborhoodCoreness implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.NEIGHBORHOOD_CORENESS, this.getParameters(), this.compatibleGraphTypes()));
 		
-		//Graph is copied because the coreness algorithm removes all the nodes
+		// Graph is copied because the coreness algorithm removes all the nodes
 		CustomGraph graphCopy = new CustomGraph(graph);
 		Coreness corenessAlgorithm = new Coreness();
 		CentralityMap corenessMap = corenessAlgorithm.getValues(graphCopy);

@@ -19,7 +19,7 @@ public class Coreness implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CORENESS, this.getParameters(), this.compatibleGraphTypes()));
 		
-		//Save indices of all nodes
+		// Save indices of all nodes
 		Map<Node, Integer> indices = new HashMap<Node, Integer>();
 		NodeCursor nc = graph.nodes();
 		
@@ -28,7 +28,7 @@ public class Coreness implements CentralityAlgorithm {
 			nc.next();
 		}
 		
-		//Execute k-core decomposition
+		// Execute k-core decomposition
 		int k = 0;
 		
 		while(!graph.isEmpty()) {
@@ -44,7 +44,7 @@ public class Coreness implements CentralityAlgorithm {
 				while(nc.ok()) {
 					Node node = nc.node();
 					
-					if(node.degree()/2 <= k) { //divide by two because in undirected graphs one edge is counted as two edges
+					if(node.degree()/2 <= k) { // divide by two because in undirected graphs one edge is counted as two edges
 						res.setNodeValue(node, k);
 						graph.removeNode(node);
 						nodeRemoved = true;

@@ -40,7 +40,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			}
 			Node s = nc.node();	
 			
-			//Variable declaration
+			// Variable declaration
 			Queue<Node> Q = new LinkedList<Node>();
 			Stack<Node> S = new Stack<Node>();
 			Map<Node, LinkedList<Node>> Pred = new HashMap<Node, LinkedList<Node>>();
@@ -48,7 +48,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			Map<Node, Integer> sigma = new HashMap<Node, Integer>();
 			Map<Node, Double> delta = new HashMap<Node, Double>();
 			
-			//Initialization
+			// Initialization
 			NodeCursor iterator = graph.nodes();
 			while(iterator.ok()) {
 				Node w = iterator.node();
@@ -63,7 +63,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			sigma.put(s, 1);
 			Q.add(s);
 			
-			//Calculate single-source shortest-paths
+			// Calculate single-source shortest-paths
 			while(!Q.isEmpty()) {
 				Node v = Q.poll();
 				S.push(v);
@@ -72,13 +72,13 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 				while(outNeighbors.ok()) {
 					Node w = outNeighbors.node();
 					
-					//Path discovery
+					// Path discovery
 					if(dist.get(w) == Double.POSITIVE_INFINITY) {
 						dist.put(w, dist.get(v) + 1);
 						Q.add(w);
 					}
 					
-					//Path counting
+					// Path counting
 					if(dist.get(w) == dist.get(v) + 1) {
 						sigma.put(w, sigma.get(w) + sigma.get(v));
 						Pred.get(w).add(v);
@@ -88,7 +88,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 				}
 			}
 			
-			//Accumulation
+			// Accumulation
 			iterator.toFirst();
 			while(iterator.ok()) {
 				Node v = iterator.node();	
@@ -109,7 +109,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			nc.next();
 		}
 		
-		//If graph is undirected, divide centrality values by 2
+		// If graph is undirected, divide centrality values by 2
 		if(!graph.getTypes().contains(GraphType.DIRECTED)) {
 			nc.toFirst();
 			while(nc.ok()) {
@@ -138,7 +138,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			}
 			Node s = nc.node();	
 			
-			//Variable declaration
+			// Variable declaration
 			Queue<Node> Q = new LinkedList<Node>();
 			Stack<Node> S = new Stack<Node>();
 			Map<Node, LinkedList<Node>> Pred = new HashMap<Node, LinkedList<Node>>();
@@ -146,7 +146,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			Map<Node, Integer> sigma = new HashMap<Node, Integer>();
 			Map<Node, Double> delta = new HashMap<Node, Double>();
 			
-			//Initialization
+			// Initialization
 			NodeCursor iterator = graph.nodes();
 			while(iterator.ok()) {
 				Node w = iterator.node();
@@ -161,9 +161,9 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			sigma.put(s, 1);
 			Q.add(s);
 			
-			//Calculate single-source shortest-paths
+			// Calculate single-source shortest-paths
 			while(!Q.isEmpty()) {
-				//Extract node with minimum distance
+				// Extract node with minimum distance
 				Node v = Q.peek();
 				for(Node cur : Q) {
 					if(dist.get(cur) < dist.get(v))
@@ -172,12 +172,11 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 				S.push(v);
 				Q.remove(v);
 				
-				//NodeCursor outNeighbors = v.successors();
 				EdgeCursor outEdges = v.outEdges();
 				while(outEdges.ok()) {
 					Node w = outEdges.edge().target();
 					
-					//Path discovery
+					// Path discovery
 					if(dist.get(w) > dist.get(v) + graph.getEdgeWeight(outEdges.edge())) {
 						dist.put(w, dist.get(v) + graph.getEdgeWeight(outEdges.edge()));
 						if(!Q.contains(w))
@@ -186,7 +185,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 						Pred.put(w, new LinkedList<Node>());
 					}
 					
-					//Path counting
+					// Path counting
 					if(dist.get(w) == dist.get(v) + graph.getEdgeWeight(outEdges.edge())) {
 						sigma.put(w, sigma.get(w) + sigma.get(v));
 						Pred.get(w).add(v);
@@ -196,7 +195,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 				}
 			}
 			
-			//Accumulation
+			// Accumulation
 			iterator.toFirst();
 			while(iterator.ok()) {
 				Node v = iterator.node();	
@@ -217,7 +216,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 			nc.next();
 		}
 		
-		//If graph is undirected, divide centrality values by 2
+		// If graph is undirected, divide centrality values by 2
 		if(!graph.getTypes().contains(GraphType.DIRECTED)) {
 			nc.toFirst();
 			while(nc.ok()) {

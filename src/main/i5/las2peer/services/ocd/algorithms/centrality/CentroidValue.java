@@ -34,7 +34,7 @@ public class CentroidValue implements CentralityAlgorithm {
 				throw new InterruptedException();
 			}
 			Node node = nc.node();	
-			//Create matrix containing all the distances between nodes
+			// Create matrix containing all the distances between nodes
 			double[] distArray = new double[n];
 			ShortestPaths.dijkstra(graph, node, true, edgeWeights, distArray);
 			Vector distVector = new BasicVector(distArray);

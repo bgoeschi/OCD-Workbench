@@ -28,7 +28,7 @@ public class FlowBetweenness implements CentralityAlgorithm {
 		
 		Node[] nodeArray = graph.getNodeArray();
 		
-		//The flow capacities are given by the edge weights, only integers are supported
+		// The flow capacities are given by the edge weights, only integers are supported
 		double[] weights = graph.getEdgeWeights();
 		int[] intWeights = new int[weights.length];
 		for(int i = 0; i < graph.getEdgeWeights().length; i++) {
@@ -51,11 +51,11 @@ public class FlowBetweenness implements CentralityAlgorithm {
 						if(nodeArray[j] != node && i != j) {
 							Node sink = nodeArray[j];
 							
-							//Instantiate data structures
+							// Instantiate data structures
 							Map<Edge, Integer> flowMap = new HashMap<Edge, Integer>();
 							EdgeMap flowEdgeMap = Maps.createEdgeMap(flowMap);
 							
-							//Calculate and add maximum flows with given source and sink
+							// Calculate and add maximum flows with given source and sink
 							int maximumFlow = NetworkFlows.calcMaxFlow(graph, source, sink, capacities, flowEdgeMap);
 							
 							int maximumFlowThroughNode = 0;

@@ -21,7 +21,7 @@ public class Integration implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.INTEGRATION, this.getParameters(), this.compatibleGraphTypes()));
 		
-		//Calculate the sum of distances and the number of reachable nodes for all nodes and find the diameter of the graph
+		// Calculate the sum of distances and the number of reachable nodes for all nodes and find the diameter of the graph
 		double[] edgeWeights = graph.getEdgeWeights();
 		Map<Node, Integer> reachableNodes = new HashMap<Node, Integer>();
 		double maxDistance = 0;
@@ -48,7 +48,7 @@ public class Integration implements CentralityAlgorithm {
 			nc.next();
 		}
 		
-		//Reverse distances
+		// Reverse distances
 		nc.toFirst();
 		while(nc.ok()) {
 			Node node = nc.node();

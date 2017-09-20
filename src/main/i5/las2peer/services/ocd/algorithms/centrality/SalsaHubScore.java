@@ -26,7 +26,7 @@ public class SalsaHubScore implements CentralityAlgorithm {
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_HUB_SCORE, this.getParameters(), this.compatibleGraphTypes()));
 		int n = graph.nodeCount();
 
-		//Create bipartite graph
+		// Create bipartite graph
 		CustomGraph bipartiteGraph = new CustomGraph();
 		Node[] nodes = graph.getNodeArray();
 		Edge[] edges = graph.getEdgeArray();
@@ -34,7 +34,7 @@ public class SalsaHubScore implements CentralityAlgorithm {
 		Map<Node, Node> authorityNodeMap = new HashMap<Node, Node>();
 		Map<Node, Node> reverseHubNodeMap = new HashMap<Node, Node>();
 		
-		//Create the nodes of the new bipartite graph
+		// Create the nodes of the new bipartite graph
 		for(Node node : nodes) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -50,7 +50,7 @@ public class SalsaHubScore implements CentralityAlgorithm {
 			}
 		}
 		
-		//Add the edges of the new bipartite graph
+		// Add the edges of the new bipartite graph
 		for(Edge edge : edges) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -63,9 +63,8 @@ public class SalsaHubScore implements CentralityAlgorithm {
 			bipartiteGraph.setEdgeWeight(newEdge, graph.getEdgeWeight(edge));
 		}
 		
-		//Construct matrix
+		// Construct matrix
 		Matrix hubMatrix = new CCSMatrix(n, n);
-		
 		for(Node ih : hubNodeMap.values()) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -74,7 +73,6 @@ public class SalsaHubScore implements CentralityAlgorithm {
 			NodeCursor stepOne = ih.successors();
 			while(stepOne.ok()) {
 				Node ka = stepOne.node();
-
 				NodeCursor stepTwo = ka.predecessors();
 				while(stepTwo.ok()) {
 					Node jh = stepTwo.node();
@@ -94,7 +92,7 @@ public class SalsaHubScore implements CentralityAlgorithm {
 			}
 		}
 		
-		//Calculate stationary distribution of hub Markov chain
+		// Calculate stationary distribution of hub Markov chain
 		Vector hubVector = MatrixOperations.calculateStationaryDistribution(hubMatrix);
 		
 		NodeCursor nc = graph.nodes();	

@@ -29,7 +29,7 @@ public class HitsAuthorityScore implements CentralityAlgorithm {
 		Vector hubWeights = new BasicVector(n);
 		Vector authorityWeights = new BasicVector(n);
 		
-		//Set all weights to 1
+		// Set all weights to 1
 		for(int i = 0; i < n; i++) {
 			hubWeights.set(i, 1.0);
 			authorityWeights.set(i, 1.0);
@@ -39,13 +39,13 @@ public class HitsAuthorityScore implements CentralityAlgorithm {
 		Vector oldH = new BasicVector(n);
 		
 		while(!authorityWeights.equals(oldA) || !hubWeights.equals(oldH)) {
-			//Copy old values
+			// Copy old values
 			for(int i = 0; i < n; i++) {
 				oldA.set(i, authorityWeights.get(i));
 				oldH.set(i, hubWeights.get(i));
 			}
 			
-			//Update authority weights
+			// Update authority weights
 			for(int i = 0; i < n; i++) {
 				double newValue = 0.0;
 				for(int j = 0; j < n; j++) {
@@ -54,7 +54,7 @@ public class HitsAuthorityScore implements CentralityAlgorithm {
 				authorityWeights.set(i, newValue);
 			}
 			
-			//Update hub weights
+			// Update hub weights
 			for(int i = 0; i < n; i++) {
 				double newValue = 0.0;
 				for(int j = 0; j < n; j++) {
@@ -63,14 +63,14 @@ public class HitsAuthorityScore implements CentralityAlgorithm {
 				hubWeights.set(i, newValue);
 			}
 			
-			//Normalize
+			// Normalize
 			double normA = MatrixOperations.norm(authorityWeights);
 			authorityWeights = authorityWeights.divide(normA);
 			double normH = MatrixOperations.norm(hubWeights);
 			hubWeights = hubWeights.divide(normH);
 		}
 		
-		//Set centrality values to the authority weights
+		// Set centrality values to the authority weights
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), authorityWeights.get(nc.node().index()));
 			nc.next();

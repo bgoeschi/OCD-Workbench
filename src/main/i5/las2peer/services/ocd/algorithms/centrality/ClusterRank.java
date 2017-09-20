@@ -27,7 +27,7 @@ public class ClusterRank implements CentralityAlgorithm {
 			}
 			Node node = nc.node();
 			
-			//Calculate clustering coefficient
+			// Calculate clustering coefficient
 			int maxEdges = node.successors().size() * (node.successors().size() - 1);
 			int edgeCount = 0;
 			double clusteringCoefficient = 0;
@@ -58,7 +58,7 @@ public class ClusterRank implements CentralityAlgorithm {
 				clusteringCoefficient = (double) edgeCount/maxEdges;
 			}
 			
-			//Calculate sum of neighbors out-degrees (+1)
+			// Calculate sum of neighbors out-degrees (+1)
 			int degreeSum = 0;
 			
 			NodeCursor neighbors = node.successors();

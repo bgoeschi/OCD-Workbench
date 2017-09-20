@@ -30,21 +30,6 @@ public class InDegree implements CentralityAlgorithm {
 		}
 		return res;
 	}
-	
-	/*public CentralityMap getNormalizedValues(CustomGraph graph) {
-		NodeCursor nc = graph.nodes();
-		CentralityMap res = new CentralityMap(graph);
-		
-		while(nc.ok()) {
-			if(Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			Node node = nc.node();
-			res.setNodeValue(node, (double) node.degree()/(graph.nodeCount()));
-			nc.next();
-		}
-		return res;
-	}*/
 
 	@Override
 	public Set<GraphType> compatibleGraphTypes() {

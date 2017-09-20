@@ -41,7 +41,6 @@ import i5.las2peer.services.ocd.metrics.StatisticalMeasure;
 import i5.las2peer.services.ocd.simulation.GraphSimulation;
 import i5.las2peer.services.ocd.simulation.SimulationFactory;
 import i5.las2peer.services.ocd.simulation.SimulationType;
-import i5.las2peer.services.ocd.simulation.SirSimulation;
 import i5.las2peer.services.ocd.utils.Error;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 import i5.las2peer.services.ocd.utils.OcdRequestHandler;
@@ -787,15 +786,15 @@ public class ServiceClass extends RESTService {
     				throw e;
     			}
     			threadHandler.interruptBenchmark(id);
-		    	List<Cover> queryResults;
-				String queryStr = "SELECT c from Cover c"
+		    	List<Cover> coverQueryResults;
+				String coverQueryStr = "SELECT c from Cover c"
 						+ " JOIN c." + Cover.GRAPH_FIELD_NAME + " g"
 						+ " WHERE g." + CustomGraph.USER_NAME_FIELD_NAME + " = :username"
 						+ " AND g." + CustomGraph.ID_FIELD_NAME + " = " + graphId;
-				TypedQuery<Cover> query = em.createQuery(queryStr, Cover.class);
-				query.setParameter("username", username);
-				queryResults = query.getResultList();
-				for(Cover cover : queryResults) {
+				TypedQuery<Cover> coverQuery = em.createQuery(coverQueryStr, Cover.class);
+				coverQuery.setParameter("username", username);
+				coverQueryResults = coverQuery.getResultList();
+				for(Cover cover : coverQueryResults) {
 					threadHandler.interruptAll(cover);
 					tx = em.getTransaction();
 					try {
@@ -810,6 +809,31 @@ public class ServiceClass extends RESTService {
 	    				throw e;
 	    			}
 				}
+				
+				List<CentralityMap> centralityMapQueryResults;
+				String centralityMapQueryStr = "SELECT c from CentralityMap c"
+						+ " JOIN c." + CentralityMap.GRAPH_FIELD_NAME + " g"
+						+ " WHERE g." + CustomGraph.USER_NAME_FIELD_NAME + " = :username"
+						+ " AND g." + CustomGraph.ID_FIELD_NAME + " = " + graphId;
+				TypedQuery<CentralityMap> centralityMapQuery = em.createQuery(centralityMapQueryStr, CentralityMap.class);
+				centralityMapQuery.setParameter("username", username);
+				centralityMapQueryResults = centralityMapQuery.getResultList();
+				for(CentralityMap map : centralityMapQueryResults) {
+					threadHandler.interruptAll(map);
+					tx = em.getTransaction();
+					try {
+						tx.begin();
+						em.remove(map);
+						tx.commit();
+	    			}
+					catch( RuntimeException e ) {
+	    				if( tx != null && tx.isActive() ) {
+	    					tx.rollback();
+	    				}
+	    				throw e;
+	    			}
+				}
+				
 				try {
 					tx = em.getTransaction();
 					tx.begin();
@@ -1595,6 +1619,7 @@ public class ServiceClass extends RESTService {
      * @param graphIdStr The id of the graph to run the algorithm on, must have the creation method status completed.
      * @param creationTypeStr The name of a CentralityCreationType corresponding to a CentralityAlgorithm.
      * Defines the CentralityAlgorithm to execute.
+     * @param content String containing the algorithm parameters.
      * @return The id of the CentralityMap being calculated which is reserved for the algorithm result.
      * Or an error xml.
      */
@@ -1832,12 +1857,6 @@ public class ServiceClass extends RESTService {
 				return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
 	    	}
 	    	/*
-	    	 * Checks whether cover is being calculated by a ground truth benchmark and if so deletes the graph instead.
-	    	 */
-	    	/*if(cover.getCreationMethod().getType().correspondsGroundTruthBenchmark() && cover.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
-	    		return this.deleteGraph(graphIdStr);
-	    	}*/
-	    	/*
 	    	 * Deletes the centrality map.
 	    	 */
     		synchronized(threadHandler) {
@@ -1860,7 +1879,7 @@ public class ServiceClass extends RESTService {
 		    	/*
 		    	 * Interrupts algorithms and metrics.
 		    	 */
-		    	// TODO: threadHandler.interruptAll(map);
+		    	threadHandler.interruptAll(map);
 		    	/*
 		    	 * Removes centrality map
 		    	 */
@@ -1890,6 +1909,15 @@ public class ServiceClass extends RESTService {
 ////////////// SIMULATIONS
 ////////////////////////////////////////////////////////////////////////////
     
+    /**
+     * Creates a new CentralityMap by running a simulation on an existing graph
+     * @param graphIdStr The id of the graph that the CentralityMap is based on.
+     * @param creationTypeStr The name of a CentralityCreationType corresponding to a simulation.
+     * Defines the simulation to execute
+     * @param content String containing the simulation parameters.
+     * @return The id of the CentralityMap being calculated which is reserved for the algorithm result.
+     * Or an error xml.
+     */
     @POST
     @Path("simulation/graphs/{graphId}/")
     @Produces(MediaType.TEXT_XML)

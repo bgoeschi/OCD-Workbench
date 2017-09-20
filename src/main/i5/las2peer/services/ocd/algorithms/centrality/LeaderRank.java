@@ -23,19 +23,19 @@ public class LeaderRank implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.LEADERRANK, this.getParameters(), this.compatibleGraphTypes()));
 		
-		//Set initial LeaderRank of all nodes to 1
+		// Set initial LeaderRank of all nodes to 1
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 1.0);
 			nc.next();
 		}
 		nc.toFirst();
 		
-		//Add ground node
+		// Add ground node
 		Node groundNode = graph.createNode();
 		while(nc.ok()) {
 			Node node = nc.node();
 			if(node != groundNode) {
-				//Add bidirectional edges
+				// Add bidirectional edges
 				Edge e1 = graph.createEdge(groundNode, node);
 				Edge e2 = graph.createEdge(node, groundNode);		
 				graph.setEdgeWeight(e1, 1.0);
@@ -68,7 +68,7 @@ public class LeaderRank implements CentralityAlgorithm {
 			nc.toFirst();
 		}
 		
-		//Distribute score of ground node evenly
+		// Distribute score of ground node evenly
 		double share = res.getNodeValue(groundNode) / n;
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), res.getNodeValue(nc.node()) + share);

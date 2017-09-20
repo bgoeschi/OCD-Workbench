@@ -32,7 +32,7 @@ public class BridgingCoefficient implements CentralityAlgorithm {
 			Node node = nc.node();	
 			int v = node.index();
 			
-			//Calculate the probability of leaving the direct neighborhood subgraph in two steps
+			// Calculate the probability of leaving the direct neighborhood subgraph in two steps
 			double leavingProbability = 0.0;
 			double nodeWeightedOutDegree = 0.0;
 			

@@ -16,6 +16,8 @@ import y.base.Node;
 import y.base.NodeCursor;
 
 public class SubgraphCentrality implements CentralityAlgorithm {
+	// The number of iterations which determines the maximum power of the adjacency matrix that is calculated
+	private static final int ITERATIONS = 20;
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
@@ -29,8 +31,7 @@ public class SubgraphCentrality implements CentralityAlgorithm {
 			nc.next();
 		}
 		
-		//TODO: Find suitable maximum value for p
-		for(int p = 1; p < 20; p++) {
+		for(int p = 1; p <= ITERATIONS; p++) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
 			}

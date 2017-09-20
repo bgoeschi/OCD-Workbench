@@ -39,7 +39,7 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 		int n = nc.size();
 		Matrix L = new CCSMatrix(n, n);
 		
-		//Create laplacian matrix
+		// Create laplacian matrix
 		nc.toFirst();
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
@@ -60,13 +60,13 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 			ec.next();
 		}
 
-		//Remove the first row and column
+		// Remove the first row and column
 		L = L.slice(1, 1, n, n);
 		
 		MatrixInverter gauss = new GaussJordanInverter(L);
 		Matrix L_inverse = gauss.inverse();
 		
-		//Create matrix C
+		// Create matrix C
 		Matrix C = new CCSMatrix(n, n);
 		for(int i = 0; i < n-1; i++) {
 			for(int j = 0; j < n-1; j++) {

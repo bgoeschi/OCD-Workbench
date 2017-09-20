@@ -22,7 +22,6 @@ public class SirSimulation implements GraphSimulation {
 	 */
 	protected static final String INFECTION_PROBABILITY_NAME = "Infection Probability";
 	protected static final String RECOVERY_PROBABILITY_NAME = "Recovery Probability";
-	//protected static final String SOURCE_NODE_ID_NAME = "Source Node Id";
 	
 	Set<Node> infectedNodes;
 	Set<Node> recoveredNodes;
@@ -31,7 +30,6 @@ public class SirSimulation implements GraphSimulation {
 	int sourceNodeId = 0;
 	double infectionProbability = 0.25;
 	double recoveryProbability = 1.0;
-	int simulationSteps = 100;
 	
 	/**
 	 * Runs the SIR-simulation on the graph starting with a single infected node
@@ -59,8 +57,7 @@ public class SirSimulation implements GraphSimulation {
 			}
 		}
 		
-		int step = 1;
-		while(!infectedNodes.isEmpty() && step <= simulationSteps) {
+		while(!infectedNodes.isEmpty()) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
 			}
@@ -88,7 +85,6 @@ public class SirSimulation implements GraphSimulation {
 					infectedNodes.add(nodeAtRisk);
 				}
 			}
-			step++;
 		}
 
 		return recoveredNodes.size();
@@ -110,7 +106,6 @@ public class SirSimulation implements GraphSimulation {
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put(INFECTION_PROBABILITY_NAME, Double.toString(infectionProbability));
 		parameters.put(RECOVERY_PROBABILITY_NAME, Double.toString(recoveryProbability));
-		//parameters.put(SOURCE_NODE_ID_NAME, Double.toString(sourceNodeId));
 		return parameters;
 	}
 	
@@ -123,10 +118,6 @@ public class SirSimulation implements GraphSimulation {
 			recoveryProbability = Double.parseDouble(parameters.get(RECOVERY_PROBABILITY_NAME));
 			parameters.remove(RECOVERY_PROBABILITY_NAME);
 		}
-		/*if(parameters.containsKey(SOURCE_NODE_ID_NAME)) {
-			sourceNodeId = Integer.parseInt(parameters.get(SOURCE_NODE_ID_NAME));
-			parameters.remove(SOURCE_NODE_ID_NAME);
-		}*/
 		if(parameters.size() > 0) {
 			throw new IllegalArgumentException();
 		}

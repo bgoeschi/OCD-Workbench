@@ -35,22 +35,6 @@ public class DegreeCentrality implements CentralityAlgorithm {
 		}
 		return res;
 	}
-	
-	/*public CentralityMap getNormalizedValues(CustomGraph graph) {
-		NodeCursor nc = graph.nodes();
-		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.compatibleGraphTypes()));
-		
-		while(nc.ok()) {
-			if(Thread.interrupted()) {
-				throw new InterruptedException();
-			}
-			Node node = nc.node();
-			res.setNodeValue(node, (double) node.degree()/2*(graph.nodeCount()));
-			nc.next();
-		}
-		return res;
-	}*/
 
 	@Override
 	public Set<GraphType> compatibleGraphTypes() {

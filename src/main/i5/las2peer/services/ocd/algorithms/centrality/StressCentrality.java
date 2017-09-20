@@ -150,11 +150,9 @@ public class StressCentrality implements CentralityAlgorithm {
 			NodeCursor iterator = graph.nodes();
 			while(iterator.ok()) {
 				Node w = iterator.node();
-
 				Pred.put(w, new LinkedList<Node>());
 				dist.put(w, Double.POSITIVE_INFINITY);
-				sigma.put(w, 0);
-				
+				sigma.put(w, 0);		
 				iterator.next();
 			}
 			dist.put(s, 0.0);
@@ -222,8 +220,7 @@ public class StressCentrality implements CentralityAlgorithm {
 				res.setNodeValue(nc.node(), res.getNodeValue(nc.node())/2);
 				nc.next();
 			}
-		}
-		
+		}	
 		return res;
 	}
 

@@ -24,7 +24,7 @@ public class ResidualCloseness implements CentralityAlgorithm {
 		CentralityMap res = new CentralityMap(graph);
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.RESIDUAL_ClOSENESS, this.getParameters(), this.compatibleGraphTypes()));
 		
-		//Calculate the network closeness (for normalization)
+		// Calculate the network closeness (for normalization)
 		NodeCursor nc = graph.nodes();
 		double[] edgeWeights = graph.getEdgeWeights();
 		double networkCloseness = 0.0;
@@ -48,10 +48,10 @@ public class ResidualCloseness implements CentralityAlgorithm {
 		int n = graph.nodeCount();
 		Node[] nodes = graph.getNodeArray();
 		
-		//Remove and re-add each node (by removing its edges)
+		// Remove and re-add each node (by removing its edges)
 		for(int k = 0; k < n; k++) {
 			Node currentNode = nodes[k];
-			//Remove edges
+			// Remove edges
 			EdgeCursor currentNodeEdges = currentNode.edges();
 			while(currentNodeEdges.ok()) {
 				graph.removeEdge(currentNodeEdges.edge());
@@ -62,7 +62,7 @@ public class ResidualCloseness implements CentralityAlgorithm {
 			double[] newEdgeWeights = graph.getEdgeWeights();
 			double distSum = 0.0;
 			
-			//Calculate the sum of distances in the graph without the current node
+			// Calculate the sum of distances in the graph without the current node
 			while(nc.ok()) {
 				if(Thread.interrupted()) {
 					throw new InterruptedException();
@@ -79,7 +79,7 @@ public class ResidualCloseness implements CentralityAlgorithm {
 			}
 			res.setNodeValue(currentNode, networkCloseness/distSum);
 			
-			//Recreate edges
+			// Recreate edges
 			for(int i = 0; i < n; i++) {
 				double weight = A.get(currentNode.index(), i);
 				if(weight != 0) {

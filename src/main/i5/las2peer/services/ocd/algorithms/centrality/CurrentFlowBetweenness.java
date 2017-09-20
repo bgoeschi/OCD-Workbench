@@ -30,7 +30,7 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		int n = nc.size();
 		Matrix L = new CCSMatrix(n, n);
 		
-		//Create laplacian matrix
+		// Create laplacian matrix
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -50,13 +50,13 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 			ec.next();
 		}
 
-		//Remove the first row and column
+		// Remove the first row and column
 		L = L.slice(1, 1, n, n);
 		
 		MatrixInverter gauss = new GaussJordanInverter(L);
 		Matrix L_inverse = gauss.inverse();
 		
-		//Create matrix C
+		// Create matrix C
 		Matrix C = new CCSMatrix(n, n);
 		for(int i = 0; i < n-1; i++) {
 			for(int j = 0; j < n-1; j++) {
@@ -84,7 +84,7 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 			ec.next();
 		}
 		
-		//Create matrix B
+		// Create matrix B
 		ec.toFirst();
 		int m = ec.size();
 		Matrix B = new CCSMatrix(m, n);
@@ -108,7 +108,7 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 		Node[] nodeArray = graph.getNodeArray();
 		nc.toFirst();
 		
-		//Calculate centrality value for each node
+		// Calculate centrality value for each node
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();

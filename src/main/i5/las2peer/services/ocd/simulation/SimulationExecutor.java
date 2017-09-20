@@ -13,7 +13,7 @@ import y.base.NodeCursor;
 public class SimulationExecutor {
 	
 	/**
-	 * Calculates CentralityMap by running simulations on a graph.
+	 * Calculates a CentralityMap by running simulations on a graph.
 	 * @param graph The graph.
 	 * @param simulation The algorithm.
 	 * @return A CentralityMap of the graph calculated by the algorithm.

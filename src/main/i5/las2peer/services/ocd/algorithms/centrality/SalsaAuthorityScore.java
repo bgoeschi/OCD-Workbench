@@ -26,7 +26,7 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_AUTHORITY_SCORE, this.getParameters(), this.compatibleGraphTypes()));
 		int n = graph.nodeCount();
 
-		//Create bipartite graph
+		// Create bipartite graph
 		CustomGraph bipartiteGraph = new CustomGraph();
 		Node[] nodes = graph.getNodeArray();
 		Edge[] edges = graph.getEdgeArray();
@@ -34,7 +34,7 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 		Map<Node, Node> authorityNodeMap = new HashMap<Node, Node>();
 		Map<Node, Node> reverseAuthorityNodeMap = new HashMap<Node, Node>();
 		
-		//Create the nodes of the new bipartite graph
+		// Create the nodes of the new bipartite graph
 		for(Node node : nodes) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -50,7 +50,7 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 			}
 		}
 		
-		//Add the edges of the new bipartite graph
+		// Add the edges of the new bipartite graph
 		for(Edge edge : edges) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -63,9 +63,8 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 			bipartiteGraph.setEdgeWeight(newEdge, graph.getEdgeWeight(edge));
 		}
 		
-		//Construct matrix
-		Matrix authorityMatrix = new CCSMatrix(n, n);
-		
+		// Construct matrix
+		Matrix authorityMatrix = new CCSMatrix(n, n);	
 		for(Node ia : authorityNodeMap.values()) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
@@ -73,8 +72,7 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 			Node i = reverseAuthorityNodeMap.get(ia);
 			NodeCursor stepOne = ia.predecessors();
 			while(stepOne.ok()) {
-				Node kh = stepOne.node();
-				
+				Node kh = stepOne.node();	
 				NodeCursor stepTwo = kh.successors();
 				while(stepTwo.ok()) {
 					Node ja = stepTwo.node();
@@ -94,7 +92,7 @@ public class SalsaAuthorityScore implements CentralityAlgorithm {
 			}
 		}
 		
-		//Calculate stationary distribution of authority Markov chain
+		// Calculate stationary distribution of authority Markov chain
 		Vector authorityVector = MatrixOperations.calculateStationaryDistribution(authorityMatrix);
 		
 		NodeCursor nc = graph.nodes();

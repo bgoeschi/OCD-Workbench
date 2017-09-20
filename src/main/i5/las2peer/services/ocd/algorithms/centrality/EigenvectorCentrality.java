@@ -41,7 +41,6 @@ public class EigenvectorCentrality implements CentralityAlgorithm {
 	@Override
 	public Set<GraphType> compatibleGraphTypes() {
 		Set<GraphType> compatibleTypes = new HashSet<GraphType>();
-		//TODO: compatibleTypes.add(GraphType.DIRECTED);
 		return compatibleTypes;
 	}
 

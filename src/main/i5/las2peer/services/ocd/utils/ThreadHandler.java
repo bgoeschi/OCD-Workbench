@@ -30,7 +30,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 /**
- * Handles the execution and synchronization of threads for running OCD algorithms, centrality algorithms, benchmarks and metrics.
+ * Handles the execution and synchronization of threads for running OCD algorithms, centrality algorithms, simulations, 
+ * benchmarks and metrics.
  * @author Sebastian, Tobias
  *
  */
@@ -496,6 +497,16 @@ public class ThreadHandler {
 		}
 		synchronized (metrics) {
 			unsynchedInterruptAllMetrics(cover);
+		}
+	}
+	
+	/**
+	 * Interrupts the algorithm creating the given CentralityMap.
+	 * @param map The CentralityMap 
+	 */
+	public void interruptAll(CentralityMap map) {
+		synchronized (centralityAlgorithms) {
+			unsynchedInterruptAlgorithm(new CentralityMapId(map.getId(), new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName())));
 		}
 	}
 	

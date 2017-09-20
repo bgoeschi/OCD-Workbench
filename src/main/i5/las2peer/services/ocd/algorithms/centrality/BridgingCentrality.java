@@ -23,7 +23,7 @@ public class BridgingCentrality implements CentralityAlgorithm {
 		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BRIDGING_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
 		int n = graph.nodeCount();
 		
-		//Determine bridging coefficient ranks
+		// Determine bridging coefficient ranks
 		BridgingCoefficient bridgingCoefficientAlgorithm = new BridgingCoefficient();
 		CentralityMap bridgingCoefficientMap = bridgingCoefficientAlgorithm.getValues(graph);
 		
@@ -42,7 +42,7 @@ public class BridgingCentrality implements CentralityAlgorithm {
 			}
 		}
 		
-		//Determine betweenness ranks
+		// Determine betweenness ranks
 		BetweennessCentrality betweennessCentralityAlgorithm = new BetweennessCentrality();
 		GraphProcessor processor = new GraphProcessor();
 		processor.invertEdgeWeights(graph);

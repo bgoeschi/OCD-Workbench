@@ -69,7 +69,7 @@ public class KatzCentrality implements CentralityAlgorithm {
 		int n = graph.nodeCount();
 		Matrix A = graph.getNeighbourhoodMatrix();
 		
-		//Create identity matrix and vector consisting of only ones
+		// Create identity matrix and vector consisting of only ones
 		Matrix I = new CCSMatrix(n, n);
 		Vector ones = new BasicVector(n);
 		for(int i = 0; i < n; i++) {

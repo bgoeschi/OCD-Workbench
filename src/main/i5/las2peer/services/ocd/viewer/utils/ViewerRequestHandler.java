@@ -1,9 +1,9 @@
 package i5.las2peer.services.ocd.viewer.utils;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
+import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
-import i5.las2peer.services.ocd.utils.Error;
 import i5.las2peer.services.ocd.utils.RequestHandler;
 import i5.las2peer.services.ocd.viewer.adapters.visualOutput.VisualOutputAdapter;
 import i5.las2peer.services.ocd.viewer.adapters.visualOutput.VisualOutputAdapterFactory;
@@ -43,7 +43,7 @@ public class ViewerRequestHandler extends RequestHandler {
 	}
 	
 	/**
-	 * Creates a visual cover output  in a specified format.
+	 * Creates a visual cover output in a specified format.
 	 * @param cover The cover.
 	 * @param outputFormat The format.
 	 * @return The visual cover output.
@@ -53,6 +53,19 @@ public class ViewerRequestHandler extends RequestHandler {
 	 */
 	public String writeCover(Cover cover, VisualOutputFormat outputFormat) throws AdapterException, InstantiationException, IllegalAccessException {
 		return writeGraph(cover.getGraph(), outputFormat);
+	}
+	
+	/**
+	 * Creates a visual CentralityMap output in a specified format.
+	 * @param map The CentralityMap.
+	 * @param outputFormat The format.
+	 * @return The visual CentralityMap output.
+	 * @throws AdapterException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public String writeCentralityMap(CentralityMap map, VisualOutputFormat outputFormat) throws AdapterException, InstantiationException, IllegalAccessException {
+		return writeGraph(map.getGraph(), outputFormat);
 	}
 
 }

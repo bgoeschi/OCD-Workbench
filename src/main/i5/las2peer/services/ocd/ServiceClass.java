@@ -46,6 +46,7 @@ import i5.las2peer.services.ocd.utils.ExecutionStatus;
 import i5.las2peer.services.ocd.utils.OcdRequestHandler;
 import i5.las2peer.services.ocd.utils.RequestHandler;
 import i5.las2peer.services.ocd.utils.ThreadHandler;
+import i5.las2peer.services.ocd.viewer.utils.CentralityVisualizationType;
 import i5.las2peer.services.ocd.viewer.utils.LayoutHandler;
 import i5.las2peer.services.ocd.viewer.utils.ViewerRequestHandler;
 import i5.las2peer.services.ocd.viewer.adapters.visualOutput.VisualOutputFormat;
@@ -3184,6 +3185,113 @@ public class ServiceClass extends RESTService {
     		return viewerRequestHandler.writeError(Error.INTERNAL, "Internal system error.");
     	}
     }
+    
+    /**
+     * Returns a visual representation of a CentralityMap.
+     * @param graphIdStr The id of the graph that the CentralityMap is based on.
+     * @param centralityMapIdStr The id of the CentralityMap.
+     * @param graphLayoutTypeStr The name of the layout type defining which graph layouter to use.
+     * @param centralityVisualizationTypeStr The type of visualization to represent the centrality values.
+     * @param visualOutputFormatStr The name of the required output format.
+     * @param doLabelNodesStr Optional query parameter. Defines whether nodes will receive labels with their names (TRUE) or not (FALSE).
+     * @param showEdgeWeightsStr Optional query parameter. Defines whether edges will receive labels with their weights (TRUE) or not (FALSE) (but only if the graph is weighted).
+     * @return The visualization.
+     * Or an error xml.
+     */
+    @GET
+    @Path("visualization/centralityMap/{centralityMapId}/graph/{graphId}/outputFormat/{VisualOutputFormat}/layout/{GraphLayoutType}/centralityVisualization/{CentralityVisualizationType}")
+    public Response getCentralityMapVisualization(
+    		@PathParam("graphId") String graphIdStr, 
+    		@PathParam("centralityMapId") String centralityMapIdStr,
+    		@PathParam("GraphLayoutType") String graphLayoutTypeStr,
+    		@PathParam("CentralityVisualizationType") String centralityVisualizationTypeStr,
+    		@PathParam("VisualOutputFormat") String visualOutputFormatStr,
+    		@DefaultValue("TRUE") @QueryParam("doLabelNodes") String doLabelNodesStr,
+    		@DefaultValue("TRUE") @QueryParam("showEdgeWeights") String showEdgeWeightsStr) {
+    	try {
+    		long graphId;
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+	    	try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			viewerRequestHandler.log(Level.WARNING, "user: " + username, e);
+				return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+	    	long centralityMapId;
+	    	try {
+	    		centralityMapId = Long.parseLong(centralityMapIdStr);
+    		}
+    		catch (Exception e) {
+    			viewerRequestHandler.log(Level.WARNING, "user: " + username, e);
+				return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "CentralityMap id is not valid.");
+    		}
+	    	VisualOutputFormat format;
+	    	GraphLayoutType layout;
+	    	boolean doLabelNodes;
+	    	boolean doLabelEdges;
+	    	try {
+	    		layout = GraphLayoutType.valueOf(graphLayoutTypeStr);
+	    	}  catch (Exception e) {
+	    		viewerRequestHandler.log(Level.WARNING, "", e);
+	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Specified layout does not exist.");
+	    	}
+	    	CentralityVisualizationType centralityVisualizationType;
+	    	try {
+	    		centralityVisualizationType = CentralityVisualizationType.valueOf(centralityVisualizationTypeStr);
+	    	}  catch (Exception e) {
+	    		viewerRequestHandler.log(Level.WARNING, "", e);
+	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality visualization type does not exist.");
+	    	}
+	    	try {
+	    		format = VisualOutputFormat.valueOf(visualOutputFormatStr);
+	    	}  catch (Exception e) {
+	    		viewerRequestHandler.log(Level.WARNING, "", e);
+	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Specified visual graph output format does not exist.");
+	    	}
+	    	try {
+	    		doLabelNodes = viewerRequestHandler.parseBoolean(doLabelNodesStr);
+	    	}  catch (Exception e) {
+	    		viewerRequestHandler.log(Level.WARNING, "", e);
+	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Label nodes is not a boolean value.");
+	    	}
+	    	try {
+	    		doLabelEdges = viewerRequestHandler.parseBoolean(showEdgeWeightsStr);
+	    	}  catch (Exception e) {
+	    		viewerRequestHandler.log(Level.WARNING, "", e);
+	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Label edges is not a boolean value.");
+	    	}
+	    	EntityManager em = viewerRequestHandler.getEntityManager();
+	    	CustomGraphId gId = new CustomGraphId(graphId, username);
+	    	CentralityMapId cId = new CentralityMapId(centralityMapId, gId);
+	    	EntityTransaction tx = em.getTransaction();
+	    	CentralityMap map;
+	    	try {
+				tx.begin();
+				map = em.find(CentralityMap.class, cId);
+		    	if(map == null) {
+		    		viewerRequestHandler.log(Level.WARNING, "user: " + username + ", " + "CentralityMap does not exist: CentralityMap id " + centralityMapId + ", graph id " + graphId);
+					return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "CentralityMap does not exist: CentralityMap id " + centralityMapId + ", graph id " + graphId);
+		    	}
+				tx.commit();
+			} catch( RuntimeException e ) {
+				if( tx != null && tx.isActive() ) {
+					tx.rollback();
+				}
+				throw e;
+			}
+			em.close();
+			if(doLabelEdges) {
+				doLabelEdges = map.getGraph().getTypes().contains(GraphType.WEIGHTED) ? true : false;
+			}
+	    	layoutHandler.doLayout(map, layout, doLabelNodes, doLabelEdges, centralityVisualizationType);
+	    	return Response.ok(viewerRequestHandler.writeCentralityMap(map, format)).build();
+    	}
+    	catch (Exception e) {
+    		viewerRequestHandler.log(Level.SEVERE, "", e);
+    		return viewerRequestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
 
     /**
      * Returns a visual representation of a graph.
@@ -3191,7 +3299,7 @@ public class ServiceClass extends RESTService {
      * @param graphLayoutTypeStr The name of the layout type defining which graph layouter to use.
      * @param visualOutputFormatStr The name of the required output format.
      * @param doLabelNodesStr Optional query parameter. Defines whether nodes will receive labels with their names (TRUE) or not (FALSE).
-     * @param doLabelEdgesStr Optional query parameter. Defines whether edges will receive labels with their weights (TRUE) or not (FALSE).
+     * @param showEdgeWeightsStr Optional query parameter. Defines whether edges will receive labels with their weights (TRUE) or not (FALSE) (but only if the graph is weighted).
      * @param minNodeSizeStr Optional query parameter. Defines the minimum size of a node. Must be greater than 0.
      * @param maxNodeSizeStr Optional query parameter. Defines the maximum size of a node. Must be at least as high as the defined minimum size.
      * @return The visualization.
@@ -3202,7 +3310,7 @@ public class ServiceClass extends RESTService {
     public Response getGraphVisualization(@PathParam("graphId") String graphIdStr, @PathParam("GraphLayoutType") String graphLayoutTypeStr,
     		@PathParam("VisualOutputFormat") String visualOutputFormatStr,
     		@DefaultValue("TRUE") @QueryParam("doLabelNodes") String doLabelNodesStr,
-    		@DefaultValue("FALSE") @QueryParam("doLabelEdges") String doLabelEdgesStr,
+    		@DefaultValue("TRUE") @QueryParam("showEdgeWeights") String showEdgeWeightsStr,
     		@DefaultValue("20") @QueryParam("minNodeSize") String minNodeSizeStr,
     		@DefaultValue("45") @QueryParam("maxNodeSize") String maxNodeSizeStr) {
     	try {
@@ -3260,7 +3368,7 @@ public class ServiceClass extends RESTService {
 	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Label nodes is not a boolean value.");
 	    	}
 	    	try {
-	    		doLabelEdges = viewerRequestHandler.parseBoolean(doLabelEdgesStr);
+	    		doLabelEdges = viewerRequestHandler.parseBoolean(showEdgeWeightsStr);
 	    	}  catch (Exception e) {
 	    		viewerRequestHandler.log(Level.WARNING, "", e);
 	    		return viewerRequestHandler.writeError(Error.PARAMETER_INVALID, "Label edges is not a boolean value.");
@@ -3284,6 +3392,9 @@ public class ServiceClass extends RESTService {
 				throw e;
 			}
 			em.close();
+			if(doLabelEdges) {
+				doLabelEdges = graph.getTypes().contains(GraphType.WEIGHTED) ? true : false;
+			}
 	    	layoutHandler.doLayout(graph, layout, doLabelNodes, doLabelEdges, minNodeSize, maxNodeSize);
 	    	return Response.ok(viewerRequestHandler.writeGraph(graph, format)).build();
     	}
@@ -3341,6 +3452,23 @@ public class ServiceClass extends RESTService {
 	public Response getVisualizationFormatNames() {
 		try {
 			return Response.ok(viewerRequestHandler.writeEnumNames(VisualOutputFormat.class)).build();
+		} catch (Exception e) {
+			viewerRequestHandler.log(Level.SEVERE, "", e);
+			return viewerRequestHandler.writeError(Error.INTERNAL,
+					"Internal system error.");
+		}
+	}
+	
+	/**
+	 * Returns all centrality visualization type names.
+	 * 
+	 * @return The visualization types in a names xml. Or an error xml.
+	 */
+	@GET
+	@Path("visualization/centralityVisualizationTypes/names")
+	public Response getCentralityVisualizationTypeNames() {
+		try {
+			return Response.ok(viewerRequestHandler.writeEnumNames(CentralityVisualizationType.class)).build();
 		} catch (Exception e) {
 			viewerRequestHandler.log(Level.SEVERE, "", e);
 			return viewerRequestHandler.writeError(Error.INTERNAL,

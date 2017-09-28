@@ -107,6 +107,24 @@ public class CentralityMap {
 		return map.get(graph.getNodeName(node));
 	}
 	
+	public double getMinValue() {
+		double res = Double.POSITIVE_INFINITY;
+		for(double d : map.values()) {
+			if(d < res)
+				res = d;
+		}
+		return res;
+	}
+	
+	public double getMaxValue() {
+		double res = Double.NEGATIVE_INFINITY;
+		for(double d : map.values()) {
+			if(d > res)
+				res = d;
+		}
+		return res;
+	}
+	
 	/**
 	 * Getter for the CentralityMap creation method.
 	 * @return The creation method.

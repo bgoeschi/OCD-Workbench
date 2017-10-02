@@ -89,24 +89,56 @@ public class CentralityMap {
 		return graph;
 	}
 	
+	/**
+	 * Getter for the map that maps the node names to the centrality values.
+	 * @return The map.
+	 */
 	public Map<String, Double> getMap() {
 		return map;
 	}
 	
+	/**
+	 * Setter for the map that maps the node names to the centrality values.
+	 * @param map The map.
+	 */
 	public void setMap(Map<String, Double> map) {
 		this.map = map;
 	}
 	
+	/**
+	 * If the given node is contained in the graph corresponding to the CentralityMap, 
+	 * its centrality values is set to the given value.
+	 * @param node The node whose value is set.
+	 * @param value The centrality value that is assigned to the node.
+	 */
 	public void setNodeValue(Node node, double value) {
 		if(graph.contains(node)) {
 			map.put(graph.getNodeName(node), value);
 		}
 	}
 	
+	/**
+	 * Get the centrality value of the node.
+	 * @param node The node.
+	 * @return The centrality assigned to the node by the CentralityMap.
+	 */
 	public double getNodeValue(Node node) {
 		return map.get(graph.getNodeName(node));
 	}
 	
+	/**
+	 * Get the centrality value of the node.
+	 * @param nodeName The name of the node.
+	 * @return The centrality assigned to the node by the CentralityMap.
+	 */
+	public double getNodeValue(String nodeName) {
+		return map.get(nodeName);
+	}
+	
+	/**
+	 * Get the minimum centrality value assigned by the CentralityMap.
+	 * @return The minimum centrality value.
+	 */
 	public double getMinValue() {
 		double res = Double.POSITIVE_INFINITY;
 		for(double d : map.values()) {
@@ -116,6 +148,10 @@ public class CentralityMap {
 		return res;
 	}
 	
+	/**
+	 * Get the maximum centrality value assigned by the CentralityMap.
+	 * @return The maximum centrality value.
+	 */
 	public double getMaxValue() {
 		double res = Double.NEGATIVE_INFINITY;
 		for(double d : map.values()) {

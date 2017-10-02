@@ -5,6 +5,7 @@ import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.restMapper.annotations.ServicePath;
 import i5.las2peer.security.UserAgent;
+import i5.las2peer.services.ocd.adapters.AdapterException;
 import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputFormat;
 import i5.las2peer.services.ocd.adapters.coverInput.CoverInputFormat;
 import i5.las2peer.services.ocd.adapters.coverOutput.CoverOutputFormat;
@@ -17,6 +18,7 @@ import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithm;
 import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
+import i5.las2peer.services.ocd.evaluation.StatisticalProcessor;
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
@@ -72,8 +74,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,6 +96,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -1515,9 +1520,9 @@ public class ServiceClass extends RESTService {
      * @param firstIndexStr Optional query parameter. The result list index of the first id to return. Defaults to 0.
      * @param lengthStr Optional query parameter. The number of ids to return. Defaults to Long.MAX_VALUE.
      * @param includeMetaStr Optional query parameter. If TRUE, instead of the ids the META XML of each graph is returned. Defaults to FALSE.
-     * @param executionStatusesStr Optional query parameter. If set only those covers are returned whose creation method status corresponds to one of the given ExecutionStatus names.
+     * @param executionStatusesStr Optional query parameter. If set only those centrality maps are returned whose creation method status corresponds to one of the given ExecutionStatus names.
      * Multiple status names are separated using the "-" delimiter.
-     * @param graphIdStr Optional query parameter. If set only those covers are returned that are based on the corresponding graph.
+     * @param graphIdStr Optional query parameter. If set only those centrality maps are returned that are based on the corresponding graph.
      * @return The centrality maps.
      * Or an error xml.
      */
@@ -1936,7 +1941,7 @@ public class ServiceClass extends RESTService {
      * Or an error xml.
      */
     @POST
-    @Path("simulation/graphs/{graphId}/")
+    @Path("simulation/graphs/{graphId}")
     @Produces(MediaType.TEXT_XML)
     @Consumes(MediaType.TEXT_PLAIN)
     @ApiResponses(value = {
@@ -2000,7 +2005,7 @@ public class ServiceClass extends RESTService {
 						return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
 			    	}
 			    	map = new CentralityMap(graph);
-			    	log = new CentralityCreationLog(CentralityCreationType.GROUND_TRUTH, parametersCopy, simulation.compatibleGraphTypes());
+			    	log = new CentralityCreationLog(CentralityCreationType.SIMULATION, parametersCopy, simulation.compatibleGraphTypes());
 			    	map.setCreationMethod(log);
 			    	em.persist(map);
 					tx.commit();
@@ -2018,6 +2023,117 @@ public class ServiceClass extends RESTService {
 				threadHandler.runSimulation(map, simulation);
 	    	}
 	    	return Response.ok(requestHandler.writeId(map)).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+////////////////////////////////////////////////////////////////////////////
+////////////// CENTRALITY EVALUATION
+////////////////////////////////////////////////////////////////////////////
+    
+    @GET
+    @Path("evaluation/average/graph/{graphId}/maps")
+    @Produces(MediaType.TEXT_XML)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Calculates the average centrality values from a list of centrality maps of the same graph.")
+    public Response getAverageCentralityMap(
+    		@PathParam("graphId") String graphIdStr, 
+    		@QueryParam("mapIds") List<Integer> ids, 
+    		String content) throws AdapterException, InstantiationException, IllegalAccessException, ParserConfigurationException {
+    	try {
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+        	long graphId;
+        	try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+    			return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+        	CustomGraph graph;
+        	EntityManager em = requestHandler.getEntityManager();
+        	CustomGraphId gId = new CustomGraphId(graphId, username);
+        	synchronized(threadHandler) {
+        		EntityTransaction tx = em.getTransaction();
+    	    	try {
+    	    		tx.begin();
+    				graph = em.find(CustomGraph.class, gId);
+    		    	if(graph == null) {
+    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
+    		    	}
+    		    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
+    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+    		    	}
+    				tx.commit();
+    	    	}
+    	    	catch( RuntimeException e ) {
+    				if( tx != null && tx.isActive() ) {
+    					tx.rollback();
+    				}
+    				throw e;
+    			}
+    			em.close();
+        	}
+        	
+        	List<CentralityMap> maps = new LinkedList<CentralityMap>();
+        	for(int id : ids) {
+        		long mapId = (long) id;
+        		em = requestHandler.getEntityManager();
+    	    	CentralityMapId cId = new CentralityMapId(mapId, gId);
+    	    	
+    	    	EntityTransaction tx = em.getTransaction();
+    	    	CentralityMap map;
+    	    	try {
+    				tx.begin();
+    				map = em.find(CentralityMap.class, cId);
+    				tx.commit();
+    			}
+    	    	catch( RuntimeException e ) {
+    				if( tx != null && tx.isActive() ) {
+    					tx.rollback();
+    				}
+    				throw e;
+    			}
+    	    	if(map == null) {
+    	    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+    				return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+    	    	}
+    	    	maps.add(map);
+        	}
+        	CentralityMap averageMap = StatisticalProcessor.getAverageMap(graph, maps);
+        	CentralityCreationLog log;
+        	Map<String, String> parameters = new HashMap<String, String>();
+        	parameters.put("Number of measures", Integer.toString(ids.size()));
+        	synchronized(threadHandler) {
+		    	EntityTransaction tx = em.getTransaction();
+		    	try {
+					tx.begin();
+					log = new CentralityCreationLog(CentralityCreationType.AVERAGE, parameters, new HashSet<GraphType>(Arrays.asList(GraphType.values())));
+					averageMap.setCreationMethod(log);
+					em.persist(averageMap);
+					tx.commit();
+				}
+		    	catch( RuntimeException e ) {
+					if( tx != null && tx.isActive() ) {
+						tx.rollback();
+					}
+					throw e;
+				}
+				em.close();
+				threadHandler.createCentralityMap(averageMap, new CentralityMapId(averageMap.getId(), new CustomGraphId(graphId, username)), false);
+	    	}
+        	
+        	return Response.ok(requestHandler.writeId(averageMap)).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);

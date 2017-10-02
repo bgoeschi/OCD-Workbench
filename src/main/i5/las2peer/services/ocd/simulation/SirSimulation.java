@@ -42,7 +42,6 @@ public class SirSimulation implements GraphSimulation {
 		infectedNodes = new HashSet<Node>();
 		recoveredNodes = new HashSet<Node>();
 		infectionMap = new HashMap<Node, InfectionState>();
-		//sourceNode = graph.getNodeArray()[sourceNodeId];
 		this.sourceNode = sourceNode;
 		infectedNodes.add(sourceNode);
 		

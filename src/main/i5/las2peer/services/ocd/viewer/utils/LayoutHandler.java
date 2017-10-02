@@ -173,10 +173,10 @@ public class LayoutHandler {
 		GraphLayouter layouter = graphLayouterFactory.getInstance(layoutType);
 		layouter.doLayout(graph);
 		switch(centralityVisualizationType) {
-		case SINGLE_COLOR_SATURATION:
+		case COLOR_SATURATION:
 			paintNodesWithSingleColor(map);
 			break;
-		case COLOR_GRADIENT:
+		case HEAT_MAP:
 			paintNodesWithColorGradient(map);
 			break;
 		case NODE_SIZE:

@@ -19,8 +19,8 @@ public class CentralityMapId {
  
     /**
      * Creates a new instance.
-     * @param id The cover-specific id.
-     * @param graphId The id of the graph the cover is based on.
+     * @param id The map-specific id.
+     * @param graphId The id of the graph the CentralityMap is based on.
      */
     public CentralityMapId(long id, CustomGraphId graphId) {
         this.id = id;

@@ -6,7 +6,7 @@ package i5.las2peer.services.ocd.viewer.utils;
  *
  */
 public enum CentralityVisualizationType {
-	SINGLE_COLOR_SATURATION,
-	COLOR_GRADIENT,
-	NODE_SIZE;
+	NODE_SIZE,
+	COLOR_SATURATION,
+	HEAT_MAP;
 }

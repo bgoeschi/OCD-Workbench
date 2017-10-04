@@ -100,6 +100,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.la4j.matrix.sparse.CCSMatrix;
 
 
@@ -2034,6 +2035,13 @@ public class ServiceClass extends RESTService {
 ////////////// CENTRALITY EVALUATION
 ////////////////////////////////////////////////////////////////////////////
     
+    /**
+     * Calculates the average centrality values given a list of centrality maps.
+     * Mainly meant to get the average of a number of simulation runs.
+     * @param graphIdStr The id of the graph that the centrality maps are based on.
+     * @param ids The list of centrality map ids.
+     * @return The id of the calculated average centrality map.
+     */
     @GET
     @Path("evaluation/average/graph/{graphId}/maps")
     @Produces(MediaType.TEXT_XML)
@@ -2046,8 +2054,7 @@ public class ServiceClass extends RESTService {
 		notes = "Calculates the average centrality values from a list of centrality maps of the same graph.")
     public Response getAverageCentralityMap(
     		@PathParam("graphId") String graphIdStr, 
-    		@QueryParam("mapIds") List<Integer> ids, 
-    		String content) throws AdapterException, InstantiationException, IllegalAccessException, ParserConfigurationException {
+    		@QueryParam("mapIds") List<Integer> ids) {
     	try {
     		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
         	long graphId;
@@ -2134,6 +2141,95 @@ public class ServiceClass extends RESTService {
 	    	}
         	
         	return Response.ok(requestHandler.writeId(averageMap)).build();
+    	}
+    	catch (Exception e) {
+    		requestHandler.log(Level.SEVERE, "", e);
+    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+    	}
+    }
+    
+    /**
+     * Calculates the Spearman correlation for each pair of centrality maps from the given list.
+     * @param graphIdStr The id of the graph that the centrality maps are based on.
+     * @param mapIds The list of centrality map ids.
+     * @return XML containing the correlation matrix.
+     */
+    @GET
+    @Path("evaluation/correlation/spearman/graph/{graphId}/maps")
+    @Produces(MediaType.TEXT_XML)
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ApiResponses(value = {
+    		@ApiResponse(code = 200, message = "Success"),
+    		@ApiResponse(code = 401, message = "Unauthorized")
+    })
+	@ApiOperation(value = "",
+		notes = "Calculates the Spearman correlation from a list of centrality maps on the same graph.")
+    public Response getSpearmanCorrelation(
+    		@PathParam("graphId") String graphIdStr, 
+    		@QueryParam("mapIds") List<Integer> mapIds) {
+    	try {
+    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+        	long graphId;
+        	try {
+    			graphId = Long.parseLong(graphIdStr);
+    		}
+    		catch (Exception e) {
+    			requestHandler.log(Level.WARNING, "user: " + username, e);
+    			return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+    		}
+        	CustomGraph graph;
+        	EntityManager em = requestHandler.getEntityManager();
+        	CustomGraphId gId = new CustomGraphId(graphId, username);
+        	synchronized(threadHandler) {
+        		EntityTransaction tx = em.getTransaction();
+    	    	try {
+    	    		tx.begin();
+    				graph = em.find(CustomGraph.class, gId);
+    		    	if(graph == null) {
+    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
+    		    	}
+    		    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
+    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+    		    	}
+    				tx.commit();
+    	    	}
+    	    	catch( RuntimeException e ) {
+    				if( tx != null && tx.isActive() ) {
+    					tx.rollback();
+    				}
+    				throw e;
+    			}
+    			em.close();
+        	}
+        	List<CentralityMap> maps = new LinkedList<CentralityMap>();
+        	for(int id : mapIds) {
+        		long mapId = (long) id;
+        		em = requestHandler.getEntityManager();
+    	    	CentralityMapId cId = new CentralityMapId(mapId, gId);
+    	    	
+    	    	EntityTransaction tx = em.getTransaction();
+    	    	CentralityMap map;
+    	    	try {
+    				tx.begin();
+    				map = em.find(CentralityMap.class, cId);
+    				tx.commit();
+    			}
+    	    	catch( RuntimeException e ) {
+    				if( tx != null && tx.isActive() ) {
+    					tx.rollback();
+    				}
+    				throw e;
+    			}
+    	    	if(map == null) {
+    	    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+    				return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
+    	    	}
+    	    	maps.add(map);
+        	}
+	    	RealMatrix correlationMatrix = StatisticalProcessor.spearmanCorrelation(graph, maps);    	        	
+        	return Response.ok(requestHandler.writeCorrelationMatrix(mapIds, correlationMatrix)).build();
     	}
     	catch (Exception e) {
     		requestHandler.log(Level.SEVERE, "", e);

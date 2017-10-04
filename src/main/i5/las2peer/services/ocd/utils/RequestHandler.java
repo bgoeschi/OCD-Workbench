@@ -43,6 +43,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.math3.linear.RealMatrix;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -235,6 +236,16 @@ public class RequestHandler {
 	public String writeConfirmationXml() throws ParserConfigurationException {
 		Document doc = getDocument();
 		doc.appendChild(doc.createElement("Confirmation"));
+		return writeDoc(doc);
+	}
+	
+	public String writeCustomValues(String[] names, double[] values) throws ParserConfigurationException {
+		Document doc = getDocument();
+		for(int i = 0; i < names.length; i++) {
+			Element elt = doc.createElement(names[i]);
+			elt.appendChild(doc.createTextNode(Double.toString(values[i])));
+			doc.appendChild(elt);
+		}
 		return writeDoc(doc);
 	}
 	
@@ -674,6 +685,33 @@ public class RequestHandler {
 	 */
 	public List<String> parseQueryMultiParam(String paramStr) {
 		return Arrays.asList(paramStr.split("-"));
+	}
+	
+	/**
+	 * Creates an XML document containing the correlation matrix of a number of centrality maps.
+	 * @param mapIds The list of centrality map ids.
+	 * @param correlationMatrix The matrix containing the correlations for each pair of centrality maps.
+	 * @return The document.
+	 * @throws ParserConfigurationException
+	 */
+	public String writeCorrelationMatrix(List<Integer> mapIds, RealMatrix correlationMatrix) throws ParserConfigurationException {
+		Document doc = getDocument();
+		Element matrixElt = doc.createElement("Matrix");
+		int n = mapIds.size();
+		Element rowElt;
+		for(int i = 0; i < n; i++) {
+			rowElt = doc.createElement("Row");
+			rowElt.setAttribute("CentralityMapId", Integer.toString(mapIds.get(i)));
+			for(int j = 0; j < n; j++) {
+				Element cellElt = doc.createElement("Cell");
+				cellElt.setAttribute("CentralityMapId", Integer.toString(mapIds.get(j)));
+				cellElt.appendChild(doc.createTextNode(Double.toString(correlationMatrix.getEntry(i, j))));
+				rowElt.appendChild(cellElt);
+			}
+			matrixElt.appendChild(rowElt);
+		}
+		doc.appendChild(matrixElt);
+		return writeDoc(doc);
 	}
 	
 }

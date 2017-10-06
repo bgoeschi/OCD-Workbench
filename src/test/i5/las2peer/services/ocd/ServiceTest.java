@@ -1,35 +1,25 @@
 package i5.las2peer.services.ocd;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.p2p.NodeException;
 import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.persistency.MalformedXMLException;
-import i5.las2peer.security.AgentException;
-import i5.las2peer.security.L2pSecurityException;
 import i5.las2peer.security.ServiceAgent;
 import i5.las2peer.security.UserAgent;
 import i5.las2peer.services.ocd.adapters.AdapterException;
+import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeries;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.testsUtils.OcdTestGraphFactory;
+import i5.las2peer.services.ocd.utils.EntityHandler;
 import i5.las2peer.services.ocd.utils.RequestHandler;
 import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.tools.CryptoException;
 import i5.las2peer.webConnector.WebConnector;
 import i5.las2peer.webConnector.client.ClientResponse;
 import i5.las2peer.webConnector.client.MiniClient;
-import y.base.Edge;
-import y.base.EdgeCursor;
-import y.base.Node;
-import y.base.NodeCursor;
-
-import static org.junit.Assert.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.persistence.EntityManager;
@@ -40,34 +30,32 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-
 /**
- * Test Class testing the Service calls
+ * Test service calls
  * 
  */
-
 
 public class ServiceTest {
 
 	private static final String HTTP_ADDRESS = "http://127.0.0.1";
 	private static final int HTTP_PORT = WebConnector.DEFAULT_HTTP_PORT;
 
-	private static LocalNode serviceNode;
+	private static LocalNode node;
 	private static WebConnector connector;
 	private static ByteArrayOutputStream logStream;
 
-	private static UserAgent adam;
+	private static UserAgent testAgent;
 	private static final String testPass = "adamspass";
 
-	private static ServiceAgent testServiceAgent;	
 	private static final String testServiceClass = "i5.las2peer.services.ocd.ServiceClass";
 	private static final String mainPath = "ocd/";
 	private static long SawmillGraphId;
 	private static long DolphinsGraphId;
 	private static long AperiodicTwoCommunitiesGraphId;
-	
+
 	private static RequestHandler requestHandler = new RequestHandler();
-	
+	private static EntityHandler entityHandler = new EntityHandler();
+
 	/**
 	 * Called before the tests start.
 	 * 
@@ -80,68 +68,77 @@ public class ServiceTest {
 	public static void startServer() throws Exception {
 
 		// start node
-		serviceNode = LocalNode.newNode();
-		serviceNode.getNodeServiceCache().setWaitForResults(3);
-		
-		adam = MockAgentFactory.getAdam();
-		adam.unlockPrivateKey(testPass); 
-		
-		serviceNode.storeAgent(adam);
-		serviceNode.launch();
+		node = LocalNode.newNode();
+		testAgent = MockAgentFactory.getAdam();
+		testAgent.unlockPrivateKey(testPass); // agent must be unlocked in order
+												// to be stored
+		node.storeAgent(testAgent);
+		node.launch();
 
-		testServiceAgent = ServiceAgent.createServiceAgent(ServiceNameVersion.fromString(testServiceClass + "@1.0"), "a pass");
-		testServiceAgent.unlockPrivateKey("a pass");
-		serviceNode.registerReceiver(testServiceAgent);
+		// during testing, the specified service version does not matter
+		ServiceAgent testService = ServiceAgent
+				.createServiceAgent(ServiceNameVersion.fromString(ServiceClass.class.getName() + "@1.0"), "a pass");
+		testService.unlockPrivateKey("a pass");
+
+		node.registerReceiver(testService);
 
 		// start connector
 		logStream = new ByteArrayOutputStream();
 
 		connector = new WebConnector(true, HTTP_PORT, false, 1000);
 		connector.setLogStream(new PrintStream(logStream));
-		connector.start(serviceNode);
+		connector.start(node);
 		Thread.sleep(1000); // wait a second for the connector to become ready
-		adam = MockAgentFactory.getAdam();
-		
+		testAgent = MockAgentFactory.getAdam();
+
 		/*
 		 * Sets up the database environment for testing.
 		 */
-		
+
 		setupDatabase();
 
 	}
 
-	/*
+	/**
 	 * Sets up the database environment for testing.
+	 * 
+	 * @throws AdapterException
+	 * @throws FileNotFoundException
+	 * @throws ParserConfigurationException
 	 */
-	private static void setupDatabase() throws AdapterException,
-			FileNotFoundException, ParserConfigurationException {
+	private static void setupDatabase() throws AdapterException, FileNotFoundException, ParserConfigurationException {
 		/*
 		 * Set db content
 		 */
-		CustomGraph graph;
-		graph = OcdTestGraphFactory.getAperiodicTwoCommunitiesGraph();
+		CustomGraph graph = OcdTestGraphFactory.getAperiodicTwoCommunitiesGraph();
 		createGraph(graph);
 		AperiodicTwoCommunitiesGraphId = graph.getId();
-		
 		graph = OcdTestGraphFactory.getDolphinsGraph();
 		createGraph(graph);
 		DolphinsGraphId = graph.getId();
-		
 		graph = OcdTestGraphFactory.getSawmillGraph();
 		createGraph(graph);
 		SawmillGraphId = graph.getId();
 	}
 
-	// Persists a graph for database setup.
-	public static void createGraph(CustomGraph graph) throws AdapterException,
-			FileNotFoundException, ParserConfigurationException {
-		
-		graph.setUserName(adam.getLoginName());
-		EntityManager em = requestHandler.getEntityManager();
+
+	/**
+	 * Persists a graph for database setup.
+	 * 
+	 * @param graph CustomGraph
+	 * @throws AdapterException
+	 * @throws FileNotFoundException
+	 * @throws ParserConfigurationException
+	 */
+	public static void createGraph(CustomGraph graph)
+			throws AdapterException, FileNotFoundException, ParserConfigurationException {
+		graph.setUserName(testAgent.getLoginName());
+		EntityManager em = entityHandler.getEntityManager();
 		EntityTransaction tx = em.getTransaction();
 		try {
 			tx.begin();
 			em.persist(graph);
+			em.flush();
 			tx.commit();
 		} catch (RuntimeException e) {
 			if (tx != null && tx.isActive()) {
@@ -151,6 +148,36 @@ public class ServiceTest {
 		}
 		em.close();
 		System.out.println(requestHandler.writeId(graph));
+	}
+	
+	/**
+	 * Persists a simulation for database setup.
+	 * 
+	 * @param simulation
+	 * @throws AdapterException
+	 * @throws FileNotFoundException
+	 * @throws ParserConfigurationException
+	 */
+	public static long createSimulation(SimulationSeries simulation)
+			throws AdapterException, FileNotFoundException, ParserConfigurationException {
+		simulation.setUserId(testAgent.getId());
+		EntityManager em = entityHandler.getEntityManager();
+		EntityTransaction tx = em.getTransaction();
+		long sId;
+		try {
+			tx.begin();
+			em.persist(simulation);
+			em.flush();
+			sId = simulation.getId();
+			tx.commit();
+		} catch (RuntimeException e) {
+			if (tx != null && tx.isActive()) {
+				tx.rollback();
+			}
+			throw e;
+		}
+		em.close();
+		return sId;
 	}
 
 	/**
@@ -163,10 +190,10 @@ public class ServiceTest {
 	public static void shutDownServer() throws Exception {
 
 		connector.stop();
-		serviceNode.shutDown();
+		node.shutDown();
 
 		connector = null;
-		serviceNode = null;
+		node = null;
 
 		LocalNode.reset();
 
@@ -183,125 +210,173 @@ public class ServiceTest {
 	 * 
 	 */
 	@Test
-	public void testValidateLogin() {
+	public void validateLogin() {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 
 		try {
-			c.setLogin(Long.toString(adam.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", mainPath + "validate",
-					"");
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", mainPath + "validate", "");
 			assertEquals(200, result.getHttpCode());
-			System.out.println("Result of 'testValidateLogin': "
-					+ result.getResponse().trim());
+			System.out.println("Result of 'testValidateLogin': " + result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
 		}
 
 	}
-	
-	
-	////////// Test RESTful Service calls  //////////// 
-	
-	
+
+	///////////////////////////// Graphs /////////////////////////////
+
 	@Test
-	public void testGetGraph() throws AdapterException, FileNotFoundException {
+	public void getGraphMetaXMLFormat() throws AdapterException, FileNotFoundException {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		try {
-			c.setLogin(Long.toString(adam.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", mainPath + "graphs/"
-					+ SawmillGraphId + "?outputFormat=META_XML", "");
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("GET",
+					mainPath + "graphs/" + SawmillGraphId + "?outputFormat=META_XML", "");
+			System.out.println("Result of 'testGetGraphs' on Sawmill: " + result.getResponse().trim());
 			assertEquals(200, result.getHttpCode());
-			System.out.println("Result of 'testGetGraphs' on Sawmill: "
-					+ result.getResponse().trim());			
-			result = c.sendRequest("GET", mainPath + "graphs/" + DolphinsGraphId
-					+ "?outputFormat=META_XML", "");
+
+			result = c.sendRequest("GET", mainPath + "graphs/" + DolphinsGraphId + "?outputFormat=META_XML", "");
+			System.out.println("Result of 'testGetGraphs' on Dolphins: " + result.getResponse().trim());
 			assertEquals(200, result.getHttpCode());
-			System.out.println("Result of 'testGetGraphs' on Dolphins: "
-					+ result.getResponse().trim());
+
 			result = c.sendRequest("GET",
-					mainPath + "graphs/" + AperiodicTwoCommunitiesGraphId
-							+ "?outputFormat=META_XML", "");
+					mainPath + "graphs/" + AperiodicTwoCommunitiesGraphId + "?outputFormat=META_XML", "");
+			System.out.println("Result of 'testGetGraphs' on AperiodicTwoCommunities: " + result.getResponse().trim());
 			assertEquals(200, result.getHttpCode());
-			System.out
-					.println("Result of 'testGetGraphs' on AperiodicTwoCommunities: "
-							+ result.getResponse().trim());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
 		}
 	}
-	
-	
-	
-	//////////Test RMI functions  //////////// 
-	
+
 	@Test
-	public void testGetRMIGraph() throws AdapterException, MalformedXMLException, IOException, L2pSecurityException, AgentException, NodeException, CryptoException, InterruptedException {
-		
-	
-		LocalNode serviceNode = LocalNode.newNode();
-		serviceNode.getNodeServiceCache().setWaitForResults(3);
-		UserAgent adam = MockAgentFactory.getAdam();
-
-		adam.unlockPrivateKey("adamspass");
-		serviceNode.launch();
-
-		ServiceAgent testServiceAgent = ServiceAgent
-				.createServiceAgent(ServiceNameVersion.fromString(testServiceClass + "@1.0"), "a pass");
-		testServiceAgent.unlockPrivateKey("a pass");
-		serviceNode.registerReceiver(testServiceAgent);		
-		
-		@SuppressWarnings("unchecked")
-		HashMap<String, Object> map = (HashMap<String, Object>) serviceNode.invoke(adam, ServiceNameVersion.fromString(testServiceClass) + "@1.0", "getGraphById", new Serializable[] { SawmillGraphId });
-		@SuppressWarnings("unchecked")
-		ArrayList<ArrayList<Integer>> network = (ArrayList<ArrayList<Integer>>) map.get("graph");
-		int nodes = (int) map.get("nodes");
-		int edges = (int) map.get("edges");	
-		
-		assertEquals(36, nodes);
-		assertEquals(36, network.size());
-		assertEquals(124, edges);
-		assertEquals(1, (int) network.get(0).get(0));
-		assertEquals(28, (int) network.get(0).get(3));
-
-		
-
-		
-		
-	}
-	
-	/*@Test
-	public void createCentralityMap() throws AdapterException, FileNotFoundException, ParserConfigurationException {
-		CustomGraph graph = new CustomGraph();
-		
-		Node nodes[] = new Node[5];  
-		for (int i = 0; i < 2; i++) {
-			nodes[i] = graph.createNode();
-		}
-		
-		graph.createEdge(nodes[0], nodes[1]);
-		
-		createGraph(graph);
-		
+	public void getGraphPropertiesXMLFormat() throws AdapterException, FileNotFoundException {
 		MiniClient c = new MiniClient();
 		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
-
 		try {
-			c.setLogin(Long.toString(adam.getId()), testPass);
-			ClientResponse result = c.sendRequest("GET", mainPath + "validate",
-					"");
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("GET",
+					mainPath + "graphs/" + DolphinsGraphId + "?outputFormat=PROPERTIES_XML", "");
+			System.out.println("Result of 'testGetGraphs' on Dolphins: " + result.getResponse().trim());
 			assertEquals(200, result.getHttpCode());
-			System.out.println("Result of 'testValidateLogin': "
-					+ result.getResponse().trim());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception: " + e);
 		}
+	}
+
+	@Test
+	public void getGraphInvalidID() throws AdapterException, FileNotFoundException {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("GET", mainPath + "graphs/" + 999 + "?outputFormat=META_XML", "");
+			System.out.println("Result of 'testGetGraphs' on Sawmill: " + result.getResponse().trim());
+			assertEquals(400, result.getHttpCode());
+
+			result = c.sendRequest("GET", mainPath + "graphs/" + -4 + "?outputFormat=META_XML", "");
+			System.out.println("Result of 'testGetGraphs' on Sawmill: " + result.getResponse().trim());
+			assertEquals(400, result.getHttpCode());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	@Test
+	public void getEnumListingProperties() throws AdapterException, FileNotFoundException {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("GET", mainPath + "graphs/properties", "");
+			assertEquals(200, result.getHttpCode());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+
+	///////////////////////////// Simulations /////////////////////////////
+	
+	@Test
+	public void getSimulation() throws AdapterException, FileNotFoundException {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
 		
-		long id = graph.getId();
-		c.sendRequest("POST", mainPath + "centrality/graphs/" + id + "/algorithms", "");
-	}*/
+		SimulationSeries s1 = new SimulationSeries();
+		s1.setName("name");
+		long id1 = 0;
+		SimulationSeries s2 = new SimulationSeries();
+		s1.setName("name2");
+		long id2 = 0;
+		
+		try {
+			id1 = createSimulation(s1);
+			id2 = createSimulation(s2);
+		} catch (ParserConfigurationException e1) {
+			e1.printStackTrace();
+		}	
+		System.out.print(id1);
+		
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+
+			ClientResponse result = c.sendRequest("GET",
+					mainPath + "simulation/" + 124, "");
+			System.out.println("Result of 'getSimulation' " + result.getResponse().trim());
+			assertEquals(400, result.getHttpCode());
+			
+			result = c.sendRequest("GET",
+					mainPath + "simulation/" + id1, "");
+			System.out.println("Result of 'getSimulation' " + result.getResponse().trim());
+			assertEquals(200, result.getHttpCode());
+			
+			result = c.sendRequest("GET",
+					mainPath + "simulation/" + id2, "");
+			System.out.println("Result of 'getSimulation' " + result.getResponse().trim());
+			assertEquals(200, result.getHttpCode());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+	
+	@Test
+	public void startSimulation() throws AdapterException, FileNotFoundException {
+		MiniClient c = new MiniClient();
+		c.setAddressPort(HTTP_ADDRESS, HTTP_PORT);
+		
+		try {
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			ClientResponse result = c.sendRequest("POST",
+					mainPath + "simulation" , "{\"graphId\":2,\"dynamic\":\"Moran\",\"dynamicValues\":[],\"payoffCC\":1.0,\"payoffCD\":1.0,\"payoffDC\":1.0,\"payoffDD\":1.0,\"iterations\":20}", "application/json", "", new HashMap<>());
+			System.out.println("Result of 'startSimulation' " + result.getResponse().trim());
+			assertEquals(200, result.getHttpCode());
+			
+			c.setLogin(Long.toString(testAgent.getId()), testPass);
+			result = c.sendRequest("POST",
+					mainPath + "simulation" , "{\"graphId\":2,\"dynamic\":\"Moran\",\"dynamicValues\":[],\"payoffValues\":[1.0,2.0,3.1,0.0],\"iterations\":20}", "application/json", "", new HashMap<>());
+			System.out.println("Result of 'startSimulation' " + result.getResponse().trim());
+			assertEquals(400, result.getHttpCode());
+
+						
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception: " + e);
+		}
+	}
+	
 }

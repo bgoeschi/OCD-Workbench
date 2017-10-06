@@ -73,6 +73,10 @@ public class ThreadHandler {
 	private RequestHandler requestHandler = new RequestHandler();
 	
 	/**
+	 * Creates a new instance.
+	 */
+	private EntityHandler entityHandler = new EntityHandler();
+	/**
 	 * Runs an algorithm.
 	 * @param cover The cover that is already persisted but not holding any valid information aside the graph and id.
 	 * @param algorithm The algorithm to calculate the cover with.
@@ -187,7 +191,7 @@ public class ThreadHandler {
     			return;
     		}
     		if(!error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
 		    	try {
 					tx.begin();				
@@ -211,7 +215,7 @@ public class ThreadHandler {
 		    	em.close();
     		}
     		if(error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
     			try {
 					tx.begin();
@@ -251,7 +255,7 @@ public class ThreadHandler {
     			return;
     		}
     		if(!error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
     			try {
     				tx.begin();
@@ -271,7 +275,7 @@ public class ThreadHandler {
     				error = true;
     			}
     			em.close();
-    			em = requestHandler.getEntityManager();
+    			em = entityHandler.getEntityManager();
     			tx = em.getTransaction();
     			try {
     				tx.begin();
@@ -293,7 +297,7 @@ public class ThreadHandler {
     			em.close();
     		}
 			if(error) {
-				EntityManager em = requestHandler.getEntityManager();
+				EntityManager em = entityHandler.getEntityManager();
 				EntityTransaction tx = em.getTransaction();
 				try {
     				tx.begin();
@@ -336,7 +340,7 @@ public class ThreadHandler {
     			return;
     		}
     		if(!error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
 		    	try {
 					tx.begin();
@@ -364,7 +368,7 @@ public class ThreadHandler {
 		    	em.close();
     		}
     		if(error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
     			try {
 					tx.begin();

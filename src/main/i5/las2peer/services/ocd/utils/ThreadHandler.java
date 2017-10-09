@@ -408,7 +408,7 @@ public class ThreadHandler {
     			return;
     		}
     		if(!error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
 		    	try {
 					tx.begin();
@@ -433,7 +433,7 @@ public class ThreadHandler {
 		    	em.close();
     		}
     		if(error) {
-    			EntityManager em = requestHandler.getEntityManager();
+    			EntityManager em = entityHandler.getEntityManager();
     			EntityTransaction tx = em.getTransaction();
     			try {
 					tx.begin();

@@ -8,6 +8,7 @@ import javax.persistence.EntityTransaction;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.CustomGraphId;
+import i5.las2peer.services.ocd.utils.EntityHandler;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 import i5.las2peer.services.ocd.utils.RequestHandler;
 import i5.las2peer.services.ocd.utils.ThreadHandler;
@@ -26,6 +27,10 @@ public class SimulationRunnable implements Runnable {
 	 * The thread handler in charge of the runnable execution.
 	 */
 	private ThreadHandler threadHandler;
+	/**
+	 * The entity handler in charge of accessing persisted data.
+	 */
+	private EntityHandler entityHandler = new EntityHandler();
 	
 	/**
 	 * Creates a new instance.
@@ -48,7 +53,7 @@ public class SimulationRunnable implements Runnable {
 		CustomGraphId graphId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
     	CentralityMapId id = new CentralityMapId(map.getId(), graphId);
     	RequestHandler requestHandler = new RequestHandler();
-    	EntityManager em = requestHandler.getEntityManager();
+    	EntityManager em = entityHandler.getEntityManager();
     	EntityTransaction tx = em.getTransaction();
 		try {
 			tx.begin();

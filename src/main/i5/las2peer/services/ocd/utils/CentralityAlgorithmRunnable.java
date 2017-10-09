@@ -30,6 +30,10 @@ public class CentralityAlgorithmRunnable implements Runnable {
 	 * The thread handler in charge of the runnable execution.
 	 */
 	private ThreadHandler threadHandler;
+	/**
+	 * The entity handler in charge of accessing persisted data.
+	 */
+	private EntityHandler entityHandler = new EntityHandler();
 	
 	/**
 	 * Creates a new instance.
@@ -52,7 +56,7 @@ public class CentralityAlgorithmRunnable implements Runnable {
 		CustomGraphId graphId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
     	CentralityMapId id = new CentralityMapId(map.getId(), graphId);
     	RequestHandler requestHandler = new RequestHandler();
-    	EntityManager em = requestHandler.getEntityManager();
+    	EntityManager em = entityHandler.getEntityManager();
     	EntityTransaction tx = em.getTransaction();
 		try {
 			tx.begin();

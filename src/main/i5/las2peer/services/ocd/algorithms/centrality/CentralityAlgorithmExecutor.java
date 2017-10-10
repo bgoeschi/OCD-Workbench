@@ -16,7 +16,7 @@ import i5.las2peer.services.ocd.utils.ExecutionStatus;
 public class CentralityAlgorithmExecutor {
 
 	/**
-	 * Calculates a CentralityMap by executing an CentralityAlgorithm on a graph.
+	 * Calculates a CentralityMap by executing a CentralityAlgorithm on a graph.
 	 * @param graph The graph.
 	 * @param algorithm The algorithm.
 	 * @return A CentralityMap of the graph calculated by the algorithm.

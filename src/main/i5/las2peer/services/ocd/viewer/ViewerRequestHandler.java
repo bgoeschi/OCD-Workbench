@@ -55,7 +55,7 @@ public class ViewerRequestHandler extends OcdRequestHandler {
 	 * @throws IllegalAccessException
 	 */
 	public Response writeCover(Cover cover, VisualOutputFormat outputFormat) throws AdapterException, InstantiationException, IllegalAccessException {
-		return Response.ok().entity(writeGraph(cover.getGraph(), outputFormat)).build();
+		return writeGraph(cover.getGraph(), outputFormat);
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class ViewerRequestHandler extends OcdRequestHandler {
 	 * @throws IllegalAccessException
 	 */
 	public Response writeCentralityMap(CentralityMap map, VisualOutputFormat outputFormat) throws AdapterException, InstantiationException, IllegalAccessException {
-		return Response.ok().entity(writeGraph(map.getGraph(), outputFormat)).build();
+		return writeGraph(map.getGraph(), outputFormat);
 	}
 
 }

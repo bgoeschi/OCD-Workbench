@@ -2763,7 +2763,7 @@ public class ServiceClass extends RESTService {
 	    			doLabelEdges = map.getGraph().getTypes().contains(GraphType.WEIGHTED) ? true : false;
 	    		}
 	    		layoutHandler.doLayout(map, layout, doLabelNodes, doLabelEdges, centralityVisualizationType);
-	    		return Response.ok(requestHandler.writeCentralityMap(map, format)).build();
+	    		return requestHandler.writeCentralityMap(map, format);
 	    	} catch (Exception e) {
 	    		requestHandler.log(Level.SEVERE, "", e);
 	    		return requestHandler.writeError(Error.INTERNAL, "Internal system error.");

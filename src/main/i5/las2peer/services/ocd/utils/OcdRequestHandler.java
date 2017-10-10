@@ -1,10 +1,10 @@
 package i5.las2peer.services.ocd.utils;
 
+import i5.las2peer.services.ocd.centrality.simulations.SimulationType;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
 import i5.las2peer.services.ocd.graphs.GraphCreationType;
 import i5.las2peer.services.ocd.metrics.OcdMetricType;
-import i5.las2peer.services.ocd.simulation.SimulationType;
 
 import javax.xml.parsers.ParserConfigurationException;
 

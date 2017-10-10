@@ -1,23 +1,20 @@
-package i5.las2peer.services.ocd.utils;
+package i5.las2peer.services.ocd.centrality.simulations;
 
 import java.util.logging.Level;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmExecutor;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.CustomGraphId;
+import i5.las2peer.services.ocd.utils.EntityHandler;
+import i5.las2peer.services.ocd.utils.ExecutionStatus;
+import i5.las2peer.services.ocd.utils.RequestHandler;
+import i5.las2peer.services.ocd.utils.ThreadHandler;
 
-/**
- * Runnable for the execution of centrality algorithms.
- * @author Tobias
- *
- */
-public class CentralityAlgorithmRunnable implements Runnable {
-
+public class SimulationRunnable implements Runnable {
+	
 	/**
 	 * The persisted CentralityMap reserved for the algorithm result.
 	 */
@@ -25,7 +22,7 @@ public class CentralityAlgorithmRunnable implements Runnable {
 	/**
 	 * The algorithm to execute.
 	 */
-	private CentralityAlgorithm algorithm;
+	private GraphSimulation simulation;
 	/**
 	 * The thread handler in charge of the runnable execution.
 	 */
@@ -38,11 +35,11 @@ public class CentralityAlgorithmRunnable implements Runnable {
 	/**
 	 * Creates a new instance.
 	 * @param map Sets the CentralityMap.
-	 * @param algorithm Sets the CentralityAlgorithm.
+	 * @param simulation Sets the CentralityAlgorithm.
 	 * @param threadHandler Sets the thread handler.
 	 */
-	public CentralityAlgorithmRunnable(CentralityMap map, CentralityAlgorithm algorithm, ThreadHandler threadHandler) {
-		this.algorithm = algorithm;
+	public SimulationRunnable(CentralityMap map, GraphSimulation simulation, ThreadHandler threadHandler) {
+		this.simulation = simulation;
 		this.map = map;
 		this.threadHandler = threadHandler;
 	}
@@ -51,7 +48,7 @@ public class CentralityAlgorithmRunnable implements Runnable {
 	public void run() {
 		boolean error = false;
 		/*
-		 * Set algorithm state to running.
+		 * Set simulation state to running.
 		 */
 		CustomGraphId graphId = new CustomGraphId(map.getGraph().getId(), map.getGraph().getUserName());
     	CentralityMapId id = new CentralityMapId(map.getId(), graphId);
@@ -65,7 +62,7 @@ public class CentralityAlgorithmRunnable implements Runnable {
 				/*
 				 * Should not happen.
 				 */
-				requestHandler.log(Level.SEVERE, "Centrality map deleted while algorithm running.");
+				requestHandler.log(Level.SEVERE, "Centrality map deleted while simulation running.");
 				throw new IllegalStateException();
 			}
 			map.getCreationMethod().setStatus(ExecutionStatus.RUNNING);
@@ -78,13 +75,13 @@ public class CentralityAlgorithmRunnable implements Runnable {
 		}
 		em.close();
 		/*
-		 * Run algorithm.
+		 * Run simulation.
 		 */
 		CentralityMap resultMap = null;
 		if(!error) {
-	        CentralityAlgorithmExecutor executor = new CentralityAlgorithmExecutor();
+	        SimulationExecutor executor = new SimulationExecutor();
 	        try {
-	        	resultMap = executor.execute(map.getGraph(), algorithm);
+	        	resultMap = executor.execute(map.getGraph(), simulation);
 	        	if(Thread.interrupted()) {
 	        		throw new InterruptedException();
 	        	}

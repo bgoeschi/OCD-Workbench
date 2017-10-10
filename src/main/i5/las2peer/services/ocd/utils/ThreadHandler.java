@@ -1,8 +1,10 @@
 package i5.las2peer.services.ocd.utils;
 
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
-import i5.las2peer.services.ocd.algorithms.centrality.CentralityAlgorithm;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
+import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
+import i5.las2peer.services.ocd.centrality.simulations.GraphSimulation;
+import i5.las2peer.services.ocd.centrality.simulations.SimulationRunnable;
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CentralityMapId;
@@ -16,8 +18,6 @@ import i5.las2peer.services.ocd.metrics.KnowledgeDrivenMeasure;
 import i5.las2peer.services.ocd.metrics.OcdMetricLog;
 import i5.las2peer.services.ocd.metrics.OcdMetricLogId;
 import i5.las2peer.services.ocd.metrics.StatisticalMeasure;
-import i5.las2peer.services.ocd.simulation.GraphSimulation;
-import i5.las2peer.services.ocd.simulation.SimulationRunnable;
 
 import java.util.HashMap;
 import java.util.Map;

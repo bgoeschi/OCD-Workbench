@@ -2,6 +2,7 @@ package i5.las2peer.services.ocd.algorithms.centrality;
 
 import org.junit.Test;
 
+import i5.las2peer.services.ocd.centrality.measures.DegreeCentrality;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import y.base.Node;

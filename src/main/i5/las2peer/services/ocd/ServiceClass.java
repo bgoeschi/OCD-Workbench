@@ -67,12 +67,12 @@ import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeriesParameters;
 import i5.las2peer.services.ocd.cd.simulation.SimulationBuilder;
 import i5.las2peer.services.ocd.cd.simulation.dynamic.DynamicType;
 import i5.las2peer.services.ocd.cd.simulation.game.GameType;
+import i5.las2peer.services.ocd.centrality.evaluation.StatisticalProcessor;
 import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmFactory;
 import i5.las2peer.services.ocd.centrality.simulations.GraphSimulation;
 import i5.las2peer.services.ocd.centrality.simulations.SimulationFactory;
 import i5.las2peer.services.ocd.centrality.simulations.SimulationType;
-import i5.las2peer.services.ocd.evaluation.StatisticalProcessor;
 import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
@@ -1210,7 +1210,7 @@ public class ServiceClass extends RESTService {
 	    })
 		@ApiOperation(value = "Manage centrality maps",
 			notes = "Returns the ids (or meta information) of multiple centrality maps.")
-	    public Response getMaps(
+	    public Response getCentralityMaps(
 	    		@DefaultValue("0") @QueryParam("firstIndex") String firstIndexStr,
 	    		@DefaultValue("") @QueryParam("length") String lengthStr,
 	    		@DefaultValue("FALSE") @QueryParam("includeMeta") String includeMetaStr,
@@ -1472,29 +1472,7 @@ public class ServiceClass extends RESTService {
 		    		requestHandler.log(Level.WARNING, "user: " + username, e);
 					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified cover output format does not exist.");
 		    	}
-	    		EntityManager em = entityHandler.getEntityManager();
-		    	CustomGraphId gId = new CustomGraphId(graphId, username);
-		    	CentralityMapId cId = new CentralityMapId(mapId, gId);
-				/*
-				 * Finds CentralityMap
-				 */
-				EntityTransaction tx = em.getTransaction();
-		    	CentralityMap map;
-		    	try {
-					tx.begin();
-					map = em.find(CentralityMap.class, cId);
-					tx.commit();
-				}
-		    	catch( RuntimeException e ) {
-					if( tx != null && tx.isActive() ) {
-						tx.rollback();
-					}
-					throw e;
-				}
-		    	if(map == null) {
-		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
-		    	}
+	    		CentralityMap map = entityHandler.getCentralityMap(username, graphId, mapId);
 		    	return Response.ok(requestHandler.writeCentralityMap(map, format)).build();
 	    	}
 	    	catch (Exception e) {
@@ -1544,69 +1522,9 @@ public class ServiceClass extends RESTService {
 	    			requestHandler.log(Level.WARNING, "user: " + username, e);
 					return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map id is not valid.");
 	    		}
-	    		EntityManager em = entityHandler.getEntityManager();
-		    	CustomGraphId gId = new CustomGraphId(graphId, username);
-		    	CentralityMapId cId = new CentralityMapId(mapId, gId);
-		    	
-		    	EntityTransaction tx = em.getTransaction();
-		    	CentralityMap map;
-		    	try {
-					tx.begin();
-					map = em.find(CentralityMap.class, cId);
-					tx.commit();
-				}
-		    	catch( RuntimeException e ) {
-					if( tx != null && tx.isActive() ) {
-						tx.rollback();
-					}
-					throw e;
-				}
-		    	if(map == null) {
-		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
-		    	}
-		    	/*
-		    	 * Deletes the centrality map.
-		    	 */
-	    		synchronized(threadHandler) {
-	    			tx = em.getTransaction();
-			    	try {
-						tx.begin();
-						map = em.find(CentralityMap.class, cId);
-						tx.commit();
-					}
-			    	catch( RuntimeException e ) {
-						if( tx != null && tx.isActive() ) {
-							tx.rollback();
-						}
-						throw e;
-					}
-			    	if(map == null) {
-			    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
-						return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map does not exist: Centrality map id " + mapId + ", graph id " + graphId);
-			    	}
-			    	/*
-			    	 * Interrupts algorithms and metrics.
-			    	 */
-			    	threadHandler.interruptAll(map);
-			    	/*
-			    	 * Removes centrality map
-			    	 */
-			    	tx = em.getTransaction();
-			    	try {
-						tx.begin();
-						em.remove(map);
-						tx.commit();
-					}
-			    	catch( RuntimeException e ) {
-						if( tx != null && tx.isActive() ) {
-							tx.rollback();
-						}
-						throw e;
-					}
-	    			em.close();
-	    			return Response.ok(requestHandler.writeConfirmationXml()).build();
-	    		}
+	    		
+		    	entityHandler.deleteCentralityMap(username, graphId, mapId, threadHandler);
+		    	return Response.ok(requestHandler.writeConfirmationXml()).build();
 	    	}
 	    	catch (Exception e) {
 	    		requestHandler.log(Level.SEVERE, "", e);

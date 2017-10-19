@@ -1,4 +1,4 @@
-package i5.las2peer.services.ocd.evaluation;
+package i5.las2peer.services.ocd.centrality.evaluation;
 
 import java.util.List;
 

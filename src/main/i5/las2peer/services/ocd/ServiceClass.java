@@ -9,9 +9,9 @@ import java.net.HttpURLConnection;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,17 +56,6 @@ import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithmFactory;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
-import i5.las2peer.services.ocd.cd.data.SimulationEntityHandler;
-import i5.las2peer.services.ocd.cd.data.mapping.MappingFactory;
-import i5.las2peer.services.ocd.cd.data.mapping.SimulationSeriesSetMapping;
-import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeries;
-import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeriesGroup;
-import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeriesGroupMetaData;
-import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeriesMetaData;
-import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeriesParameters;
-import i5.las2peer.services.ocd.cd.simulation.SimulationBuilder;
-import i5.las2peer.services.ocd.cd.simulation.dynamic.DynamicType;
-import i5.las2peer.services.ocd.cd.simulation.game.GameType;
 import i5.las2peer.services.ocd.centrality.evaluation.StatisticalProcessor;
 import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmFactory;
@@ -77,6 +66,18 @@ import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
 import i5.las2peer.services.ocd.graphs.CentralityCreationType;
 import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CentralityMapId;
+import i5.las2peer.services.ocd.cooperation.data.SimulationEntityHandler;
+import i5.las2peer.services.ocd.cooperation.data.mapping.MappingFactory;
+import i5.las2peer.services.ocd.cooperation.data.mapping.SimulationSeriesSetMapping;
+import i5.las2peer.services.ocd.cooperation.data.simulation.SimulationSeries;
+import i5.las2peer.services.ocd.cooperation.data.simulation.SimulationSeriesGroup;
+import i5.las2peer.services.ocd.cooperation.data.simulation.SimulationSeriesGroupMetaData;
+import i5.las2peer.services.ocd.cooperation.data.simulation.SimulationSeriesMetaData;
+import i5.las2peer.services.ocd.cooperation.data.simulation.SimulationSeriesParameters;
+import i5.las2peer.services.ocd.cooperation.simulation.SimulationBuilder;
+import i5.las2peer.services.ocd.cooperation.simulation.dynamic.DynamicType;
+import i5.las2peer.services.ocd.cooperation.simulation.game.GameType;
+import i5.las2peer.services.ocd.cooperation.simulation.termination.ConditionType;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
@@ -3319,8 +3320,10 @@ public class ServiceClass extends RESTService {
 				@ApiResponse(code = HttpURLConnection.HTTP_OK, message = "REPLACE THIS WITH YOUR OK MESSAGE"),
 				@ApiResponse(code = HttpURLConnection.HTTP_UNAUTHORIZED, message = "Unauthorized") })
 		public Response getSimulationMeta(@DefaultValue("0") @QueryParam("firstIndex") int firstIndex,
-				@DefaultValue("0") @QueryParam("length") int length, SimulationSeriesParameters parameters) {
-	
+				@DefaultValue("0") @QueryParam("length") int length,
+				@DefaultValue("0") @QueryParam("graphId") long graphId,
+				SimulationSeriesParameters parameters) {
+
 			if (parameters == null) {
 				parameters = new SimulationSeriesParameters();
 			}
@@ -3330,7 +3333,11 @@ public class ServiceClass extends RESTService {
 				if (firstIndex < 0 || length <= 0) {
 					simulations = entityHandler.getSimulationSeriesByUser(getUserId());
 				} else {
-					simulations = entityHandler.getSimulationSeriesByUser(getUserId(), firstIndex, length);
+					if (graphId <= 0) {
+						simulations = entityHandler.getSimulationSeriesByUser(getUserId(), firstIndex, length);
+					} else {
+						simulations = entityHandler.getSimulationSeriesByUser(getUserId(), graphId, firstIndex, length);
+					}
 				}
 			} catch (Exception e) {
 				L2pLogger.logEvent(this, Event.SERVICE_ERROR, "fail to get simulation series. " + e.toString());
@@ -3734,25 +3741,29 @@ public class ServiceClass extends RESTService {
 		public Response getSimulationGroupMapping(@PathParam("groupId") long groupId) {
 	
 			String username = getUserName();
-			SimulationSeriesGroup series = null;
+			SimulationSeriesGroup simulationGroup = null;
 			SimulationSeriesSetMapping mapping;
 	
 			try {
-				series = entityHandler.getSimulationSeriesGroup(groupId);
-	
-				if (series == null)
+				simulationGroup = entityHandler.getSimulationSeriesGroup(groupId);
+
+				if (simulationGroup == null)
 					return Response.status(Status.BAD_REQUEST).entity("no simulation with id " + groupId + " found")
 							.build();
-	
-				series.evaluate();
-	
+
+				if (!simulationGroup.isEvaluated())
+					simulationGroup.evaluate();
+								
 				MappingFactory factory = new MappingFactory();
-				mapping = factory.build(series.getSimulationSeries(), series.getName());
+				mapping = factory.build(simulationGroup.getSimulationSeries(), simulationGroup.getName());
 				for(SimulationSeries sim: mapping.getSimulation()) {
 					sim.setNetwork(entityHandler.getGraph(getUserName(), sim.getParameters().getGraphId()));
 				}
-				mapping.correlate();
-	
+				
+				if (!mapping.isEvaluated())
+					mapping.correlate();
+
+				
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "user: " + username, e);
 				e.printStackTrace();
@@ -3801,7 +3812,24 @@ public class ServiceClass extends RESTService {
 	
 		}
 
-  }  
+		/**
+		 * Returns all available break condition
+		 * 
+		 * @return HttpResponse with the returnString
+		 */
+		@GET
+		@Path("/simulation/conditions")
+		@Produces(MediaType.APPLICATION_JSON)
+		@ApiOperation(value = "GET Condition", notes = "Get all available break conditions")
+		@ApiResponses(value = { @ApiResponse(code = HttpURLConnection.HTTP_OK, message = "OK"),
+				@ApiResponse(code = HttpURLConnection.HTTP_UNAUTHORIZED, message = "Unauthorized") })
+		public Response getBreakConditions() {
+
+			return Response.status(Status.OK).entity(ConditionType.values()).build();
+
+		}
+
+	}
 	//////////////////////////////////////////////////////////////////
 	///////// RMI Methods
 	//////////////////////////////////////////////////////////////////

@@ -2,20 +2,6 @@ package i5.las2peer.services.ocd;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import i5.las2peer.p2p.LocalNode;
-import i5.las2peer.p2p.ServiceNameVersion;
-import i5.las2peer.security.ServiceAgent;
-import i5.las2peer.security.UserAgent;
-import i5.las2peer.services.ocd.adapters.AdapterException;
-import i5.las2peer.services.ocd.cd.data.simulation.SimulationSeries;
-import i5.las2peer.services.ocd.graphs.CustomGraph;
-import i5.las2peer.services.ocd.testsUtils.OcdTestGraphFactory;
-import i5.las2peer.services.ocd.utils.EntityHandler;
-import i5.las2peer.services.ocd.utils.RequestHandler;
-import i5.las2peer.testing.MockAgentFactory;
-import i5.las2peer.webConnector.WebConnector;
-import i5.las2peer.webConnector.client.ClientResponse;
-import i5.las2peer.webConnector.client.MiniClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -29,6 +15,21 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import i5.las2peer.p2p.LocalNode;
+import i5.las2peer.p2p.ServiceNameVersion;
+import i5.las2peer.security.ServiceAgent;
+import i5.las2peer.security.UserAgent;
+import i5.las2peer.services.ocd.adapters.AdapterException;
+import i5.las2peer.services.ocd.cooperation.data.simulation.SimulationSeries;
+import i5.las2peer.services.ocd.graphs.CustomGraph;
+import i5.las2peer.services.ocd.testsUtils.OcdTestGraphFactory;
+import i5.las2peer.services.ocd.utils.EntityHandler;
+import i5.las2peer.services.ocd.utils.RequestHandler;
+import i5.las2peer.testing.MockAgentFactory;
+import i5.las2peer.webConnector.WebConnector;
+import i5.las2peer.webConnector.client.ClientResponse;
+import i5.las2peer.webConnector.client.MiniClient;
 
 /**
  * Test service calls
@@ -364,7 +365,7 @@ public class ServiceTest {
 			ClientResponse result = c.sendRequest("POST",
 					mainPath + "simulation" , "{\"graphId\":2,\"dynamic\":\"Moran\",\"dynamicValues\":[],\"payoffCC\":1.0,\"payoffCD\":1.0,\"payoffDC\":1.0,\"payoffDD\":1.0,\"iterations\":20}", "application/json", "", new HashMap<>());
 			System.out.println("Result of 'startSimulation' " + result.getResponse().trim());
-			assertEquals(200, result.getHttpCode());
+			assertEquals(400, result.getHttpCode());
 			
 			c.setLogin(Long.toString(testAgent.getId()), testPass);
 			result = c.sendRequest("POST",

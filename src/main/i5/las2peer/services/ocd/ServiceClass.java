@@ -45,6 +45,7 @@ import i5.las2peer.p2p.AgentNotKnownException;
 import i5.las2peer.restMapper.RESTService;
 import i5.las2peer.restMapper.annotations.ServicePath;
 import i5.las2peer.security.UserAgent;
+import i5.las2peer.services.ocd.adapters.centralityInput.CentralityInputFormat;
 import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputFormat;
 import i5.las2peer.services.ocd.adapters.coverInput.CoverInputFormat;
 import i5.las2peer.services.ocd.adapters.coverOutput.CoverOutputFormat;
@@ -1179,6 +1180,98 @@ public class ServiceClass extends RESTService {
 		//////////////////////////////////////////////////////////////////////////
 		//////////// CENTRALITY MEASURES
 		//////////////////////////////////////////////////////////////////////////
+		
+		/**
+		 * Imports a ground-truth CentralityMap for an existing graph.
+		 * 
+		 * @param graphIdStr
+		 *            The id of the graph that the cover is based on.
+		 * @param nameStr
+		 *            A name for the CentralityMap.
+		 * @param creationTypeStr
+		 *            Specifies the way the centrality was created.
+		 * @param centralityInputFormatStr
+		 *            The input format of the CentralityMap.
+		 * @param contentStr
+		 *            The CentralityMap input.
+		 * @return A centrality map id xml. Or an error xml.
+		 */
+		@POST
+		@Path("centrality/graphs/{graphId}")
+		@Produces(MediaType.TEXT_XML)
+		@Consumes(MediaType.TEXT_PLAIN)
+		@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+				@ApiResponse(code = 401, message = "Unauthorized") })
+		@ApiOperation(value = "", notes = "Imports a centrality map for an existing graph.")
+		public Response importCentralityMap(@PathParam("graphId") String graphIdStr,
+				@DefaultValue("unnamed") @QueryParam("name") String nameStr,
+				@DefaultValue("GROUND-TRUTH") @QueryParam("creationType") String creationTypeStr,
+				@DefaultValue("NODE_VALUE_LIST") @QueryParam("inputFormat") String centralityInputFormatStr,
+				String contentStr) {
+			try {
+				// TODO: Use nameStr
+				String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
+				long graphId;
+				try {
+					graphId = Long.parseLong(graphIdStr);
+				} catch (Exception e) {
+					requestHandler.log(Level.WARNING, "user: " + username, e);
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
+				}
+				CentralityInputFormat format;
+				try {
+					format = CentralityInputFormat.valueOf(centralityInputFormatStr);
+				} catch (Exception e) {
+					requestHandler.log(Level.WARNING, "user: " + username, e);
+					return requestHandler.writeError(Error.PARAMETER_INVALID,
+							"Specified centrality input format does not exist.");
+				}
+				CentralityCreationType creationType;
+				try {
+					creationType = CentralityCreationType.valueOf(creationTypeStr);
+				} catch (Exception e) {
+					requestHandler.log(Level.WARNING, "user: " + username, e);
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm does not exist.");
+				}
+				CentralityCreationLog log = new CentralityCreationLog(creationType, null, null);
+				log.setStatus(ExecutionStatus.COMPLETED);
+				EntityManager em = entityHandler.getEntityManager();
+				EntityTransaction tx = em.getTransaction();
+				CentralityMap map;
+				try {
+					CustomGraph graph;
+					try {
+						graph = entityHandler.getGraph(username, graphId);
+					} catch (Exception e) {
+						requestHandler.log(Level.WARNING,
+								"user: " + username + ", " + "Graph does not exist: graph id " + graphId);
+						return requestHandler.writeError(Error.PARAMETER_INVALID,
+								"Graph does not exist: graph id " + graphId);
+					}
+					try {
+						map = requestHandler.parseCentralityMap(contentStr, graph, format);
+					} catch (Exception e) {
+						requestHandler.log(Level.WARNING, "user: " + username, e);
+						return requestHandler.writeError(Error.PARAMETER_INVALID,
+								"Input centrality data does not correspond to the specified format.");
+					}
+					map.setCreationMethod(log);
+					tx.begin();
+					em.persist(map);
+					tx.commit();
+				} catch (RuntimeException e) {
+					if (tx != null && tx.isActive()) {
+						tx.rollback();
+					}
+					throw e;
+				}
+				em.close();
+				return Response.ok(requestHandler.writeId(map)).build();
+			} catch (Exception e) {
+				requestHandler.log(Level.SEVERE, "", e);
+				return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+			}
+		}
 	    
 	    /**
 	     * Returns the ids (or meta information) of the calculated centrality maps.
@@ -1551,7 +1644,7 @@ public class ServiceClass extends RESTService {
 	     *            for the algorithm result. Or an error xml.
 	     */
 	    @POST
-	    @Path("simulation/graphs/{graphId}")
+	    @Path("centrality/simulation/graphs/{graphId}")
 	    @Produces(MediaType.TEXT_XML)
 	    @Consumes(MediaType.TEXT_PLAIN)
 	    @ApiResponses(value = {
@@ -3143,7 +3236,67 @@ public class ServiceClass extends RESTService {
 				return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
 			}
 		}
+		
+		/**
+		 * Returns all centrality creation type names.
+		 * 
+		 * @return The types in a names xml. Or an error xml.
+		 */
+		@GET
+		@Path("centralities/creationtypes")
+		@Produces(MediaType.TEXT_XML)
+		@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+				@ApiResponse(code = 401, message = "Unauthorized") })
+		@ApiOperation(value = "", notes = "Returns all centrality creation type names.")
+		public Response getCentralityCreationMethodNames() {
+			try {
+				return Response.ok(requestHandler.writeEnumNames(CentralityCreationType.class)).build();
+			} catch (Exception e) {
+				requestHandler.log(Level.SEVERE, "", e);
+				return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+			}
+		}
+		
+		/**
+		 * Returns all centrality output format names.
+		 * 
+		 * @return The formats in a names xml. Or an error xml.
+		 */
+		@GET
+		@Path("centralities/formats/output")
+		@Produces(MediaType.TEXT_XML)
+		@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+				@ApiResponse(code = 401, message = "Unauthorized") })
+		@ApiOperation(value = "", notes = "Returns all centrality output format names.")
+		public Response getCentralityOutputFormatNames() {
+			try {
+				return Response.ok(requestHandler.writeEnumNames(CentralityOutputFormat.class)).build();
+			} catch (Exception e) {
+				requestHandler.log(Level.SEVERE, "", e);
+				return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+			}
+		}
 	
+		/**
+		 * Returns all centrality input format names.
+		 * 
+		 * @return The formats in a names xml. Or an error xml.
+		 */
+		@GET
+		@Path("centralities/formats/input")
+		@Produces(MediaType.TEXT_XML)
+		@ApiResponses(value = { @ApiResponse(code = 200, message = "Success"),
+				@ApiResponse(code = 401, message = "Unauthorized") })
+		@ApiOperation(value = "", notes = "Returns all cover creation type names.")
+		public Response getCentralityInputFormatNames() {
+			try {
+				return Response.ok(requestHandler.writeEnumNames(CentralityInputFormat.class)).build();
+			} catch (Exception e) {
+				requestHandler.log(Level.SEVERE, "", e);
+				return requestHandler.writeError(Error.INTERNAL, "Internal system error.");
+			}
+		}
+		
 		/**
 		 * Returns all statistical measure type names.
 		 * 

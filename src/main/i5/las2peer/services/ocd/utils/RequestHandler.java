@@ -1,6 +1,9 @@
 package i5.las2peer.services.ocd.utils;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
+import i5.las2peer.services.ocd.adapters.centralityInput.CentralityInputAdapter;
+import i5.las2peer.services.ocd.adapters.centralityInput.CentralityInputAdapterFactory;
+import i5.las2peer.services.ocd.adapters.centralityInput.CentralityInputFormat;
 import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputAdapter;
 import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputAdapterFactory;
 import i5.las2peer.services.ocd.adapters.centralityOutput.CentralityOutputFormat;
@@ -89,6 +92,11 @@ public class RequestHandler {
 	 * The factory used for creating cover input adapters.
 	 */
 	private static CoverInputAdapterFactory coverInputAdapterFactory = new CoverInputAdapterFactory();
+	
+	/**
+	 * The factory used for creating centrality input adapters.
+	 */
+	private static CentralityInputAdapterFactory centralityInputAdapterFactory = new CentralityInputAdapterFactory();
 
 	/**
 	 * The factory used for creating graph input adapters.
@@ -525,6 +533,26 @@ public class RequestHandler {
 		Reader reader = new StringReader(contentStr);
 		adapter.setReader(reader);
 		return adapter.readCover(graph);
+	}
+	
+	/**
+	 * Creates a CentralityMap by parsing a String containing centrality values.
+	 * 
+	 * @param contentStr
+	 *            The centrality input
+	 * @param graph
+	 *            The graph the centrality values are based on.
+	 * @return The CentralityMap.
+	 * @throws AdapterException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public CentralityMap parseCentralityMap(String contentStr, CustomGraph graph, CentralityInputFormat inputFormat)
+			throws AdapterException, InstantiationException, IllegalAccessException {
+		CentralityInputAdapter adapter = centralityInputAdapterFactory.getInstance(inputFormat);
+		Reader reader = new StringReader(contentStr);
+		adapter.setReader(reader);
+		return adapter.readCentrality(graph);
 	}
 
 	/**

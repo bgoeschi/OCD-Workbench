@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import y.base.Node;
 import y.base.NodeCursor;

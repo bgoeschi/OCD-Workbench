@@ -12,9 +12,9 @@ import org.la4j.matrix.sparse.CCSMatrix;
 import org.la4j.vector.Vector;
 import org.la4j.vector.dense.BasicVector;
 
-import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
-import i5.las2peer.services.ocd.graphs.CentralityCreationType;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import y.base.Node;

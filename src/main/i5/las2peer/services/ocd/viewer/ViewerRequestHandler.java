@@ -9,7 +9,7 @@ import i5.las2peer.services.ocd.adapters.AdapterException;
 import i5.las2peer.services.ocd.adapters.visualOutput.VisualOutputAdapter;
 import i5.las2peer.services.ocd.adapters.visualOutput.VisualOutputAdapterFactory;
 import i5.las2peer.services.ocd.adapters.visualOutput.VisualOutputFormat;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.utils.OcdRequestHandler;

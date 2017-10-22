@@ -2,7 +2,7 @@ package i5.las2peer.services.ocd.centrality.measures;
 
 import java.util.Map;
 
-import i5.las2peer.services.ocd.graphs.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
 import i5.las2peer.services.ocd.utils.ConditionalParameterizableFactory;
 
 public class CentralityAlgorithmFactory implements ConditionalParameterizableFactory<CentralityAlgorithm, CentralityCreationType> {

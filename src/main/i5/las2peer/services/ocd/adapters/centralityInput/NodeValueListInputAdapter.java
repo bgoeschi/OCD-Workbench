@@ -5,7 +5,7 @@ import java.util.List;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
 import i5.las2peer.services.ocd.adapters.Adapters;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import y.base.NodeCursor;
 

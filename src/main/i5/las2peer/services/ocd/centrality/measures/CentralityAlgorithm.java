@@ -2,9 +2,9 @@ package i5.las2peer.services.ocd.centrality.measures;
 
 import java.util.Set;
 
-import i5.las2peer.services.ocd.graphs.CentralityCreationMethod;
-import i5.las2peer.services.ocd.graphs.CentralityCreationType;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationMethod;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import i5.las2peer.services.ocd.utils.Parameterizable;

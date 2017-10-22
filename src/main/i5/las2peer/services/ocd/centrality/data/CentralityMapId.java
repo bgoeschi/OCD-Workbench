@@ -1,4 +1,6 @@
-package i5.las2peer.services.ocd.graphs;
+package i5.las2peer.services.ocd.centrality.data;
+
+import i5.las2peer.services.ocd.graphs.CustomGraphId;
 
 /**
  * Composite persistence id of a CentralityMap.

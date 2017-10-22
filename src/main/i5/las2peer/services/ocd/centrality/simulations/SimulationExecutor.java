@@ -1,9 +1,9 @@
 package i5.las2peer.services.ocd.centrality.simulations;
 
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmException;
-import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
-import i5.las2peer.services.ocd.graphs.CentralityCreationType;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphProcessor;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;

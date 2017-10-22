@@ -11,8 +11,8 @@ import javax.persistence.TypedQuery;
 
 import i5.las2peer.logging.L2pLogger;
 import i5.las2peer.p2p.AgentNotKnownException;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
-import i5.las2peer.services.ocd.graphs.CentralityMapId;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverId;

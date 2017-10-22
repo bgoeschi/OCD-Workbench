@@ -2,7 +2,7 @@ package i5.las2peer.services.ocd.adapters.centralityOutput;
 
 import i5.las2peer.services.ocd.adapters.AdapterException;
 import i5.las2peer.services.ocd.adapters.OutputAdapter;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 
 /**
  * The common interface of all centrality output adapters.

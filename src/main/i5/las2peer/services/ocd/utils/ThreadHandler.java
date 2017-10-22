@@ -2,12 +2,12 @@ package i5.las2peer.services.ocd.utils;
 
 import i5.las2peer.services.ocd.algorithms.OcdAlgorithm;
 import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMapId;
 import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.simulations.GraphSimulation;
 import i5.las2peer.services.ocd.centrality.simulations.SimulationRunnable;
-import i5.las2peer.services.ocd.graphs.CentralityCreationLog;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
-import i5.las2peer.services.ocd.graphs.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CoverCreationLog;
 import i5.las2peer.services.ocd.graphs.CoverId;

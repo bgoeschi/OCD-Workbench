@@ -19,7 +19,7 @@ import i5.las2peer.services.ocd.adapters.graphInput.GraphInputFormat;
 import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputAdapter;
 import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputAdapterFactory;
 import i5.las2peer.services.ocd.adapters.graphOutput.GraphOutputFormat;
-import i5.las2peer.services.ocd.graphs.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.Cover;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.metrics.OcdMetricLog;

@@ -1,4 +1,4 @@
-package i5.las2peer.services.ocd.graphs;
+package i5.las2peer.services.ocd.centrality.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.OneToOne;
 
+import i5.las2peer.services.ocd.graphs.CustomGraph;
+import i5.las2peer.services.ocd.graphs.GraphType;
 import y.base.Node;
 
 @Entity

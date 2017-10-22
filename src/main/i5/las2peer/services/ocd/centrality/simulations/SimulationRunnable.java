@@ -5,8 +5,8 @@ import java.util.logging.Level;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-import i5.las2peer.services.ocd.graphs.CentralityMap;
-import i5.las2peer.services.ocd.graphs.CentralityMapId;
+import i5.las2peer.services.ocd.centrality.data.CentralityMap;
+import i5.las2peer.services.ocd.centrality.data.CentralityMapId;
 import i5.las2peer.services.ocd.graphs.CustomGraphId;
 import i5.las2peer.services.ocd.utils.EntityHandler;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;

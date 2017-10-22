@@ -1,5 +1,6 @@
-package i5.las2peer.services.ocd.graphs;
+package i5.las2peer.services.ocd.centrality.data;
 
+import i5.las2peer.services.ocd.graphs.GraphType;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
 import java.util.HashMap;

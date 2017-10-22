@@ -1,4 +1,4 @@
-package i5.las2peer.services.ocd.graphs;
+package i5.las2peer.services.ocd.centrality.data;
 
 import java.security.InvalidParameterException;
 import java.util.Locale;

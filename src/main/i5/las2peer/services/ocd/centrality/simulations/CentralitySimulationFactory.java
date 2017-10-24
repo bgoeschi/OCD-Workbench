@@ -4,10 +4,10 @@ import java.util.Map;
 
 import i5.las2peer.services.ocd.utils.ConditionalParameterizableFactory;
 
-public class SimulationFactory implements ConditionalParameterizableFactory<GraphSimulation, SimulationType> {
+public class CentralitySimulationFactory implements ConditionalParameterizableFactory<CentralitySimulation, CentralitySimulationType> {
 
 	@Override
-	public boolean isInstantiatable(SimulationType simulationType) {
+	public boolean isInstantiatable(CentralitySimulationType simulationType) {
 		if(simulationType.correspondsAlgorithm()) {
 			return true;
 		}
@@ -17,10 +17,10 @@ public class SimulationFactory implements ConditionalParameterizableFactory<Grap
 	}
 
 	@Override
-	public GraphSimulation getInstance(SimulationType simulationType, Map<String, String> parameters)
+	public CentralitySimulation getInstance(CentralitySimulationType simulationType, Map<String, String> parameters)
 			throws InstantiationException, IllegalAccessException {
 		if(isInstantiatable(simulationType)) {
-			GraphSimulation simulation = simulationType.getSimulationClass().newInstance();
+			CentralitySimulation simulation = simulationType.getSimulationClass().newInstance();
 			simulation.setParameters(parameters);
 			return simulation;
 		}

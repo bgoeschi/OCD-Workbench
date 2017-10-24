@@ -12,6 +12,8 @@ import org.la4j.matrix.sparse.CCSMatrix;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -25,7 +27,7 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CURRENT_FLOW_BETWEENNESS, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.CURRENT_FLOW_BETWEENNESS, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		// If the graph contains no edges
 		if(graph.edgeCount() == 0) {
@@ -160,8 +162,8 @@ public class CurrentFlowBetweenness implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.CURRENT_FLOW_BETWEENNESS;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.CURRENT_FLOW_BETWEENNESS;
 	}
 	
 	@Override

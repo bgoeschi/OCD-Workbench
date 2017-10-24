@@ -12,6 +12,8 @@ import org.la4j.vector.Vector;
 import i5.las2peer.services.ocd.algorithms.utils.MatrixOperations;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -23,7 +25,7 @@ public class SalsaHubScore implements CentralityAlgorithm {
 	
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.SALSA_HUB_SCORE, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.SALSA_HUB_SCORE, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		int n = graph.nodeCount();
 		
 		// If the graph contains no edges
@@ -127,8 +129,8 @@ public class SalsaHubScore implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.SALSA_HUB_SCORE;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.SALSA_HUB_SCORE;
 	}
 	
 	@Override

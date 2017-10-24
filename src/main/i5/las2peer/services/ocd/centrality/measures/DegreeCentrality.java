@@ -7,6 +7,8 @@ import java.util.Set;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -18,7 +20,7 @@ public class DegreeCentrality implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.DEGREE_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.DEGREE_CENTRALITY, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
@@ -44,8 +46,8 @@ public class DegreeCentrality implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.DEGREE_CENTRALITY;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.DEGREE_CENTRALITY;
 	}
 	
 	@Override

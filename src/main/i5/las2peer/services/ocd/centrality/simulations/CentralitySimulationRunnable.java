@@ -13,7 +13,7 @@ import i5.las2peer.services.ocd.utils.ExecutionStatus;
 import i5.las2peer.services.ocd.utils.RequestHandler;
 import i5.las2peer.services.ocd.utils.ThreadHandler;
 
-public class SimulationRunnable implements Runnable {
+public class CentralitySimulationRunnable implements Runnable {
 	
 	/**
 	 * The persisted CentralityMap reserved for the algorithm result.
@@ -22,7 +22,7 @@ public class SimulationRunnable implements Runnable {
 	/**
 	 * The algorithm to execute.
 	 */
-	private GraphSimulation simulation;
+	private CentralitySimulation simulation;
 	/**
 	 * The thread handler in charge of the runnable execution.
 	 */
@@ -38,7 +38,7 @@ public class SimulationRunnable implements Runnable {
 	 * @param simulation Sets the CentralityAlgorithm.
 	 * @param threadHandler Sets the thread handler.
 	 */
-	public SimulationRunnable(CentralityMap map, GraphSimulation simulation, ThreadHandler threadHandler) {
+	public CentralitySimulationRunnable(CentralityMap map, CentralitySimulation simulation, ThreadHandler threadHandler) {
 		this.simulation = simulation;
 		this.map = map;
 		this.threadHandler = threadHandler;
@@ -79,7 +79,7 @@ public class SimulationRunnable implements Runnable {
 		 */
 		CentralityMap resultMap = null;
 		if(!error) {
-	        SimulationExecutor executor = new SimulationExecutor();
+	        CentralitySimulationExecutor executor = new CentralitySimulationExecutor();
 	        try {
 	        	resultMap = executor.execute(map.getGraph(), simulation);
 	        	if(Thread.interrupted()) {

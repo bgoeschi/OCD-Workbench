@@ -7,6 +7,8 @@ import java.util.Set;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -18,7 +20,7 @@ public class HIndex implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.H_INDEX, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.H_INDEX, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
@@ -60,8 +62,8 @@ public class HIndex implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.H_INDEX;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.H_INDEX;
 	}
 	
 	@Override

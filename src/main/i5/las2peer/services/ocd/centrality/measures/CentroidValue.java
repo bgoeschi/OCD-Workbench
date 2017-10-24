@@ -12,6 +12,8 @@ import org.la4j.vector.dense.BasicVector;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -25,7 +27,7 @@ public class CentroidValue implements CentralityAlgorithm {
 		NodeCursor nc = graph.nodes();
 		int n = graph.nodeCount();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CENTROID_VALUE, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.CENTROID_VALUE, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		double[] edgeWeights = graph.getEdgeWeights();
 		Matrix dist = new CCSMatrix(n, n);
@@ -88,8 +90,8 @@ public class CentroidValue implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.CENTROID_VALUE;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.CENTROID_VALUE;
 	}
 	
 	@Override

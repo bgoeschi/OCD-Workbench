@@ -30,6 +30,9 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			/*
 			 * Basic Attributes
 			 */
+			Element nameElt = doc.createElement("Name");
+			nameElt.appendChild(doc.createTextNode(map.getName()));
+			mapElt.appendChild(nameElt);
 			Element idElt = doc.createElement("Id");
 			Element mapIdElt = doc.createElement("CentralityMapId");
 			mapIdElt.appendChild(doc.createTextNode(Long.toString(map.getId())));
@@ -39,7 +42,7 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			idElt.appendChild(graphIdElt);
 			mapElt.appendChild(idElt);
 			Element graphElt = doc.createElement("Graph");
-			Element graphNameElt = doc.createElement("Name");
+			Element graphNameElt = doc.createElement("GraphName");
 			graphNameElt.appendChild(doc.createTextNode(map.getGraph().getName()));
 			graphElt.appendChild(graphNameElt);
 			mapElt.appendChild(graphElt);
@@ -48,7 +51,7 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			 */
 			Element creationMethodElt = doc.createElement("CreationMethod");
 			Element creationMethodTypeElt = doc.createElement("Type");
-			creationMethodTypeElt.appendChild(doc.createTextNode(map.getCreationMethod().getType().name()));
+			creationMethodTypeElt.appendChild(doc.createTextNode(map.getCreationMethod().getCreationType().name()));
 			creationMethodElt.appendChild(creationMethodTypeElt);
 			/*
 			 * Parameters
@@ -57,9 +60,9 @@ public class MetaXmlCentralityOutputAdapter extends AbstractCentralityOutputAdap
 			Map<String, String> parameters = map.getCreationMethod().getParameters();
 			for(String parameter : parameters.keySet()) {
 				Element creationMethodParameter = doc.createElement("Parameter");
-				Element creationMethodParameterName = doc.createElement("Name");
+				Element creationMethodParameterName = doc.createElement("ParameterName");
 				creationMethodParameterName.appendChild(doc.createTextNode(parameter));
-				Element creationMethodParameterValue = doc.createElement("Value");
+				Element creationMethodParameterValue = doc.createElement("ParameterValue");
 				creationMethodParameterValue.appendChild(doc.createTextNode(parameters.get(parameter)));
 				creationMethodParameter.appendChild(creationMethodParameterName);
 				creationMethodParameter.appendChild(creationMethodParameterValue);

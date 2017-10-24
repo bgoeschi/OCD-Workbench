@@ -25,6 +25,7 @@ public class CentralityMap {
 	/*
 	 * Database column name definitions.
 	 */
+	public static final String nameColumnName = "NAME";
 	public static final String graphIdColumnName = "GRAPH_ID";
 	public static final String graphUserColumnName = "USER_NAME";
 	public static final String idColumnName = "ID";
@@ -45,6 +46,11 @@ public class CentralityMap {
     @Column(name = idColumnName)
 	private long id;
 	/**
+	 * The name of the CentralityMap.
+	 */
+	@Column(name = nameColumnName)
+	private String name = "";
+	/**
 	 * The graph that the CentralityMap is based on.
 	 */
 	@Id
@@ -59,7 +65,7 @@ public class CentralityMap {
 	 */
 	@OneToOne(orphanRemoval = true, cascade={CascadeType.ALL})
 	@JoinColumn(name = creationMethodColumnName)
-	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashMap<String, String>(), new HashSet<GraphType>());
+	private CentralityCreationLog creationMethod = new CentralityCreationLog(CentralityMeasureType.UNDEFINED, CentralityCreationType.UNDEFINED, new HashMap<String, String>(), new HashSet<GraphType>());
 
 	private Map<String, Double> map = new HashMap<String, Double>();
 	
@@ -81,6 +87,25 @@ public class CentralityMap {
 	 */
 	public long getId() {
 		return id;
+	}
+	
+	/**
+	 * Getter for the CentralityMap name.
+	 * 
+	 * @return The name.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Setter for the CentralityMap name.
+	 * 
+	 * @param name
+	 *            The name.
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	/**
@@ -180,7 +205,7 @@ public class CentralityMap {
 			this.creationMethod = creationMethod;
 		}
 		else {
-			this.creationMethod = new CentralityCreationLog(CentralityCreationType.UNDEFINED, new HashMap<String, String>(), new HashSet<GraphType>());
+			this.creationMethod = new CentralityCreationLog(CentralityMeasureType.UNDEFINED, CentralityCreationType.UNDEFINED, new HashMap<String, String>(), new HashSet<GraphType>());
 		}
 	}
 

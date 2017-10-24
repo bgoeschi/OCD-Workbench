@@ -1,5 +1,6 @@
 package i5.las2peer.services.ocd.centrality.data;
 
+import i5.las2peer.services.ocd.centrality.simulations.CentralitySimulationType;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 
@@ -27,7 +28,8 @@ public class CentralityCreationLog {
 	 * Database column name definitions.
 	 */
 	private static final String idColumnName = "ID";
-	private static final String typeColumnName = "TYPE";
+	private static final String centralityTypeColumnName = "CENTRALITY_TYPE";
+	private static final String creationTypeColumnName = "CREATION_TYPE";
 	private static final String statusIdColumnName = "STATUS";
 	private static final String executionTimeColumnName = "EXECUTION_TIME";
 	
@@ -49,10 +51,15 @@ public class CentralityCreationLog {
 	@ElementCollection
 	private Map<String, String> parameters;
 	/**
-	 * Id of the creation methods corresponding CentralityCreationType.
+	 * Id of the creation methods corresponding CentralityType.
 	 */
-	@Column(name = typeColumnName)
-	private int typeId;
+	@Column(name = centralityTypeColumnName)
+	private int centralityTypeId;
+	/**
+	 * Id of the corresponding CentralityCreationType.
+	 */
+	@Column(name = creationTypeColumnName)
+	private int creationTypeId;
 	/**
 	 * The status of the corresponding execution.
 	 */
@@ -78,16 +85,30 @@ public class CentralityCreationLog {
 	
 	/**
 	 * Creates a new instance.
-	 * @param type The type of creation method.
+	 * @param centralityType The corresponding CentralityType.
+	 * @param creationType The corresponding CentralityCreationType.
 	 * @param parameters The parameters used by the creation method.
 	 * @param compatibleGraphTypes The graph types which are compatible with the creation method.
 	 */
-	public CentralityCreationLog(CentralityCreationType type, Map<String, String> parameters, Set<GraphType> compatibleGraphTypes) {
-		if(type != null) {
-			this.typeId = type.getId();
+	public CentralityCreationLog(CentralityType centralityType, CentralityCreationType creationType, Map<String, String> parameters, Set<GraphType> compatibleGraphTypes) {
+		if(centralityType != null) {
+			if(creationTypeId == CentralityCreationType.CENTRALITY_MEASURE.getId())
+				this.centralityTypeId = ((CentralityMeasureType)centralityType).getId();
+			else if(creationTypeId == CentralityCreationType.SIMULATION.getId()) {
+				this.centralityTypeId = ((CentralitySimulationType)centralityType).getId();
+			}
+			else {
+				this.centralityTypeId = 0;
+			}
 		}
 		else {
-			this.typeId = CentralityCreationType.UNDEFINED.getId();
+			this.centralityTypeId = CentralityMeasureType.UNDEFINED.getId();
+		}
+		if(creationType != null) {
+			this.creationTypeId = creationType.getId();
+		}
+		else {
+			this.creationTypeId = CentralityCreationType.UNDEFINED.getId();
 		}
 		if(parameters != null) {
 			this.parameters = parameters;
@@ -103,11 +124,27 @@ public class CentralityCreationLog {
 	}
 
 	/**
-	 * Returns the type of the corresponding creation method.
+	 * Returns the centrality maps CentralityType as a String.
+	 * @return The centrality type name.
+	 */
+	public String getCentralityTypeName() {
+		if(getCreationType() == CentralityCreationType.CENTRALITY_MEASURE) {
+			return CentralityMeasureType.lookupType(centralityTypeId).name();
+		}
+		else if(getCreationType() == CentralityCreationType.SIMULATION) {
+			return CentralitySimulationType.lookupType(centralityTypeId).name();
+		}
+		else {
+			return "UNDEFINED";
+		}
+	}
+	
+	/**
+	 * Returns the centrality maps CentralityCreationType.
 	 * @return The type.
 	 */
-	public CentralityCreationType getType() {
-		return CentralityCreationType.lookupType(typeId);
+	public CentralityCreationType getCreationType() {
+		return CentralityCreationType.lookupType(creationTypeId);
 	}
 
 	/**

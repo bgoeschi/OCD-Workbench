@@ -12,6 +12,8 @@ import org.la4j.vector.dense.BasicVector;
 import i5.las2peer.services.ocd.algorithms.utils.MatrixOperations;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -30,7 +32,7 @@ public class BargainingCentrality implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BARGAINING_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.BARGAINING_CENTRALITY, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		// If the graph contains no edges
 		if(graph.edgeCount() == 0) {
@@ -88,8 +90,8 @@ public class BargainingCentrality implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.BARGAINING_CENTRALITY;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.BARGAINING_CENTRALITY;
 	}
 
 	@Override

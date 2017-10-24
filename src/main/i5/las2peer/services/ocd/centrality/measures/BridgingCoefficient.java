@@ -9,6 +9,8 @@ import org.la4j.matrix.Matrix;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -20,7 +22,7 @@ public class BridgingCoefficient implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BRIDGING_COEFFICIENT, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.BRIDGING_COEFFICIENT, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		Matrix A = graph.getNeighbourhoodMatrix();
 		int n = graph.nodeCount();
@@ -76,8 +78,8 @@ public class BridgingCoefficient implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.BRIDGING_COEFFICIENT;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.BRIDGING_COEFFICIENT;
 	}
 	
 	@Override

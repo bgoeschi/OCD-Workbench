@@ -16,7 +16,7 @@ import y.base.NodeCursor;
  * @author Tobias
  *
  */
-public class SirSimulation implements GraphSimulation {
+public class SirSimulation implements CentralitySimulation {
 	/*
 	 * PARAMETER NAMES
 	 */
@@ -97,8 +97,8 @@ public class SirSimulation implements GraphSimulation {
 	}
 	
 	@Override
-	public SimulationType getSimulationType() {
-		return SimulationType.SIR;
+	public CentralitySimulationType getSimulationType() {
+		return CentralitySimulationType.SIR;
 	}
 	
 	public Map<String, String> getParameters() {

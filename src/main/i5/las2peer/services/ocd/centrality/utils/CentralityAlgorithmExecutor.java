@@ -1,7 +1,8 @@
-package i5.las2peer.services.ocd.centrality.measures;
+package i5.las2peer.services.ocd.centrality.utils;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphProcessor;
@@ -26,15 +27,15 @@ public class CentralityAlgorithmExecutor {
 		CustomGraph graphCopy = new CustomGraph(graph);
 		GraphProcessor processor = new GraphProcessor();
 		processor.makeCompatible(graphCopy, algorithm.compatibleGraphTypes());
-		if(algorithm.getAlgorithmType() == CentralityCreationType.ECCENTRICITY || algorithm.getAlgorithmType() == CentralityCreationType.CLOSENESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.BETWEENNESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.STRESS_CENTRALITY || algorithm.getAlgorithmType() == CentralityCreationType.INTEGRATION || algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY || algorithm.getAlgorithmType() == CentralityCreationType.RESIDUAL_ClOSENESS) {
+		if(algorithm.getCentralityMeasureType() == CentralityMeasureType.ECCENTRICITY || algorithm.getCentralityMeasureType() == CentralityMeasureType.CLOSENESS_CENTRALITY || algorithm.getCentralityMeasureType() == CentralityMeasureType.BETWEENNESS_CENTRALITY || algorithm.getCentralityMeasureType() == CentralityMeasureType.STRESS_CENTRALITY || algorithm.getCentralityMeasureType() == CentralityMeasureType.INTEGRATION || algorithm.getCentralityMeasureType() == CentralityMeasureType.RADIALITY || algorithm.getCentralityMeasureType() == CentralityMeasureType.RESIDUAL_ClOSENESS) {
 			processor.invertEdgeWeights(graphCopy);
 		}
-		if(algorithm.getAlgorithmType() == CentralityCreationType.RADIALITY) {
+		if(algorithm.getCentralityMeasureType() == CentralityMeasureType.RADIALITY) {
 			processor.reverseEdgeDirections(graphCopy);
 		}
 		long startTime = System.currentTimeMillis();
 		CentralityMap map = algorithm.getValues(graphCopy);
-		map.setCreationMethod(new CentralityCreationLog(algorithm.getAlgorithmType(), algorithm.getParameters(), algorithm.compatibleGraphTypes()));
+		map.setCreationMethod(new CentralityCreationLog(algorithm.getCentralityMeasureType(), CentralityCreationType.CENTRALITY_MEASURE, algorithm.getParameters(), algorithm.compatibleGraphTypes()));
 		map.getCreationMethod().setStatus(ExecutionStatus.COMPLETED);
 		long executionTime = System.currentTimeMillis() - startTime;
 		map.getCreationMethod().setExecutionTime(executionTime);

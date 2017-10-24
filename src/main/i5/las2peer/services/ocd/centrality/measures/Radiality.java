@@ -7,6 +7,8 @@ import java.util.Set;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -17,7 +19,7 @@ public class Radiality implements CentralityAlgorithm {
 		Integration integrationAlgorithm = new Integration();
 		CentralityMap res = integrationAlgorithm.getValues(graph);
 		
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.RADIALITY, this.getParameters(), this.compatibleGraphTypes()));	
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.RADIALITY, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));	
 		return res;
 	}
 
@@ -30,8 +32,8 @@ public class Radiality implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.RADIALITY;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.RADIALITY;
 	}
 	
 	@Override

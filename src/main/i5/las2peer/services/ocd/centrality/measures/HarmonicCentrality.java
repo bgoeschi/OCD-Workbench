@@ -7,6 +7,8 @@ import java.util.Set;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -20,7 +22,7 @@ public class HarmonicCentrality implements CentralityAlgorithm {
 		NodeCursor nc = graph.nodes();
 		
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.HARMONIC_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.HARMONIC_CENTRALITY, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		// If there is only a single node
 		if(graph.nodeCount() == 1) {
@@ -57,8 +59,8 @@ public class HarmonicCentrality implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.HARMONIC_CENTRALITY;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.HARMONIC_CENTRALITY;
 	}
 	
 	@Override

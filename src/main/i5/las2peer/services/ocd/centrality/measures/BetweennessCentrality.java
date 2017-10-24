@@ -10,6 +10,8 @@ import java.util.Queue;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -26,7 +28,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 		
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.BETWEENNESS_CENTRALITY, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 0);
@@ -124,7 +126,7 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 	private CentralityMap getValuesWeighted(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.BETWEENNESS_CENTRALITY, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.BETWEENNESS_CENTRALITY, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			res.setNodeValue(nc.node(), 0);
@@ -237,8 +239,8 @@ public class BetweennessCentrality implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.BETWEENNESS_CENTRALITY;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.BETWEENNESS_CENTRALITY;
 	}
 	
 	@Override

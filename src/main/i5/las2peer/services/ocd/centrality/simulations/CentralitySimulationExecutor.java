@@ -2,15 +2,15 @@ package i5.las2peer.services.ocd.centrality.simulations;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithmException;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmException;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphProcessor;
 import i5.las2peer.services.ocd.utils.ExecutionStatus;
 import y.base.Node;
 import y.base.NodeCursor;
 
-public class SimulationExecutor {
+public class CentralitySimulationExecutor {
 	
 	/**
 	 * Calculates a CentralityMap by running simulations on a graph.
@@ -20,20 +20,20 @@ public class SimulationExecutor {
 	 * @throws CentralityAlgorithmException In case of an algorithm failure.
 	 * @throws InterruptedException In case of an algorithm interrupt.
 	 */
-	public CentralityMap execute(CustomGraph graph, GraphSimulation simulation) throws CentralityAlgorithmException, InterruptedException {
+	public CentralityMap execute(CustomGraph graph, CentralitySimulation simulation) throws CentralityAlgorithmException, InterruptedException {
 		CustomGraph graphCopy = new CustomGraph(graph);
 		GraphProcessor processor = new GraphProcessor();
 		processor.makeCompatible(graphCopy, simulation.compatibleGraphTypes());
 		long startTime = System.currentTimeMillis();
 		CentralityMap map = new CentralityMap(graphCopy);
-		map.setCreationMethod(new CentralityCreationLog(CentralityCreationType.GROUND_TRUTH, simulation.getParameters(), simulation.compatibleGraphTypes()));
+		map.setCreationMethod(new CentralityCreationLog(CentralitySimulationType.SIR, CentralityCreationType.SIMULATION, simulation.getParameters(), simulation.compatibleGraphTypes()));
 		NodeCursor nc = graphCopy.nodes();
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
 				throw new InterruptedException();
 			}
 			Node currentNode = nc.node();
-			if(simulation.getSimulationType() == SimulationType.SIR) {
+			if(simulation.getSimulationType() == CentralitySimulationType.SIR) {
 				double d = ((SirSimulation) simulation).runSimulation(graphCopy, currentNode);
 				map.setNodeValue(currentNode, d);
 			}

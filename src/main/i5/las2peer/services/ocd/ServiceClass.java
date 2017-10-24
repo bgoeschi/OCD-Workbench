@@ -59,14 +59,15 @@ import i5.las2peer.services.ocd.benchmarks.GroundTruthBenchmark;
 import i5.las2peer.services.ocd.benchmarks.OcdBenchmarkFactory;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.centrality.data.CentralityMapId;
 import i5.las2peer.services.ocd.centrality.evaluation.StatisticalProcessor;
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmFactory;
-import i5.las2peer.services.ocd.centrality.simulations.GraphSimulation;
-import i5.las2peer.services.ocd.centrality.simulations.SimulationFactory;
-import i5.las2peer.services.ocd.centrality.simulations.SimulationType;
+import i5.las2peer.services.ocd.centrality.simulations.CentralitySimulation;
+import i5.las2peer.services.ocd.centrality.simulations.CentralitySimulationFactory;
+import i5.las2peer.services.ocd.centrality.simulations.CentralitySimulationType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithmFactory;
 import i5.las2peer.services.ocd.cooperation.data.SimulationEntityHandler;
 import i5.las2peer.services.ocd.cooperation.data.mapping.MappingFactory;
 import i5.las2peer.services.ocd.cooperation.data.mapping.SimulationSeriesSetMapping;
@@ -180,12 +181,12 @@ public class ServiceClass extends RESTService {
 	/**
 	 * The factory used for creating simulations.
 	 */
-	private final static SimulationFactory simulationFactory = new SimulationFactory();
+	private final static CentralitySimulationFactory centralitySimulationFactory = new CentralitySimulationFactory();
 	
 	/**
 	 * The factory used for creating centrality algorithms.
 	 */
-	private final static CentralityAlgorithmFactory centralityFactory = new CentralityAlgorithmFactory();
+	private final static CentralityAlgorithmFactory centralityAlgorithmFactory = new CentralityAlgorithmFactory();
 
 	/**
 	 * The factory used for creating metrics.
@@ -1182,7 +1183,7 @@ public class ServiceClass extends RESTService {
 		//////////////////////////////////////////////////////////////////////////
 		
 		/**
-		 * Imports a ground-truth CentralityMap for an existing graph.
+		 * Imports a CentralityMap for an existing graph.
 		 * 
 		 * @param graphIdStr
 		 *            The id of the graph that the cover is based on.
@@ -1205,11 +1206,10 @@ public class ServiceClass extends RESTService {
 		@ApiOperation(value = "", notes = "Imports a centrality map for an existing graph.")
 		public Response importCentralityMap(@PathParam("graphId") String graphIdStr,
 				@DefaultValue("unnamed") @QueryParam("name") String nameStr,
-				@DefaultValue("GROUND-TRUTH") @QueryParam("creationType") String creationTypeStr,
+				@DefaultValue("UNDEFINED") @QueryParam("creationType") String creationTypeStr,
 				@DefaultValue("NODE_VALUE_LIST") @QueryParam("inputFormat") String centralityInputFormatStr,
 				String contentStr) {
 			try {
-				// TODO: Use nameStr
 				String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
 				long graphId;
 				try {
@@ -1231,9 +1231,9 @@ public class ServiceClass extends RESTService {
 					creationType = CentralityCreationType.valueOf(creationTypeStr);
 				} catch (Exception e) {
 					requestHandler.log(Level.WARNING, "user: " + username, e);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm does not exist.");
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified creation type does not exist.");
 				}
-				CentralityCreationLog log = new CentralityCreationLog(creationType, null, null);
+				CentralityCreationLog log = new CentralityCreationLog(null, creationType, null, null);
 				log.setStatus(ExecutionStatus.COMPLETED);
 				EntityManager em = entityHandler.getEntityManager();
 				EntityTransaction tx = em.getTransaction();
@@ -1256,6 +1256,7 @@ public class ServiceClass extends RESTService {
 								"Input centrality data does not correspond to the specified format.");
 					}
 					map.setCreationMethod(log);
+					map.setName(nameStr);
 					tx.begin();
 					em.persist(map);
 					tx.commit();
@@ -1412,8 +1413,8 @@ public class ServiceClass extends RESTService {
 	     * @param graphIdStr 
 	     *            The id of the graph to run the algorithm on, must have the 
 	     *            creation method status completed.
-	     * @param creationTypeStr 
-	     *            The name of a CentralityCreationType corresponding to a 
+	     * @param centralityMeasureTypeStr 
+	     *            The name of a CentralityMeasureType corresponding to a 
 	     *            CentralityAlgorithm. Defines the CentralityAlgorithm to 
 	     *            execute.
 	     * @param content 
@@ -1430,15 +1431,15 @@ public class ServiceClass extends RESTService {
 	    		@ApiResponse(code = 401, message = "Unauthorized")
 	    })
 		@ApiOperation(value = "",
-			notes = "Creates a new CentralityMap by running a centrality algorithm on an existing graph.")
+			notes = "Creates a new centrality map by running a centrality algorithm on an existing graph.")
 	    public Response calculateCentrality(
 	    		@PathParam("graphId") String graphIdStr,
-	    		@DefaultValue("DEGREE_CENTRALITY") @QueryParam("algorithm") String creationTypeStr, String content)
+	    		@DefaultValue("Degree Centrality") @QueryParam("algorithm") String centralityMeasureTypeStr, String content)
 	    {
 	    	try {
 	    		long graphId;
 	    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
-	    		CentralityCreationType algorithmType;
+	    		CentralityMeasureType centralityMeasureType;
 	    		try {
 	    			graphId = Long.parseLong(graphIdStr);
 	    		}
@@ -1447,15 +1448,15 @@ public class ServiceClass extends RESTService {
 					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
 	    		}
 	    		try {
-	    			algorithmType = CentralityCreationType.valueOf(creationTypeStr);
-	    			if(algorithmType == CentralityCreationType.UNDEFINED) {
-	    				requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified algorithm type is not valid for this request: " + algorithmType.name());
-	    				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm type is not valid for this request: " + algorithmType.name());
+	    			centralityMeasureType = CentralityMeasureType.lookupType(centralityMeasureTypeStr);
+	    			if(centralityMeasureType == CentralityMeasureType.UNDEFINED) {
+	    				requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified centrality measure type is not valid for this request: " + centralityMeasureType.getDisplayName());
+	    				return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality measure type is not valid for this request: " + centralityMeasureType.getDisplayName());
 	    			}
 	    		}
 		    	catch (Exception e) {
 		    		requestHandler.log(Level.WARNING, "user: " + username, e);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified algorithm does not exist.");
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality measure does not exist.");
 		    	}
 	    		CentralityAlgorithm algorithm;
 	    		Map<String, String> parameters;
@@ -1465,7 +1466,7 @@ public class ServiceClass extends RESTService {
 	    			for(String parameter : parameters.keySet()) {
 	    				parametersCopy.put(parameter, parameters.get(parameter));
 	    			}
-	    			algorithm = centralityFactory.getInstance(algorithmType, parameters);
+	    			algorithm = centralityAlgorithmFactory.getInstance(centralityMeasureType, parameters);
 	    		}
 	    		catch (Exception e) {
 	    			requestHandler.log(Level.WARNING, "user: " + username, e);
@@ -1486,11 +1487,12 @@ public class ServiceClass extends RESTService {
 							return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
 				    	}
 				    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
-				    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
-							return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+				    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for centrality algorithm execution: " + graph.getCreationMethod().getStatus().name());
+							return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for centrality algorithm execution: " + graph.getCreationMethod().getStatus().name());
 				    	}
 				    	map = new CentralityMap(graph);
-				    	log = new CentralityCreationLog(algorithmType, parametersCopy, algorithm.compatibleGraphTypes());
+				    	map.setName(centralityMeasureType.getDisplayName());
+				    	log = new CentralityCreationLog(centralityMeasureType, CentralityCreationType.CENTRALITY_MEASURE, parametersCopy, algorithm.compatibleGraphTypes());
 				    	map.setCreationMethod(log);
 				    	em.persist(map);
 						tx.commit();
@@ -1556,7 +1558,7 @@ public class ServiceClass extends RESTService {
 	    		}
 	    		catch (Exception e) {
 	    			requestHandler.log(Level.WARNING, "user: " + username, e);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Cover id is not valid.");
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Centrality map id is not valid.");
 	    		}
 	    		CentralityOutputFormat format;
 	    		try {
@@ -1564,7 +1566,7 @@ public class ServiceClass extends RESTService {
 	    		}
 		    	catch (Exception e) {
 		    		requestHandler.log(Level.WARNING, "user: " + username, e);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified cover output format does not exist.");
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality output format does not exist.");
 		    	}
 	    		CentralityMap map = entityHandler.getCentralityMap(username, graphId, mapId);
 		    	return Response.ok(requestHandler.writeCentralityMap(map, format)).build();
@@ -1627,17 +1629,16 @@ public class ServiceClass extends RESTService {
 	    }
 	    
 		////////////////////////////////////////////////////////////////////////////
-		////////////// SIMULATIONS
+		////////////// CENTRALITY SIMULATIONS
 		////////////////////////////////////////////////////////////////////////////
 		    
 	    /**
-	     * Creates a new CentralityMap by running a simulation on an existing graph
+	     * Creates a new CentralityMap by running a CentralitySimulation on an existing graph
 	     * 
 	     * @param graphIdStr 
 	     *            The id of the graph that the CentralityMap is based on.
-	     * @param creationTypeStr 
-	     *            The name of a CentralityCreationType corresponding to a 
-	     *            simulation. Defines the simulation to execute
+	     * @param simulationTypeStr 
+	     *            The name of the CentralitySimulation to execute.
 	     * @param content 
 	     *            String containing the simulation parameters.
 	     * @return The id of the CentralityMap being calculated which is reserved 
@@ -1652,16 +1653,16 @@ public class ServiceClass extends RESTService {
 	    		@ApiResponse(code = 401, message = "Unauthorized")
 	    })
 		@ApiOperation(value = "",
-			notes = "Runs SIR simulation for every possible source node in the graph.")
-	    public Response runSirSimulation(
+			notes = "Runs a centrality simulation on the specified graph.")
+	    public Response runCentralitySimulation(
 	    		@PathParam("graphId") String graphIdStr, 
-	    		@DefaultValue("SIR") @QueryParam("simulation") String creationTypeStr, String content)
+	    		@DefaultValue("SIR Simulation") @QueryParam("simulation") String simulationTypeStr, String content)
 	    {
 	    	try {
 	    		long graphId;
 	    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
-	    		SimulationType simulationType;
-	    		GraphSimulation simulation;
+	    		CentralitySimulationType simulationType;
+	    		CentralitySimulation simulation;
 	    		try {
 	    			graphId = Long.parseLong(graphIdStr);
 	    		}
@@ -1670,7 +1671,7 @@ public class ServiceClass extends RESTService {
 					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph id is not valid.");
 	    		}
 	    		try {
-	    			simulationType = SimulationType.valueOf(creationTypeStr);
+	    			simulationType = CentralitySimulationType.lookupType(simulationTypeStr);
 	    		}
 		    	catch (Exception e) {
 		    		requestHandler.log(Level.WARNING, "user: " + username, e);
@@ -1683,7 +1684,7 @@ public class ServiceClass extends RESTService {
 	    			for(String parameter : parameters.keySet()) {
 	    				parametersCopy.put(parameter, parameters.get(parameter));
 	    			}
-	    			simulation = simulationFactory.getInstance(simulationType, parameters);
+	    			simulation = centralitySimulationFactory.getInstance(simulationType, parameters);
 	    		}
 	    		catch (Exception e) {
 	    			requestHandler.log(Level.WARNING, "user: " + username, e);
@@ -1704,11 +1705,12 @@ public class ServiceClass extends RESTService {
 							return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
 				    	}
 				    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
-				    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
-							return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+				    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for simulation execution: " + graph.getCreationMethod().getStatus().name());
+							return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for simulation execution: " + graph.getCreationMethod().getStatus().name());
 				    	}
 				    	map = new CentralityMap(graph);
-				    	log = new CentralityCreationLog(CentralityCreationType.SIMULATION, parametersCopy, simulation.compatibleGraphTypes());
+				    	map.setName(simulationType.getDisplayName());
+				    	log = new CentralityCreationLog(simulationType, CentralityCreationType.SIMULATION, parametersCopy, simulation.compatibleGraphTypes());
 				    	map.setCreationMethod(log);
 				    	em.persist(map);
 						tx.commit();
@@ -1783,8 +1785,8 @@ public class ServiceClass extends RESTService {
 	    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
 	    		    	}
 	    		    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
-	    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
-	    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+	    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for centrality calculation: " + graph.getCreationMethod().getStatus().name());
+	    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for centrality calculation: " + graph.getCreationMethod().getStatus().name());
 	    		    	}
 	    				tx.commit();
 	    	    	}
@@ -1830,7 +1832,7 @@ public class ServiceClass extends RESTService {
 			    	EntityTransaction tx = em.getTransaction();
 			    	try {
 						tx.begin();
-						log = new CentralityCreationLog(CentralityCreationType.AVERAGE, parameters, new HashSet<GraphType>(Arrays.asList(GraphType.values())));
+						log = new CentralityCreationLog(CentralityMeasureType.UNDEFINED, CentralityCreationType.AVERAGE, parameters, new HashSet<GraphType>(Arrays.asList(GraphType.values())));
 						averageMap.setCreationMethod(log);
 						em.persist(averageMap);
 						tx.commit();
@@ -1898,8 +1900,8 @@ public class ServiceClass extends RESTService {
 	    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Graph does not exist: graph id " + graphId);
 	    		    	}
 	    		    	if(graph.getCreationMethod().getStatus() != ExecutionStatus.COMPLETED) {
-	    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
-	    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for metric execution: " + graph.getCreationMethod().getStatus().name());
+	    		    		requestHandler.log(Level.WARNING, "user: " + username + ", " + "Invalid graph creation method status for correlation calculation: " + graph.getCreationMethod().getStatus().name());
+	    					return requestHandler.writeError(Error.PARAMETER_INVALID, "Invalid graph creation method status for correlation calculation: " + graph.getCreationMethod().getStatus().name());
 	    		    	}
 	    				tx.commit();
 	    	    	}
@@ -2827,41 +2829,40 @@ public class ServiceClass extends RESTService {
 		}
 		
 		/**
-	     * Returns the default parameters of a centrality algorithm.
+	     * Returns the default parameters of a CentralityAlgorithm.
 	     * 
-	     * @param centralityCreationTypeStr 
-	     *            A centrality creation type corresponding to a centrality 
-	     *            algorithm.
+	     * @param centralityMeasureTypeStr 
+	     *            A CentralityMeasureType corresponding to a CentralityAlgorithm.
 	     * @return A parameter xml. Or an error xml.
 	     */
 	    @GET
-	    @Path("centralities/{CentralityCreationType}/parameters/default")
+	    @Path("centralities/{CentralityMeasureType}/parameters/default")
 	    @Produces(MediaType.TEXT_XML)
 	    @ApiResponses(value = {
 	    		@ApiResponse(code = 200, message = "Success"),
 	    		@ApiResponse(code = 401, message = "Unauthorized")
 	    })
 		@ApiOperation(value = "",
-			notes = "Returns the default parameters of an algorithm.")
+			notes = "Returns the default parameters of a centrality measure.")
 	    public Response getCentralityAlgorithmDefaultParams(
-	    		@PathParam("CentralityCreationType") String centralityCreationTypeStr)
+	    		@PathParam("CentralityMeasureType") String centralityMeasureTypeStr)
 	    {
 	    	try {
 	    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
-	    		CentralityCreationType creationType;
+	    		CentralityMeasureType centralityMeasureType;
 	    		try {
-	    			creationType = CentralityCreationType.valueOf(centralityCreationTypeStr);
+	    			centralityMeasureType = CentralityMeasureType.lookupType(centralityMeasureTypeStr);
 	    		}
 		    	catch (Exception e) {
 		    		requestHandler.log(Level.WARNING, "user: " + username, e);
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality creation type does not exist.");
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality measure type does not exist.");
 		    	}
-				if(!centralityFactory.isInstantiatable(creationType)) {
-					requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified centrality creation type is not instantiatable: " + creationType.name());
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality creation type is not instantiatable: " + creationType.name());
+				if(!centralityAlgorithmFactory.isInstantiatable(centralityMeasureType)) {
+					requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified centrality measure type is not instantiatable: " + centralityMeasureType.getDisplayName());
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified centrality measure type is not instantiatable: " + centralityMeasureType.getDisplayName());
 				}
 				else {
-					CentralityAlgorithm defaultInstance = centralityFactory.getInstance(creationType, new HashMap<String, String>());
+					CentralityAlgorithm defaultInstance = centralityAlgorithmFactory.getInstance(centralityMeasureType, new HashMap<String, String>());
 					return Response.ok(requestHandler.writeParameters(defaultInstance.getParameters())).build();
 				}
 	    	}
@@ -2872,39 +2873,39 @@ public class ServiceClass extends RESTService {
 	    }
 	    
 	    /**
-	     * Returns the default parameters of a simulation.
+	     * Returns the default parameters of a CentralitySimulation.
 	     * 
-	     * @param simulationTypeStr A simulation type corresponding to a simulation.
+	     * @param simulationTypeStr A simulation type corresponding to a CentralitySimulation.
 	     * @return A parameter xml. Or an error xml.
 	     */
 	    @GET
-	    @Path("simulations/{SimulationType}/parameters/default")
+	    @Path("centralitysimulations/{SimulationType}/parameters/default")
 	    @Produces(MediaType.TEXT_XML)
 	    @ApiResponses(value = {
 	    		@ApiResponse(code = 200, message = "Success"),
 	    		@ApiResponse(code = 401, message = "Unauthorized")
 	    })
 		@ApiOperation(value = "",
-			notes = "Returns the default parameters of a simulation.")
+			notes = "Returns the default parameters of a centrality simulation.")
 	    public Response getSimulationDefaultParams(
 	    		@PathParam("SimulationType") String simulationTypeStr)
 	    {
 	    	try {
 	    		String username = ((UserAgent) Context.getCurrent().getMainAgent()).getLoginName();
-	    		SimulationType simulationType;
+	    		CentralitySimulationType simulationType;
 	    		try {
-	    			simulationType = SimulationType.valueOf(simulationTypeStr);
+	    			simulationType = CentralitySimulationType.lookupType(simulationTypeStr);
 	    		}
 		    	catch (Exception e) {
 		    		requestHandler.log(Level.WARNING, "user: " + username, e);
 					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified simulation type does not exist.");
 		    	}
-				if(!simulationFactory.isInstantiatable(simulationType)) {
-					requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified simulation type is not instantiatable: " + simulationType.name());
-					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified simulation type is not instantiatable: " + simulationType.name());
+				if(!centralitySimulationFactory.isInstantiatable(simulationType)) {
+					requestHandler.log(Level.WARNING, "user: " + username + ", " + "Specified simulation type is not instantiatable: " + simulationType.getDisplayName());
+					return requestHandler.writeError(Error.PARAMETER_INVALID, "Specified simulation type is not instantiatable: " + simulationType.getDisplayName());
 				}
 				else {
-					GraphSimulation defaultInstance = simulationFactory.getInstance(simulationType, new HashMap<String, String>());
+					CentralitySimulation defaultInstance = centralitySimulationFactory.getInstance(simulationType, new HashMap<String, String>());
 					return Response.ok(requestHandler.writeParameters(defaultInstance.getParameters())).build();
 				}
 	    	}
@@ -3073,22 +3074,22 @@ public class ServiceClass extends RESTService {
 	    }
 	    
 	    /**
-	     * Returns all simulation names.
+	     * Returns all CentralitySimulation names.
 	     * 
 	     * @return The simulation names in an xml. Or an error xml.
 	     */
 	    @GET
-	    @Path("simulations")
+	    @Path("centralitysimulations")
 	    @Produces(MediaType.TEXT_XML)
 	    @ApiResponses(value = {
 	    		@ApiResponse(code = 200, message = "Success"),
 	    		@ApiResponse(code = 401, message = "Unauthorized")
 	    })
-		@ApiOperation(value = "Simulations information",
-			notes = "Returns all simulation names.")
+		@ApiOperation(value = "Centrality simulations information",
+			notes = "Returns all centrality simulation names.")
 	    public Response getSimulationNames() {
 	    	try {
-				return Response.ok(requestHandler.writeSimulationNames()).build();
+				return Response.ok(requestHandler.writeCentralitySimulationNames()).build();
 	    	}
 	    	catch (Exception e) {
 	    		requestHandler.log(Level.SEVERE, "", e);

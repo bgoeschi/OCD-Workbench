@@ -12,6 +12,8 @@ import org.la4j.matrix.sparse.CCSMatrix;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationLog;
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -25,7 +27,7 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.CURRENT_FLOW_CLOSENESS, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityMeasureType.CURRENT_FLOW_CLOSENESS, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
@@ -123,8 +125,8 @@ public class CurrentFlowCloseness implements CentralityAlgorithm {
 	}
 
 	@Override
-	public CentralityCreationType getAlgorithmType() {
-		return CentralityCreationType.CURRENT_FLOW_CLOSENESS;
+	public CentralityMeasureType getCentralityMeasureType() {
+		return CentralityMeasureType.CURRENT_FLOW_CLOSENESS;
 	}
 	
 	@Override

@@ -1,9 +1,9 @@
-package i5.las2peer.services.ocd.centrality.measures;
+package i5.las2peer.services.ocd.centrality.utils;
 
 import java.util.Set;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityCreationMethod;
-import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.graphs.CustomGraph;
 import i5.las2peer.services.ocd.graphs.GraphType;
@@ -23,7 +23,7 @@ public interface CentralityAlgorithm extends Parameterizable, CentralityCreation
 	 * Returns a log representing the concrete algorithm execution.
 	 * @return The log.
 	 */
-	public CentralityCreationType getAlgorithmType();
+	public CentralityMeasureType getCentralityMeasureType();
 	
 	/**
 	 * Returns all graph types the algorithm is compatible with.

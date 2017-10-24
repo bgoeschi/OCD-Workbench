@@ -1,4 +1,4 @@
-package i5.las2peer.services.ocd.centrality.measures;
+package i5.las2peer.services.ocd.centrality.utils;
 
 import i5.las2peer.services.ocd.utils.AbstractCustomException;
 

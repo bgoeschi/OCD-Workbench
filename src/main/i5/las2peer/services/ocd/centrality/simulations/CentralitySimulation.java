@@ -5,12 +5,12 @@ import java.util.Set;
 import i5.las2peer.services.ocd.graphs.GraphType;
 import i5.las2peer.services.ocd.utils.Parameterizable;
 
-public interface GraphSimulation extends Parameterizable {
+public interface CentralitySimulation extends Parameterizable {
 	/**
 	 * Returns a log representing the concrete simulation execution.
 	 * @return The log.
 	 */
-	public SimulationType getSimulationType();
+	public CentralitySimulationType getSimulationType();
 	
 	/**
 	 * Returns all graph types the simulation is compatible with.

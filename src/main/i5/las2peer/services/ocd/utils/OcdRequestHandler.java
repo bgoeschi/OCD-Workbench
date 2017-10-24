@@ -1,7 +1,7 @@
 package i5.las2peer.services.ocd.utils;
 
-import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;
-import i5.las2peer.services.ocd.centrality.simulations.SimulationType;
+import i5.las2peer.services.ocd.centrality.data.CentralityMeasureType;
+import i5.las2peer.services.ocd.centrality.simulations.CentralitySimulationType;
 import i5.las2peer.services.ocd.graphs.CoverCreationType;
 import i5.las2peer.services.ocd.graphs.GraphCreationType;
 import i5.las2peer.services.ocd.metrics.OcdMetricType;
@@ -103,9 +103,9 @@ public class OcdRequestHandler extends RequestHandler {
 	public String writeCentralityMeasureNames() throws ParserConfigurationException {
 		Document doc = getDocument();
 		Element namesElt = doc.createElement("Names");
-		for(CentralityCreationType e : CentralityCreationType.class.getEnumConstants()) {
+		for(CentralityMeasureType e : CentralityMeasureType.class.getEnumConstants()) {
 			Element nameElt = doc.createElement("Name");
-			nameElt.appendChild(doc.createTextNode(e.name()));
+			nameElt.appendChild(doc.createTextNode(e.getDisplayName()));
 			namesElt.appendChild(nameElt);
 		}
 		doc.appendChild(namesElt);
@@ -117,12 +117,12 @@ public class OcdRequestHandler extends RequestHandler {
 	 * @return The document.
 	 * @throws ParserConfigurationException
 	 */
-	public String writeSimulationNames() throws ParserConfigurationException {
+	public String writeCentralitySimulationNames() throws ParserConfigurationException {
 		Document doc = getDocument();
 		Element namesElt = doc.createElement("Names");
-		for(SimulationType e : SimulationType.class.getEnumConstants()) {
+		for(CentralitySimulationType e : CentralitySimulationType.class.getEnumConstants()) {
 			Element nameElt = doc.createElement("Name");
-			nameElt.appendChild(doc.createTextNode(e.name()));
+			nameElt.appendChild(doc.createTextNode(e.getDisplayName()));
 			namesElt.appendChild(nameElt);
 		}
 		doc.appendChild(namesElt);

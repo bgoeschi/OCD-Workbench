@@ -19,7 +19,7 @@ public class CentralityScaffold implements CentralityAlgorithm {
 	public CentralityMap getValues(CustomGraph graph) throws InterruptedException {
 		NodeCursor nc = graph.nodes();
 		CentralityMap res = new CentralityMap(graph);
-		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.TYPE, this.getParameters(), this.compatibleGraphTypes()));
+		res.setCreationMethod(new CentralityCreationLog(CentralityCreationType.TYPE, CentralityCreationType.CENTRALITY_MEASURE, this.getParameters(), this.compatibleGraphTypes()));
 		
 		while(nc.ok()) {
 			if(Thread.interrupted()) {
@@ -56,3 +56,5 @@ public class CentralityScaffold implements CentralityAlgorithm {
 		}
 	}
 }*/
+
+import i5.las2peer.services.ocd.centrality.data.CentralityCreationType;

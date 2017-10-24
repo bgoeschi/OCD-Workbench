@@ -7,8 +7,8 @@ import javax.persistence.EntityTransaction;
 
 import i5.las2peer.services.ocd.centrality.data.CentralityMap;
 import i5.las2peer.services.ocd.centrality.data.CentralityMapId;
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithm;
-import i5.las2peer.services.ocd.centrality.measures.CentralityAlgorithmExecutor;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithm;
+import i5.las2peer.services.ocd.centrality.utils.CentralityAlgorithmExecutor;
 import i5.las2peer.services.ocd.graphs.CustomGraphId;
 
 /**

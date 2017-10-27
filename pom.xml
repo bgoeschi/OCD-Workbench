@@ -4,9 +4,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>groupId</groupId>
+    <groupId>bgoeschi</groupId>
     <artifactId>OCD-Workbench</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
+
     <repositories>
         <repository>
             <id>central</id>
@@ -25,9 +26,12 @@
         </repository>
     </repositories>
 
-
     <dependencies>
-
+        <dependency>
+            <groupId>yWorks</groupId>
+            <artifactId>yFiles</artifactId>
+            <version>2.7.0.4</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jpa_2.0_spec</artifactId>
@@ -93,6 +97,26 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <groupId>yWorks</groupId>
+                            <artifactId>yFiles</artifactId>
+                            <version>2.7.0.4</version>
+                            <packaging>jar</packaging>
+                            <file>${basedir}/lib/y.jar</file>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
